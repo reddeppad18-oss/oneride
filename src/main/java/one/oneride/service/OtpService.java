@@ -1,8 +1,10 @@
 package one.oneride.service;
 
-public abstract class OtpService {
-    public abstract void sendOtp(String phoneNumber);
+import one.oneride.entity.User;
 
-    public abstract boolean verifyOtp(String phoneNumber,
-                                      String otp);
+public interface OtpService {
+
+    void sendOtp(String phoneNumber);
+
+    User verifyOtp(String phoneNumber, String otp);
 }

@@ -1,9 +1,10 @@
 package one.oneride.controller;
 
+import lombok.RequiredArgsConstructor;
 import one.oneride.dto.SendOtpRequest;
 import one.oneride.dto.VerifyOtpRequest;
+import one.oneride.entity.User;
 import one.oneride.service.OtpService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +20,8 @@ public class AuthController {
             @RequestBody SendOtpRequest request) {
 
         otpService.sendOtp(
-                request.getPhoneNumber());
+                request.getPhoneNumber()
+        );
 
         return "OTP Sent";
     }
@@ -28,13 +30,16 @@ public class AuthController {
     public String verifyOtp(
             @RequestBody VerifyOtpRequest request) {
 
-        boolean verified =
+        User user =
                 otpService.verifyOtp(
                         request.getPhoneNumber(),
-                        request.getOtp());
+                        request.getOtp()
+                );
 
-        return verified
-                ? "OTP Verified"
-                : "Invalid OTP";
+        if (user == null) {
+            return "Invalid OTP";
+        }
+
+        return "OTP Verified";
     }
 }

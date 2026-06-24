@@ -1,4 +1,10 @@
 package one.oneride.service;
 
-public class UserService {
+import one.oneride.entity.User;
+
+public interface UserService {
+
+    User createUserIfNotExists(
+            String phoneNumber
+    );
 }

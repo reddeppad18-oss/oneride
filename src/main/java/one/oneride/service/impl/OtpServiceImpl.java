@@ -1,11 +1,11 @@
 package one.oneride.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import one.oneride.entity.OtpDetails;
-
-
+import one.oneride.entity.User;
 import one.oneride.repository.OtpRepository;
 import one.oneride.service.OtpService;
-import lombok.RequiredArgsConstructor;
+import one.oneride.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,23 +13,27 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class OtpServiceImpl extends OtpService {
+public class OtpServiceImpl implements OtpService {
 
     private final OtpRepository otpRepository;
+    private final UserService userService;
 
     @Override
     public void sendOtp(String phoneNumber) {
 
         String otp =
-                String.valueOf(100000 + new Random().nextInt(900000));
+                String.valueOf(
+                        100000 + new Random().nextInt(900000)
+                );
 
-        OtpDetails otpDetails =
-                OtpDetails.builder()
-                        .phoneNumber(phoneNumber)
-                        .otp(otp)
-                        .verified(false)
-                        .expiryTime(LocalDateTime.now().plusMinutes(5))
-                        .build();
+        OtpDetails otpDetails = OtpDetails.builder()
+                .phoneNumber(phoneNumber)
+                .otp(otp)
+                .verified(false)
+                .expiryTime(
+                        LocalDateTime.now().plusMinutes(5)
+                )
+                .build();
 
         otpRepository.save(otpDetails);
 
@@ -39,28 +43,39 @@ public class OtpServiceImpl extends OtpService {
     }
 
     @Override
-    public boolean verifyOtp(String phoneNumber,
-                             String otp) {
+    public User verifyOtp(
+            String phoneNumber,
+            String otp) {
 
         OtpDetails otpDetails =
                 otpRepository
-                        .findTopByPhoneNumberOrderByIdDesc(phoneNumber)
+                        .findTopByPhoneNumberOrderByIdDesc(
+                                phoneNumber
+                        )
                         .orElse(null);
 
-        if (otpDetails == null)
-            return false;
+        if (otpDetails == null) {
+            return null;
+        }
 
         if (LocalDateTime.now()
-                .isAfter(otpDetails.getExpiryTime()))
-            return false;
+                .isAfter(
+                        otpDetails.getExpiryTime()
+                )) {
+            return null;
+        }
 
-        if (!otpDetails.getOtp().equals(otp))
-            return false;
+        if (!otpDetails.getOtp().equals(otp)) {
+            return null;
+        }
 
         otpDetails.setVerified(true);
 
         otpRepository.save(otpDetails);
 
-        return true;
+        return userService
+                .createUserIfNotExists(
+                        phoneNumber
+                );
     }
 }
