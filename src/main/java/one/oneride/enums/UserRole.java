@@ -1,4 +1,7 @@
 package one.oneride.enums;
 
-public class UserRole {
+public enum UserRole {
+    RIDER,
+    DRIVER,
+    ADMIN
 }
