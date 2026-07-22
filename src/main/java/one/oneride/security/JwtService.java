@@ -3,6 +3,7 @@ package one.oneride.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import one.oneride.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,17 +22,34 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
+    @PostConstruct
+    public void init() {
+
+        System.out.println("====================================");
+        System.out.println("JWT SECRET LOADED");
+        System.out.println(secretKey);
+        System.out.println("JWT Expiration : " + jwtExpiration);
+        System.out.println("====================================");
+    }
+
     /**
      * Generate JWT for authenticated user.
      */
     public String generateToken(User user) {
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .subject(user.getPhoneNumber())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())
                 .compact();
+
+        System.out.println("====================================");
+        System.out.println("GENERATED JWT");
+        System.out.println(token);
+        System.out.println("====================================");
+
+        return token;
     }
 
     /**
