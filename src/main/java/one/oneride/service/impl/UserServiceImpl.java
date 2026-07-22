@@ -1,6 +1,7 @@
 package one.oneride.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import one.oneride.dto.UpdateProfileRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.entity.User;
 import one.oneride.enums.UserRole;
@@ -47,5 +48,18 @@ public class UserServiceImpl implements UserService {
                 .role(user.getRole().name())
                 .verified(user.getVerified())
                 .build();
+    }
+    @Override
+    public void updateProfile(
+            String phoneNumber,
+            UpdateProfileRequest request) {
+
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        user.setFullName(request.getFullName());
+
+        userRepository.save(user);
     }
 }

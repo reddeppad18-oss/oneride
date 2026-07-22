@@ -1,6 +1,7 @@
 package one.oneride.controller;
 
 import lombok.RequiredArgsConstructor;
+import one.oneride.dto.UpdateProfileRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.service.UserService;
 import org.springframework.security.core.Authentication;
@@ -20,5 +21,16 @@ public class UserController {
         String phoneNumber = authentication.getName();
 
         return userService.getCurrentUser(phoneNumber);
+    }
+    @PutMapping("/profile")
+    public String updateProfile(
+            Authentication authentication,
+            @RequestBody UpdateProfileRequest request) {
+
+        String phoneNumber = authentication.getName();
+
+        userService.updateProfile(phoneNumber, request);
+
+        return "Profile updated successfully";
     }
 }
