@@ -2,9 +2,14 @@ package one.oneride.controller;
 
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.CreateRideRequest;
+import one.oneride.dto.MessageResponse;
+import one.oneride.dto.RideResponse;
 import one.oneride.service.RideService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -15,7 +20,7 @@ public class RideController {
     private final RideService rideService;
 
     @PostMapping
-    public String createRide(
+    public MessageResponse createRide(
             Authentication authentication,
             @RequestBody CreateRideRequest request) {
 
@@ -23,6 +28,31 @@ public class RideController {
 
         rideService.createRide(phoneNumber, request);
 
-        return "Ride created successfully";
+        return MessageResponse.builder()
+                .message("Ride created successfully")
+                .build();
+    }
+    @GetMapping("/my")
+    public List<RideResponse> getMyRides(
+            Authentication authentication) {
+
+        String phoneNumber = authentication.getName();
+
+        return rideService.getMyRides(phoneNumber);
+    }
+    @GetMapping("/search")
+    public List<RideResponse> searchRides(
+
+            @RequestParam String source,
+
+            @RequestParam String destination,
+
+            @RequestParam LocalDate travelDate) {
+
+        return rideService.searchRides(
+                source,
+                destination,
+                travelDate
+        );
     }
 }

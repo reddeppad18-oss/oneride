@@ -2,6 +2,7 @@ package one.oneride.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.CreateRideRequest;
+import one.oneride.dto.RideResponse;
 import one.oneride.entity.Ride;
 import one.oneride.entity.User;
 import one.oneride.enums.RideStatus;
@@ -10,7 +11,9 @@ import one.oneride.repository.UserRepository;
 import one.oneride.service.RideService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,4 +45,57 @@ public class RideServiceImpl implements RideService {
 
         rideRepository.save(ride);
     }
+        @Override
+        public List<RideResponse> getMyRides(String phoneNumber) {
+
+            User user = userRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() ->
+                            new RuntimeException("User not found"));
+
+            List<Ride> rides = rideRepository.findByUser(user);
+
+            return rides.stream()
+                    .map(ride -> RideResponse.builder()
+                            .id(ride.getId())
+                            .source(ride.getSource())
+                            .destination(ride.getDestination())
+                            .travelDate(ride.getTravelDate())
+                            .travelTime(ride.getTravelTime())
+                            .availableSeats(ride.getAvailableSeats())
+                            .pricePerSeat(ride.getPricePerSeat())
+                            .description(ride.getDescription())
+                            .status(ride.getStatus().name())
+                            .build())
+                    .toList();
+        }
+
+    @Override
+    public List<RideResponse> searchRides(
+            String source,
+            String destination,
+            LocalDate travelDate) {
+
+        List<Ride> rides =
+                rideRepository.findBySourceIgnoreCaseAndDestinationIgnoreCaseAndTravelDateAndStatus(
+                        source,
+                        destination,
+                        travelDate,
+                        RideStatus.ACTIVE
+                );
+
+        return rides.stream()
+                .map(ride -> RideResponse.builder()
+                        .id(ride.getId())
+                        .source(ride.getSource())
+                        .destination(ride.getDestination())
+                        .travelDate(ride.getTravelDate())
+                        .travelTime(ride.getTravelTime())
+                        .availableSeats(ride.getAvailableSeats())
+                        .pricePerSeat(ride.getPricePerSeat())
+                        .description(ride.getDescription())
+                        .status(ride.getStatus().name())
+                        .build())
+                .toList();
+    }
+
 }

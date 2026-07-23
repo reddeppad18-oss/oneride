@@ -1,6 +1,7 @@
 package one.oneride.controller;
 
 import lombok.RequiredArgsConstructor;
+import one.oneride.dto.MessageResponse;
 import one.oneride.dto.UpdateProfileRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.service.UserService;
@@ -22,8 +23,9 @@ public class UserController {
 
         return userService.getCurrentUser(phoneNumber);
     }
+
     @PutMapping("/profile")
-    public String updateProfile(
+    public MessageResponse updateProfile(
             Authentication authentication,
             @RequestBody UpdateProfileRequest request) {
 
@@ -31,6 +33,8 @@ public class UserController {
 
         userService.updateProfile(phoneNumber, request);
 
-        return "Profile updated successfully";
+        return MessageResponse.builder()
+                .message("Profile updated successfully")
+                .build();
     }
 }
