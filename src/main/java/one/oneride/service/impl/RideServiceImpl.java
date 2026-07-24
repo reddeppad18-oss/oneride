@@ -2,6 +2,7 @@ package one.oneride.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.CreateRideRequest;
+import one.oneride.dto.MessageResponse;
 import one.oneride.dto.RideResponse;
 import one.oneride.entity.Ride;
 import one.oneride.entity.User;
@@ -160,5 +161,60 @@ public class RideServiceImpl implements RideService {
 
         rideRepository.save(ride);
     }
+    @Override
+    public MessageResponse startRide(
+            Long rideId,
+            String phoneNumber) {
 
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new RuntimeException("Ride not found"));
+
+        // Only ride owner can start the ride
+        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        // Ride must be ACTIVE or FULL
+        if (ride.getStatus() != RideStatus.ACTIVE &&
+                ride.getStatus() != RideStatus.FULL) {
+
+            throw new RuntimeException("Ride cannot be started");
+        }
+
+        ride.setStatus(RideStatus.STARTED);
+
+        rideRepository.save(ride);
+
+        return MessageResponse.builder()
+                .message("Ride started successfully")
+                .build();
+    }
+    @Override
+    public MessageResponse completeRide(
+            Long rideId,
+            String phoneNumber) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new RuntimeException("Ride not found"));
+
+        // Only ride owner can complete the ride
+        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        // Ride must already be STARTED
+        if (ride.getStatus() != RideStatus.STARTED) {
+            throw new RuntimeException("Ride has not started yet");
+        }
+
+        ride.setStatus(RideStatus.COMPLETED);
+
+        rideRepository.save(ride);
+
+        return MessageResponse.builder()
+                .message("Ride completed successfully")
+                .build();
+    }
 }

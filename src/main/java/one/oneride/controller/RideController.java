@@ -72,4 +72,24 @@ public class RideController {
                 .message("Ride cancelled successfully")
                 .build();
     }
+    @PutMapping("/{rideId}/start")
+    public MessageResponse startRide(
+            @PathVariable Long rideId,
+            Authentication authentication) {
+
+        return rideService.startRide(
+                rideId,
+                authentication.getName()
+        );
+    }
+    @PutMapping("/{rideId}/complete")
+    public MessageResponse completeRide(
+            @PathVariable Long rideId,
+            Authentication authentication) {
+
+        return rideService.completeRide(
+                rideId,
+                authentication.getName()
+        );
+    }
 }
