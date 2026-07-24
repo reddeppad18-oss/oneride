@@ -6,6 +6,9 @@ import one.oneride.dto.RideResponse;
 import one.oneride.entity.Ride;
 import one.oneride.entity.User;
 import one.oneride.enums.RideStatus;
+import one.oneride.exception.InvalidRideStateException;
+import one.oneride.exception.RideNotFoundException;
+import one.oneride.exception.UnauthorizedRideException;
 import one.oneride.repository.RideRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.RideService;
@@ -96,6 +99,66 @@ public class RideServiceImpl implements RideService {
                         .status(ride.getStatus().name())
                         .build())
                 .toList();
+    }
+    @Override
+    public RideResponse getRideById(Long rideId) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new RuntimeException("Ride not found"));
+
+        return RideResponse.builder()
+                .id(ride.getId())
+                .source(ride.getSource())
+                .destination(ride.getDestination())
+                .travelDate(ride.getTravelDate())
+                .travelTime(ride.getTravelTime())
+                .availableSeats(ride.getAvailableSeats())
+                .pricePerSeat(ride.getPricePerSeat())
+                .description(ride.getDescription())
+                .status(ride.getStatus().name())
+                .build();
+    }
+    private RideResponse mapToRideResponse(Ride ride) {
+
+        return RideResponse.builder()
+                .id(ride.getId())
+                .source(ride.getSource())
+                .destination(ride.getDestination())
+                .travelDate(ride.getTravelDate())
+                .travelTime(ride.getTravelTime())
+                .availableSeats(ride.getAvailableSeats())
+                .pricePerSeat(ride.getPricePerSeat())
+                .description(ride.getDescription())
+                .status(ride.getStatus().name())
+                .build();
+    }
+    @Override
+    public void cancelRide(
+            Long rideId,
+            String phoneNumber) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new RideNotFoundException("Ride not found"));
+
+        if (!ride.getUser()
+                .getPhoneNumber()
+                .equals(phoneNumber)) {
+
+            throw new UnauthorizedRideException(
+                    "You can cancel only your own ride");
+        }
+
+        if (ride.getStatus() != RideStatus.ACTIVE) {
+
+            throw new InvalidRideStateException(
+                    "Only active rides can be cancelled");
+        }
+
+        ride.setStatus(RideStatus.CANCELLED);
+
+        rideRepository.save(ride);
     }
 
 }

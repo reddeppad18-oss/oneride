@@ -16,4 +16,6 @@ public interface RideService {
             String destination,
             LocalDate travelDate
     );
+    RideResponse getRideById(Long rideId);
+    void cancelRide(Long rideId, String phoneNumber);
 }

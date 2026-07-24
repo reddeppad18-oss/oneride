@@ -20,8 +20,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUserIfNotExists(String phoneNumber) {
 
-        return userRepository
-                .findByPhoneNumber(phoneNumber)
+        System.out.println("====================================");
+        System.out.println("PHONE RECEIVED : " + phoneNumber);
+        System.out.println("====================================");
+
+        return userRepository.findByPhoneNumber(phoneNumber)
                 .orElseGet(() -> {
 
                     User user = User.builder()
@@ -31,9 +34,17 @@ public class UserServiceImpl implements UserService {
                             .createdAt(LocalDateTime.now())
                             .build();
 
+                    System.out.println("====================================");
+                    System.out.println("USER BEFORE SAVE");
+                    System.out.println("Phone : " + user.getPhoneNumber());
+                    System.out.println("Role  : " + user.getRole());
+                    System.out.println("Verified : " + user.getVerified());
+                    System.out.println("====================================");
+
                     return userRepository.save(user);
                 });
     }
+
     @Override
     public UserResponse getCurrentUser(String phoneNumber) {
 

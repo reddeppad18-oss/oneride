@@ -18,12 +18,11 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/send-otp")
-    public String sendOtp(
-            @RequestBody SendOtpRequest request) {
+    public String sendOtp(@RequestBody SendOtpRequest request) {
 
-        otpService.sendOtp(
-                request.getPhoneNumber()
-        );
+        System.out.println("Phone received in Controller: " + request.getPhoneNumber());
+
+        otpService.sendOtp(request.getPhoneNumber());
 
         return "OTP Sent";
     }

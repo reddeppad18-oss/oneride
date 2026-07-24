@@ -55,4 +55,21 @@ public class RideController {
                 travelDate
         );
     }
+    @GetMapping("/{rideId}")
+    public RideResponse getRideById(@PathVariable Long rideId) {
+        return rideService.getRideById(rideId);
+    }
+    @PutMapping("/{rideId}/cancel")
+    public MessageResponse cancelRide(
+            @PathVariable Long rideId,
+            Authentication authentication) {
+
+        String phoneNumber = authentication.getName();
+
+        rideService.cancelRide(rideId, phoneNumber);
+
+        return MessageResponse.builder()
+                .message("Ride cancelled successfully")
+                .build();
+    }
 }
