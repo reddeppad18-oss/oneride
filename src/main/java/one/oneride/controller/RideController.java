@@ -5,6 +5,7 @@ import one.oneride.dto.CreateRideRequest;
 import one.oneride.dto.MessageResponse;
 import one.oneride.dto.RideResponse;
 import one.oneride.service.RideService;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,84 +18,181 @@ import java.util.List;
 @CrossOrigin("*")
 public class RideController {
 
+
     private final RideService rideService;
+
 
     @PostMapping
     public MessageResponse createRide(
             Authentication authentication,
             @RequestBody CreateRideRequest request) {
 
+
         String phoneNumber = authentication.getName();
 
-        rideService.createRide(phoneNumber, request);
+
+        rideService.createRide(
+                phoneNumber,
+                request
+        );
+
 
         return MessageResponse.builder()
                 .message("Ride created successfully")
                 .build();
     }
+
+
+
     @GetMapping("/my")
     public List<RideResponse> getMyRides(
             Authentication authentication) {
 
-        String phoneNumber = authentication.getName();
 
-        return rideService.getMyRides(phoneNumber);
+        return rideService.getMyRides(
+                authentication.getName()
+        );
     }
+
+
+
+
     @GetMapping("/search")
-    public List<RideResponse> searchRides(
+    public Page<RideResponse> searchRides(
 
-            @RequestParam String source,
 
-            @RequestParam String destination,
+            @RequestParam(required = false)
+            String source,
 
-            @RequestParam LocalDate travelDate) {
+
+            @RequestParam(required = false)
+            String destination,
+
+
+            @RequestParam(required = false)
+            LocalDate travelDate,
+
+
+            @RequestParam(required = false)
+            Integer availableSeats,
+
+
+            @RequestParam(required = false)
+            Double maxPrice,
+
+
+            @RequestParam(defaultValue = "0")
+            int page,
+
+
+            @RequestParam(defaultValue = "10")
+            int size,
+
+
+            @RequestParam(defaultValue = "travelDate")
+            String sortBy
+
+    ) {
+
 
         return rideService.searchRides(
                 source,
                 destination,
-                travelDate
+                travelDate,
+                availableSeats,
+                maxPrice,
+                page,
+                size,
+                sortBy
         );
     }
+
+
+
+
     @GetMapping("/{rideId}")
-    public RideResponse getRideById(@PathVariable Long rideId) {
-        return rideService.getRideById(rideId);
+    public RideResponse getRideById(
+            @PathVariable Long rideId) {
+
+
+        return rideService.getRideById(
+                rideId
+        );
     }
+
+
+
+
     @PutMapping("/{rideId}/cancel")
     public MessageResponse cancelRide(
+
             @PathVariable Long rideId,
-            Authentication authentication) {
 
-        String phoneNumber = authentication.getName();
+            Authentication authentication
 
-        rideService.cancelRide(rideId, phoneNumber);
+    ) {
+
+
+        rideService.cancelRide(
+                rideId,
+                authentication.getName()
+        );
+
 
         return MessageResponse.builder()
                 .message("Ride cancelled successfully")
                 .build();
     }
+
+
+
+
     @PutMapping("/{rideId}/start")
     public MessageResponse startRide(
+
             @PathVariable Long rideId,
-            Authentication authentication) {
+
+            Authentication authentication
+
+    ) {
+
 
         return rideService.startRide(
                 rideId,
                 authentication.getName()
         );
     }
+
+
+
+
+
     @PutMapping("/{rideId}/complete")
     public MessageResponse completeRide(
+
             @PathVariable Long rideId,
-            Authentication authentication) {
+
+            Authentication authentication
+
+    ) {
+
 
         return rideService.completeRide(
                 rideId,
                 authentication.getName()
         );
     }
+
+
+
+
     @GetMapping("/history")
     public List<RideResponse> getRideHistory(
-            Authentication authentication) {
+
+            Authentication authentication
+
+    ) {
+
 
         return rideService.getRideHistory(
                 authentication.getName()

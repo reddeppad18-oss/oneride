@@ -13,26 +13,40 @@ import one.oneride.exception.UnauthorizedRideException;
 import one.oneride.repository.RideRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.RideService;
+import one.oneride.specification.RideSpecification;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor
 public class RideServiceImpl implements RideService {
 
+
     private final RideRepository rideRepository;
+
     private final UserRepository userRepository;
 
+
     @Override
-    public void createRide(String phoneNumber,
-                           CreateRideRequest request) {
+    public void createRide(
+            String phoneNumber,
+            CreateRideRequest request) {
+
 
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
+
 
         Ride ride = Ride.builder()
                 .source(request.getSource())
@@ -47,193 +61,251 @@ public class RideServiceImpl implements RideService {
                 .user(user)
                 .build();
 
+
         rideRepository.save(ride);
     }
-        @Override
-        public List<RideResponse> getMyRides(String phoneNumber) {
 
-            User user = userRepository.findByPhoneNumber(phoneNumber)
-                    .orElseThrow(() ->
-                            new RuntimeException("User not found"));
 
-            List<Ride> rides = rideRepository.findByUser(user);
-
-            return rides.stream()
-                    .map(ride -> RideResponse.builder()
-                            .id(ride.getId())
-                            .source(ride.getSource())
-                            .destination(ride.getDestination())
-                            .travelDate(ride.getTravelDate())
-                            .travelTime(ride.getTravelTime())
-                            .availableSeats(ride.getAvailableSeats())
-                            .pricePerSeat(ride.getPricePerSeat())
-                            .description(ride.getDescription())
-                            .status(ride.getStatus().name())
-                            .build())
-                    .toList();
-        }
 
     @Override
-    public List<RideResponse> searchRides(
-            String source,
-            String destination,
-            LocalDate travelDate) {
+    public List<RideResponse> getMyRides(
+            String phoneNumber) {
 
-        List<Ride> rides =
-                rideRepository.findBySourceIgnoreCaseAndDestinationIgnoreCaseAndTravelDateAndStatus(
-                        source,
-                        destination,
-                        travelDate,
-                        RideStatus.ACTIVE
-                );
 
-        return rides.stream()
-                .map(ride -> RideResponse.builder()
-                        .id(ride.getId())
-                        .source(ride.getSource())
-                        .destination(ride.getDestination())
-                        .travelDate(ride.getTravelDate())
-                        .travelTime(ride.getTravelTime())
-                        .availableSeats(ride.getAvailableSeats())
-                        .pricePerSeat(ride.getPricePerSeat())
-                        .description(ride.getDescription())
-                        .status(ride.getStatus().name())
-                        .build())
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+
+        return rideRepository.findByUser(user)
+                .stream()
+                .map(this::mapToRideResponse)
                 .toList();
     }
+
+
+
+    @Override
+    public Page<RideResponse> searchRides(
+
+            String source,
+            String destination,
+            LocalDate travelDate,
+            Integer availableSeats,
+            Double maxPrice,
+            int page,
+            int size,
+            String sortBy
+
+    ) {
+
+
+        Pageable pageable =
+                PageRequest.of(
+                        page,
+                        size,
+                        Sort.by(sortBy).ascending()
+                );
+
+
+        return rideRepository.findAll(
+                        RideSpecification.searchRide(
+                                source,
+                                destination,
+                                travelDate,
+                                availableSeats,
+                                maxPrice
+                        ),
+                        pageable
+                )
+                .map(this::mapToRideResponse);
+    }
+
+
+
     @Override
     public RideResponse getRideById(Long rideId) {
 
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() ->
-                        new RuntimeException("Ride not found"));
-
-        return RideResponse.builder()
-                .id(ride.getId())
-                .source(ride.getSource())
-                .destination(ride.getDestination())
-                .travelDate(ride.getTravelDate())
-                .travelTime(ride.getTravelTime())
-                .availableSeats(ride.getAvailableSeats())
-                .pricePerSeat(ride.getPricePerSeat())
-                .description(ride.getDescription())
-                .status(ride.getStatus().name())
-                .build();
-    }
-    private RideResponse mapToRideResponse(Ride ride) {
-
-        return RideResponse.builder()
-                .id(ride.getId())
-                .source(ride.getSource())
-                .destination(ride.getDestination())
-                .travelDate(ride.getTravelDate())
-                .travelTime(ride.getTravelTime())
-                .availableSeats(ride.getAvailableSeats())
-                .pricePerSeat(ride.getPricePerSeat())
-                .description(ride.getDescription())
-                .status(ride.getStatus().name())
-                .build();
-    }
-    @Override
-    public void cancelRide(
-            Long rideId,
-            String phoneNumber) {
 
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() ->
                         new RideNotFoundException("Ride not found"));
 
+
+        return mapToRideResponse(ride);
+    }
+
+
+
+    @Override
+    public void cancelRide(
+            Long rideId,
+            String phoneNumber) {
+
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new RideNotFoundException("Ride not found"));
+
+
+
         if (!ride.getUser()
                 .getPhoneNumber()
                 .equals(phoneNumber)) {
+
 
             throw new UnauthorizedRideException(
                     "You can cancel only your own ride");
         }
 
+
+
         if (ride.getStatus() != RideStatus.ACTIVE) {
+
 
             throw new InvalidRideStateException(
                     "Only active rides can be cancelled");
         }
 
+
         ride.setStatus(RideStatus.CANCELLED);
 
         rideRepository.save(ride);
     }
+
+
+
     @Override
     public MessageResponse startRide(
             Long rideId,
             String phoneNumber) {
 
+
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() ->
                         new RuntimeException("Ride not found"));
 
-        // Only ride owner can start the ride
-        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
+
+
+        if (!ride.getUser()
+                .getPhoneNumber()
+                .equals(phoneNumber)) {
+
+
             throw new RuntimeException("Unauthorized");
         }
 
-        // Ride must be ACTIVE or FULL
+
+
         if (ride.getStatus() != RideStatus.ACTIVE &&
                 ride.getStatus() != RideStatus.FULL) {
 
-            throw new RuntimeException("Ride cannot be started");
+
+            throw new RuntimeException(
+                    "Ride cannot be started");
         }
+
+
 
         ride.setStatus(RideStatus.STARTED);
 
         rideRepository.save(ride);
 
+
+
         return MessageResponse.builder()
                 .message("Ride started successfully")
                 .build();
     }
+
+
+
     @Override
     public MessageResponse completeRide(
             Long rideId,
             String phoneNumber) {
 
+
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() ->
                         new RuntimeException("Ride not found"));
 
-        // Only ride owner can complete the ride
-        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
+
+
+        if (!ride.getUser()
+                .getPhoneNumber()
+                .equals(phoneNumber)) {
+
+
             throw new RuntimeException("Unauthorized");
         }
 
-        // Ride must already be STARTED
+
+
         if (ride.getStatus() != RideStatus.STARTED) {
-            throw new RuntimeException("Ride has not started yet");
+
+
+            throw new RuntimeException(
+                    "Ride has not started yet");
         }
+
+
 
         ride.setStatus(RideStatus.COMPLETED);
 
         rideRepository.save(ride);
+
+
 
         return MessageResponse.builder()
                 .message("Ride completed successfully")
                 .build();
     }
 
+
+
+
     @Override
-    public List<RideResponse> getRideHistory(String phoneNumber) {
+    public List<RideResponse> getRideHistory(
+            String phoneNumber) {
+
 
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        List<RideStatus> historyStatuses = List.of(
+
+
+        List<RideStatus> statuses = List.of(
                 RideStatus.COMPLETED,
                 RideStatus.CANCELLED
         );
 
+
         return rideRepository
-                .findByUserAndStatusIn(user, historyStatuses)
+                .findByUserAndStatusIn(user, statuses)
                 .stream()
                 .map(this::mapToRideResponse)
                 .toList();
+    }
+
+
+
+
+    private RideResponse mapToRideResponse(
+            Ride ride) {
+
+
+        return RideResponse.builder()
+                .id(ride.getId())
+                .source(ride.getSource())
+                .destination(ride.getDestination())
+                .travelDate(ride.getTravelDate())
+                .travelTime(ride.getTravelTime())
+                .availableSeats(ride.getAvailableSeats())
+                .pricePerSeat(ride.getPricePerSeat())
+                .description(ride.getDescription())
+                .status(ride.getStatus().name())
+                .build();
     }
 }
