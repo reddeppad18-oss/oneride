@@ -37,4 +37,11 @@ public interface BookingRepository
             BookingStatus status,
             LocalDateTime time
     );
+
+
+    // Fetch booking history by user and status
+    List<Booking> findByUserAndStatusIn(
+            User user,
+            List<BookingStatus> statuses
+    );
 }

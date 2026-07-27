@@ -27,4 +27,10 @@ public class RideResponse {
     private String description;
 
     private String status;
+
+    private String vehicleType;
+
+    private String vehicleName;
+
+    private String vehicleNumber;
 }

@@ -1,5 +1,8 @@
 package one.oneride.service.impl;
 
+import one.oneride.entity.Booking;
+import one.oneride.enums.BookingStatus;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.CreateRideRequest;
 import one.oneride.dto.MessageResponse;
@@ -10,6 +13,7 @@ import one.oneride.enums.RideStatus;
 import one.oneride.exception.InvalidRideStateException;
 import one.oneride.exception.RideNotFoundException;
 import one.oneride.exception.UnauthorizedRideException;
+import one.oneride.repository.BookingRepository;
 import one.oneride.repository.RideRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.RideService;
@@ -36,6 +40,8 @@ public class RideServiceImpl implements RideService {
 
     private final UserRepository userRepository;
 
+    private final BookingRepository bookingRepository;
+
 
     @Override
     public void createRide(
@@ -53,6 +59,9 @@ public class RideServiceImpl implements RideService {
                 .destination(request.getDestination())
                 .travelDate(request.getTravelDate())
                 .travelTime(request.getTravelTime())
+                .vehicleType(request.getVehicleType())
+                .vehicleName(request.getVehicleName())
+                .vehicleNumber(request.getVehicleNumber())
                 .availableSeats(request.getAvailableSeats())
                 .pricePerSeat(request.getPricePerSeat())
                 .description(request.getDescription())
@@ -217,10 +226,8 @@ public class RideServiceImpl implements RideService {
                 .message("Ride started successfully")
                 .build();
     }
-
-
-
     @Override
+    @Transactional
     public MessageResponse completeRide(
             Long rideId,
             String phoneNumber) {
@@ -231,39 +238,58 @@ public class RideServiceImpl implements RideService {
                         new RuntimeException("Ride not found"));
 
 
-
         if (!ride.getUser()
                 .getPhoneNumber()
                 .equals(phoneNumber)) {
 
-
-            throw new RuntimeException("Unauthorized");
+            throw new RuntimeException(
+                    "Unauthorized"
+            );
         }
-
 
 
         if (ride.getStatus() != RideStatus.STARTED) {
 
-
             throw new RuntimeException(
-                    "Ride has not started yet");
+                    "Ride has not started yet"
+            );
         }
 
 
+        // Change ride status
+        ride.setStatus(
+                RideStatus.COMPLETED
+        );
 
-        ride.setStatus(RideStatus.COMPLETED);
+
+        // Find all confirmed bookings
+        List<Booking> bookings =
+                bookingRepository.findByRideAndStatus(
+                        ride,
+                        BookingStatus.CONFIRMED
+                );
+
+
+        // Complete all bookings
+        for (Booking booking : bookings) {
+
+            booking.setStatus(
+                    BookingStatus.COMPLETED
+            );
+        }
+
+
+        bookingRepository.saveAll(bookings);
 
         rideRepository.save(ride);
 
 
-
         return MessageResponse.builder()
-                .message("Ride completed successfully")
+                .message(
+                        "Ride completed successfully"
+                )
                 .build();
     }
-
-
-
 
     @Override
     public List<RideResponse> getRideHistory(
@@ -302,6 +328,9 @@ public class RideServiceImpl implements RideService {
                 .destination(ride.getDestination())
                 .travelDate(ride.getTravelDate())
                 .travelTime(ride.getTravelTime())
+                .vehicleType(ride.getVehicleType())
+                .vehicleName(ride.getVehicleName())
+                .vehicleNumber(ride.getVehicleNumber())
                 .availableSeats(ride.getAvailableSeats())
                 .pricePerSeat(ride.getPricePerSeat())
                 .description(ride.getDescription())

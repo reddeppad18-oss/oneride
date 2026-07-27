@@ -33,6 +33,12 @@ public class Ride {
 
     private Double pricePerSeat;
 
+    private String vehicleType;
+
+    private String vehicleName;
+
+    private String vehicleNumber;
+
     @Column(length = 500)
     private String description;
 

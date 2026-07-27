@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class BookingResponse {
-
     private Long bookingId;
 
     private Long rideId;
@@ -15,7 +14,19 @@ public class BookingResponse {
 
     private String destination;
 
+    private String rideOwnerName;
+
+    private String passengerName;
+
+    private String travelDate;
+
+    private String travelTime;
+
     private Integer seatsBooked;
+
+    private Double pricePerSeat;
+
+    private Double totalAmount;
 
     private String bookingStatus;
 }

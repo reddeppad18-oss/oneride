@@ -1,5 +1,6 @@
 package one.oneride.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.CreateRideRequest;
 import one.oneride.dto.MessageResponse;
@@ -25,7 +26,7 @@ public class RideController {
     @PostMapping
     public MessageResponse createRide(
             Authentication authentication,
-            @RequestBody CreateRideRequest request) {
+            @RequestBody @Valid CreateRideRequest request) {
 
 
         String phoneNumber = authentication.getName();

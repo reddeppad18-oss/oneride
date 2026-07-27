@@ -1,5 +1,6 @@
 package one.oneride.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.BookingResponse;
 import one.oneride.dto.CreateBookingRequest;
@@ -21,7 +22,7 @@ public class BookingController {
     @PostMapping
     public BookingResponse createBooking(
             Authentication authentication,
-            @RequestBody CreateBookingRequest request) {
+            @Valid @RequestBody CreateBookingRequest request){
 
         String phoneNumber = authentication.getName();
 
@@ -65,6 +66,14 @@ public class BookingController {
 
         return bookingService.getBookingsForRide(
                 rideId,
+                authentication.getName()
+        );
+    }
+    @GetMapping("/history")
+    public List<BookingResponse> getBookingHistory(
+            Authentication authentication) {
+
+        return bookingService.getBookingHistory(
                 authentication.getName()
         );
     }

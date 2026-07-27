@@ -1,65 +1,131 @@
 package one.oneride.exception;
 
-import one.oneride.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
-@ControllerAdvice
+
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
+
+    private ResponseEntity<Map<String, Object>> buildResponse(
+            HttpStatus status,
+            String message) {
+
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put(
+                "timestamp",
+                LocalDateTime.now()
+        );
+
+        response.put(
+                "status",
+                status.value()
+        );
+
+        response.put(
+                "message",
+                message
+        );
+
+
+        return new ResponseEntity<>(
+                response,
+                status
+        );
+    }
+
+
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFound(
+            UserNotFoundException exception) {
+
+
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                exception.getMessage()
+        );
+    }
+
+
+
     @ExceptionHandler(RideNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleRideNotFound(
-            RideNotFoundException ex) {
+    public ResponseEntity<?> handleRideNotFound(
+            RideNotFoundException exception) {
 
-        ErrorResponse error = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .message(ex.getMessage())
-                .build();
 
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                exception.getMessage()
+        );
     }
 
-    @ExceptionHandler(UnauthorizedRideException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedRide(
-            UnauthorizedRideException ex) {
 
-        ErrorResponse error = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.FORBIDDEN.value())
-                .message(ex.getMessage())
-                .build();
 
-        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<?> handleBookingNotFound(
+            BookingNotFoundException exception) {
+
+
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                exception.getMessage()
+        );
     }
 
-    @ExceptionHandler(InvalidRideStateException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidRideState(
-            InvalidRideStateException ex) {
 
-        ErrorResponse error = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(ex.getMessage())
-                .build();
 
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(UnAuthorisedException.class)
+    public ResponseEntity<?> handleUnauthorized(
+            UnAuthorisedException exception) {
+
+
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                exception.getMessage()
+        );
     }
+
+
+
+    @ExceptionHandler(InvalidStateException.class)
+    public ResponseEntity<?> handleInvalidState(
+            InvalidStateException exception) {
+
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                exception.getMessage()
+        );
+    }
+
+
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
-            Exception ex) {
+    public ResponseEntity<?> handleGeneralException(
+            Exception exception) {
 
-        ErrorResponse error = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message(ex.getMessage())
-                .build();
 
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                exception.getMessage()
+        );
+    }
+    @ExceptionHandler(RentalNotFoundException.class)
+    public ResponseEntity<?> handleRentalNotFound(
+            RentalNotFoundException exception) {
+
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                exception.getMessage()
+        );
     }
 }

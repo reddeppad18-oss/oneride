@@ -1,6 +1,6 @@
 package one.oneride.enums;
 
-public enum BookingStatus {
+public enum RentalBookingStatus {
 
     PENDING,
 
@@ -10,6 +10,6 @@ public enum BookingStatus {
 
     CANCELLED,
 
-    EXPIRED,
     COMPLETED
+
 }
