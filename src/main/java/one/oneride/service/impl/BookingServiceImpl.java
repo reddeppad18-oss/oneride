@@ -15,6 +15,7 @@ import one.oneride.repository.UserRepository;
 import one.oneride.service.BookingService;
 import org.springframework.stereotype.Service;
 import one.oneride.service.NotificationService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +43,25 @@ public class BookingServiceImpl implements BookingService {
         Ride ride = rideRepository.findById(request.getRideId())
                 .orElseThrow(() ->
                         new RuntimeException("Ride not found"));
+        List<BookingStatus> activeStatuses = List.of(
+                BookingStatus.PENDING,
+                BookingStatus.CONFIRMED
+        );
+
+
+        boolean alreadyBooked =
+                bookingRepository.existsByRideIdAndUserIdAndStatusIn(
+                        ride.getId(),
+                        passenger.getId(),
+                        activeStatuses
+                );
+
+
+        if (alreadyBooked) {
+            throw new RuntimeException(
+                    "You already have a booking request for this ride"
+            );
+        }
 
         // Rule 1: User cannot book their own ride
         if (ride.getUser().getId().equals(passenger.getId())) {
@@ -119,6 +139,7 @@ public class BookingServiceImpl implements BookingService {
                 .build();
     }
     @Override
+    @Transactional
     public MessageResponse confirmBooking(
             Long bookingId,
             String phoneNumber) {
@@ -127,12 +148,11 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() ->
                         new RuntimeException("Booking not found"));
 
-        Ride ride = booking.getRide();
-
-        // Only the ride owner can confirm
-        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
-            throw new RuntimeException("Unauthorized");
-        }
+        Ride ride = rideRepository.findByIdForUpdate(
+                        booking.getRide().getId()
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("Ride not found"));
 
         // Booking must be pending
         if (booking.getStatus() != BookingStatus.PENDING) {
@@ -174,9 +194,7 @@ public class BookingServiceImpl implements BookingService {
                 .build();
     }
     @Override
-    public MessageResponse rejectBooking(
-            Long bookingId,
-            String phoneNumber) {
+    public MessageResponse rejectBooking(Long bookingId, String phoneNumber) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() ->

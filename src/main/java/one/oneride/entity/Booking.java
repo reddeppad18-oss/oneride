@@ -5,7 +5,6 @@ import lombok.*;
 import one.oneride.enums.BookingStatus;
 
 import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "bookings")
 @Getter
@@ -33,4 +32,6 @@ public class Booking {
     private BookingStatus status;
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime expiresAt;
 }

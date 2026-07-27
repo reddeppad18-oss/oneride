@@ -6,17 +6,35 @@ import one.oneride.entity.User;
 import one.oneride.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingRepository
         extends JpaRepository<Booking, Long> {
 
+
     List<Booking> findByUser(User user);
 
+
     List<Booking> findByRide(Ride ride);
+
 
     List<Booking> findByRideAndStatus(
             Ride ride,
             BookingStatus status
+    );
+
+
+    boolean existsByRideIdAndUserIdAndStatusIn(
+            Long rideId,
+            Long userId,
+            List<BookingStatus> statuses
+    );
+
+
+    // Fetch pending bookings whose expiry time has passed
+    List<Booking> findByStatusAndExpiresAtBefore(
+            BookingStatus status,
+            LocalDateTime time
     );
 }

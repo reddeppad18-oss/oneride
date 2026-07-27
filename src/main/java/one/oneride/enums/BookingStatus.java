@@ -8,5 +8,7 @@ public enum BookingStatus {
 
     REJECTED,
 
-    CANCELLED
+    CANCELLED,
+
+    EXPIRED
 }
