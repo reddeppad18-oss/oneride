@@ -1,5 +1,7 @@
 package one.oneride.service.impl;
 
+import one.oneride.entity.Rating;
+import one.oneride.repository.RatingRepository;
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.UpdateProfileRequest;
 import one.oneride.dto.UserResponse;
@@ -8,6 +10,7 @@ import one.oneride.enums.UserRole;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.UserService;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RatingRepository ratingRepository;
 
     @Override
     public User createUserIfNotExists(String phoneNumber) {
@@ -44,7 +48,6 @@ public class UserServiceImpl implements UserService {
                     return userRepository.save(user);
                 });
     }
-
     @Override
     public UserResponse getCurrentUser(String phoneNumber) {
 
@@ -52,14 +55,26 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
+        List<Rating> ratings = ratingRepository.findByReviewee(user);
+
+        double averageRating = ratings.stream()
+                .mapToInt(Rating::getRating)
+                .average()
+                .orElse(0.0);
+
+        long totalRatings = ratings.size();
+
         return UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())
                 .role(user.getRole().name())
                 .verified(user.getVerified())
+                .averageRating(averageRating)
+                .totalRatings(totalRatings)
                 .build();
     }
+
     @Override
     public void updateProfile(
             String phoneNumber,

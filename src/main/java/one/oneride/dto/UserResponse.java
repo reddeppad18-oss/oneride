@@ -1,12 +1,12 @@
 package one.oneride.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
+@Builder
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class UserResponse {
 
     private Long id;
@@ -18,4 +18,8 @@ public class UserResponse {
     private String role;
 
     private Boolean verified;
+
+    private Double averageRating;
+
+    private Long totalRatings;
 }

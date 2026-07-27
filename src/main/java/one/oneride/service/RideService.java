@@ -28,4 +28,7 @@ public interface RideService {
             Long rideId,
             String phoneNumber
     );
+    List<RideResponse> getRideHistory(
+            String phoneNumber
+    );
 }

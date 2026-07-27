@@ -92,4 +92,12 @@ public class RideController {
                 authentication.getName()
         );
     }
+    @GetMapping("/history")
+    public List<RideResponse> getRideHistory(
+            Authentication authentication) {
+
+        return rideService.getRideHistory(
+                authentication.getName()
+        );
+    }
 }

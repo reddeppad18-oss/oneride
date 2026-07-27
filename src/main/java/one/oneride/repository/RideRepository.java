@@ -18,4 +18,8 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
             LocalDate travelDate,
             RideStatus status
     );
+    List<Ride> findByUserAndStatusIn(
+            User user,
+            List<RideStatus> statuses
+    );
 }

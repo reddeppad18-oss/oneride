@@ -14,6 +14,7 @@ import one.oneride.repository.RideRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.BookingService;
 import org.springframework.stereotype.Service;
+import one.oneride.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     public BookingResponse createBooking(
@@ -71,6 +73,17 @@ public class BookingServiceImpl implements BookingService {
                 .build();
 
         booking = bookingRepository.save(booking);
+        notificationService.createNotification(
+                ride.getUser(),
+                "New Booking Request",
+                passenger.getFullName()
+                        + " requested "
+                        + booking.getSeatsBooked()
+                        + " seat(s) for your ride from "
+                        + ride.getSource()
+                        + " to "
+                        + ride.getDestination()
+        );
 
         // Return response
         return BookingResponse.builder()
@@ -146,6 +159,15 @@ public class BookingServiceImpl implements BookingService {
 
         bookingRepository.save(booking);
         rideRepository.save(ride);
+        notificationService.createNotification(
+                booking.getUser(),
+                "Booking Confirmed",
+                "Your booking for the ride from "
+                        + ride.getSource()
+                        + " to "
+                        + ride.getDestination()
+                        + " has been confirmed."
+        );
 
         return MessageResponse.builder()
                 .message("Booking confirmed successfully")
@@ -175,6 +197,15 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.REJECTED);
 
         bookingRepository.save(booking);
+        notificationService.createNotification(
+                booking.getUser(),
+                "Booking Rejected",
+                "Your booking for the ride from "
+                        + ride.getSource()
+                        + " to "
+                        + ride.getDestination()
+                        + " has been rejected."
+        );
 
         return MessageResponse.builder()
                 .message("Booking rejected successfully")

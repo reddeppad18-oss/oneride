@@ -217,4 +217,23 @@ public class RideServiceImpl implements RideService {
                 .message("Ride completed successfully")
                 .build();
     }
+
+    @Override
+    public List<RideResponse> getRideHistory(String phoneNumber) {
+
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        List<RideStatus> historyStatuses = List.of(
+                RideStatus.COMPLETED,
+                RideStatus.CANCELLED
+        );
+
+        return rideRepository
+                .findByUserAndStatusIn(user, historyStatuses)
+                .stream()
+                .map(this::mapToRideResponse)
+                .toList();
+    }
 }
