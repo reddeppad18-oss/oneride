@@ -60,8 +60,6 @@ public class RideServiceImpl implements RideService {
                 .travelDate(request.getTravelDate())
                 .travelTime(request.getTravelTime())
                 .vehicleType(request.getVehicleType())
-                .vehicleName(request.getVehicleName())
-                .vehicleNumber(request.getVehicleNumber())
                 .availableSeats(request.getAvailableSeats())
                 .pricePerSeat(request.getPricePerSeat())
                 .description(request.getDescription())

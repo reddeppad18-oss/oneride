@@ -30,11 +30,14 @@ public class BookingServiceImpl implements BookingService {
     private final NotificationService notificationService;
 
 
+    // =========================================================
+    // CREATE BOOKING
+    // =========================================================
+
     @Override
     public BookingResponse createBooking(
             String phoneNumber,
             CreateBookingRequest request) {
-
 
         User passenger = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
@@ -67,6 +70,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
+        // Passenger cannot book their own ride
         if (ride.getUser().getId().equals(passenger.getId())) {
             throw new RuntimeException(
                     "You cannot book your own ride"
@@ -74,6 +78,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
+        // Ride must be active
         if (ride.getStatus() != RideStatus.ACTIVE) {
             throw new RuntimeException(
                     "Ride is not available"
@@ -81,6 +86,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
+        // Seats must be greater than zero
         if (request.getSeatsBooked() <= 0) {
             throw new RuntimeException(
                     "Seats booked must be greater than zero"
@@ -88,11 +94,14 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
+        // Check available seats
         if (request.getSeatsBooked() > ride.getAvailableSeats()) {
             throw new RuntimeException(
                     "Not enough seats available"
             );
         }
+
+
         Booking booking = Booking.builder()
                 .ride(ride)
                 .user(passenger)
@@ -108,10 +117,10 @@ public class BookingServiceImpl implements BookingService {
                 .build();
 
 
-
         booking = bookingRepository.save(booking);
 
 
+        // Notify ride owner
         notificationService.createNotification(
                 ride.getUser(),
                 "New Booking Request",
@@ -129,10 +138,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
+    // =========================================================
+    // GET MY BOOKINGS
+    // =========================================================
+
     @Override
     public List<BookingResponse> getMyBookings(
             String phoneNumber) {
-
 
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
@@ -146,9 +158,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
+    // =========================================================
+    // MAP BOOKING TO RESPONSE
+    // =========================================================
+
     private BookingResponse mapToBookingResponse(
             Booking booking) {
-
 
         Ride ride = booking.getRide();
 
@@ -159,13 +174,21 @@ public class BookingServiceImpl implements BookingService {
 
         return BookingResponse.builder()
 
-                .bookingId(booking.getId())
+                .bookingId(
+                        booking.getId()
+                )
 
-                .rideId(ride.getId())
+                .rideId(
+                        ride.getId()
+                )
 
-                .source(ride.getSource())
+                .source(
+                        ride.getSource()
+                )
 
-                .destination(ride.getDestination())
+                .destination(
+                        ride.getDestination()
+                )
 
                 .rideOwnerName(
                         rideOwner.getFullName()
@@ -204,12 +227,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
+    // =========================================================
+    // CONFIRM BOOKING
+    // =========================================================
+
     @Override
     @Transactional
     public MessageResponse confirmBooking(
             Long bookingId,
             String phoneNumber) {
-
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() ->
@@ -223,6 +249,18 @@ public class BookingServiceImpl implements BookingService {
                         new RuntimeException("Ride not found"));
 
 
+        // Make sure the logged-in user is the ride owner
+        if (!ride.getUser()
+                .getPhoneNumber()
+                .equals(phoneNumber)) {
+
+            throw new RuntimeException(
+                    "Unauthorized"
+            );
+        }
+
+
+        // Only pending bookings can be confirmed
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new RuntimeException(
                     "Booking already processed"
@@ -230,25 +268,32 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
-        if (booking.getSeatsBooked() > ride.getAvailableSeats()) {
+        // Check available seats
+        if (booking.getSeatsBooked()
+                > ride.getAvailableSeats()) {
+
             throw new RuntimeException(
                     "Not enough seats available"
             );
         }
 
 
+        // Confirm booking
         booking.setStatus(
                 BookingStatus.CONFIRMED
         );
 
 
+        // Reduce available seats
         ride.setAvailableSeats(
                 ride.getAvailableSeats()
                         - booking.getSeatsBooked()
         );
 
 
+        // If no seats remain, mark ride as FULL
         if (ride.getAvailableSeats() == 0) {
+
             ride.setStatus(
                     RideStatus.FULL
             );
@@ -260,6 +305,7 @@ public class BookingServiceImpl implements BookingService {
         rideRepository.save(ride);
 
 
+        // Notify passenger
         notificationService.createNotification(
                 booking.getUser(),
                 "Booking Confirmed",
@@ -272,16 +318,21 @@ public class BookingServiceImpl implements BookingService {
 
 
         return MessageResponse.builder()
-                .message("Booking confirmed successfully")
+                .message(
+                        "Booking confirmed successfully"
+                )
                 .build();
     }
 
+
+    // =========================================================
+    // REJECT BOOKING
+    // =========================================================
 
     @Override
     public MessageResponse rejectBooking(
             Long bookingId,
             String phoneNumber) {
-
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() ->
@@ -291,6 +342,7 @@ public class BookingServiceImpl implements BookingService {
         Ride ride = booking.getRide();
 
 
+        // Only ride owner can reject
         if (!ride.getUser()
                 .getPhoneNumber()
                 .equals(phoneNumber)) {
@@ -301,6 +353,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
+        // Only pending bookings can be rejected
         if (booking.getStatus() != BookingStatus.PENDING) {
 
             throw new RuntimeException(
@@ -309,6 +362,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
+        // Change status
         booking.setStatus(
                 BookingStatus.REJECTED
         );
@@ -317,6 +371,7 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(booking);
 
 
+        // Notify passenger
         notificationService.createNotification(
                 booking.getUser(),
                 "Booking Rejected",
@@ -329,22 +384,28 @@ public class BookingServiceImpl implements BookingService {
 
 
         return MessageResponse.builder()
-                .message("Booking rejected successfully")
+                .message(
+                        "Booking rejected successfully"
+                )
                 .build();
     }
 
+
+    // =========================================================
+    // GET BOOKINGS FOR RIDE
+    // =========================================================
 
     @Override
     public List<BookingResponse> getBookingsForRide(
             Long rideId,
             String phoneNumber) {
 
-
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() ->
                         new RuntimeException("Ride not found"));
 
 
+        // Only ride owner can view booking requests
         if (!ride.getUser()
                 .getPhoneNumber()
                 .equals(phoneNumber)) {
@@ -362,10 +423,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
+    // =========================================================
+    // GET BOOKING HISTORY
+    // =========================================================
+
     @Override
     public List<BookingResponse> getBookingHistory(
             String phoneNumber) {
-
 
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
@@ -389,18 +453,30 @@ public class BookingServiceImpl implements BookingService {
                 .map(this::mapToBookingResponse)
                 .toList();
     }
+
+
+    // =========================================================
+    // CANCEL BOOKING
+    // =========================================================
+
     @Override
     @Transactional
     public MessageResponse cancelBooking(
             Long bookingId,
             String phoneNumber) {
 
+        // Find booking
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() ->
-                        new RuntimeException("Booking not found"));
+                        new RuntimeException(
+                                "Booking not found"
+                        ));
 
 
-        // Only passenger who created booking can cancel
+        // -----------------------------------------------------
+        // Check whether the logged-in customer owns the booking
+        // -----------------------------------------------------
+
         if (!booking.getUser()
                 .getPhoneNumber()
                 .equals(phoneNumber)) {
@@ -411,45 +487,38 @@ public class BookingServiceImpl implements BookingService {
         }
 
 
-        // Only pending or confirmed bookings can be cancelled
-        if (booking.getStatus() != BookingStatus.PENDING &&
-                booking.getStatus() != BookingStatus.CONFIRMED) {
+        // -----------------------------------------------------
+        // Customer can cancel ONLY PENDING bookings
+        // -----------------------------------------------------
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
 
             throw new RuntimeException(
-                    "Booking cannot be cancelled"
+                    "Only pending bookings can be cancelled"
             );
         }
 
 
+        // Get the ride
         Ride ride = booking.getRide();
 
 
-        // Restore seats if booking was confirmed
-        if (booking.getStatus() == BookingStatus.CONFIRMED) {
-
-            ride.setAvailableSeats(
-                    ride.getAvailableSeats()
-                            + booking.getSeatsBooked()
-            );
-
-
-            if (ride.getStatus() == RideStatus.FULL) {
-
-                ride.setStatus(RideStatus.ACTIVE);
-            }
-
-
-            rideRepository.save(ride);
-        }
-
+        // -----------------------------------------------------
+        // Change booking status to CANCELLED
+        // -----------------------------------------------------
 
         booking.setStatus(
                 BookingStatus.CANCELLED
         );
 
 
+        // Save updated booking
         bookingRepository.save(booking);
 
+
+        // -----------------------------------------------------
+        // Notify ride owner
+        // -----------------------------------------------------
 
         notificationService.createNotification(
                 ride.getUser(),
@@ -461,8 +530,11 @@ public class BookingServiceImpl implements BookingService {
         );
 
 
+        // Return success response
         return MessageResponse.builder()
-                .message("Booking cancelled successfully")
+                .message(
+                        "Booking cancelled successfully"
+                )
                 .build();
     }
 }

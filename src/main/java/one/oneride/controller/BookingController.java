@@ -19,10 +19,11 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    // Create a new booking
     @PostMapping
     public BookingResponse createBooking(
             Authentication authentication,
-            @Valid @RequestBody CreateBookingRequest request){
+            @Valid @RequestBody CreateBookingRequest request) {
 
         String phoneNumber = authentication.getName();
 
@@ -31,6 +32,8 @@ public class BookingController {
                 request
         );
     }
+
+    // Get bookings created by the current user
     @GetMapping("/my")
     public List<BookingResponse> getMyBookings(
             Authentication authentication) {
@@ -39,6 +42,8 @@ public class BookingController {
                 authentication.getName()
         );
     }
+
+    // Confirm a booking
     @PutMapping("/{bookingId}/confirm")
     public MessageResponse confirmBooking(
             @PathVariable Long bookingId,
@@ -49,6 +54,8 @@ public class BookingController {
                 authentication.getName()
         );
     }
+
+    // Reject a booking
     @PutMapping("/{bookingId}/reject")
     public MessageResponse rejectBooking(
             @PathVariable Long bookingId,
@@ -59,6 +66,8 @@ public class BookingController {
                 authentication.getName()
         );
     }
+
+    // Get all bookings for a particular ride
     @GetMapping("/ride/{rideId}")
     public List<BookingResponse> getBookingsForRide(
             @PathVariable Long rideId,
@@ -69,11 +78,25 @@ public class BookingController {
                 authentication.getName()
         );
     }
+
+    // Get booking history
     @GetMapping("/history")
     public List<BookingResponse> getBookingHistory(
             Authentication authentication) {
 
         return bookingService.getBookingHistory(
+                authentication.getName()
+        );
+    }
+
+    // Cancel a booking
+    @PutMapping("/{bookingId}/cancel")
+    public MessageResponse cancelBooking(
+            @PathVariable Long bookingId,
+            Authentication authentication) {
+
+        return bookingService.cancelBooking(
+                bookingId,
                 authentication.getName()
         );
     }

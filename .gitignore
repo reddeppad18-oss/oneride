@@ -31,3 +31,25 @@ build/
 
 ### VS Code ###
 .vscode/
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Java crash/replay logs
+hs_err_pid*.log
+replay_pid*.log
+
+# Build output
+target/
+dist/
+
+# Environment files
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.iml

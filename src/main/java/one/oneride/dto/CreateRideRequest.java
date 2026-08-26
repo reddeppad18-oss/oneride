@@ -44,11 +44,4 @@ public class CreateRideRequest {
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
-    public String getVehicleName() {
-        return getVehicleName();
-    }
-
-    public String getVehicleNumber() {
-        return getVehicleNumber();
-    }
 }
