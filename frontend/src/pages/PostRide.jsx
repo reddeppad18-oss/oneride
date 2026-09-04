@@ -2,56 +2,7 @@ import { useState } from "react";
 import { createRide } from "../services/rideService.js";
 
 function PostRide() {
-const [formData, setFormData] = useState({
-source: "",
-destination: "",
-travelDate: "",
-travelTime: "",
-availableSeats: "",
-pricePerSeat: "",
-vehicleType: "",
-brand: "",
-registrationNumber: "",
-description: "",
-});
-
-const [message, setMessage] = useState("");
-const [errorMessage, setErrorMessage] = useState("");
-const [loading, setLoading] = useState(false);
-
-const handleChange = (event) => {
-const { name, value } = event.target;
-
-setFormData((previousData) => ({
-  ...previousData,
-  [name]: value,
-}));
-
-};
-
-const handleSubmit = async (event) => {
-event.preventDefault();
-
-setMessage("");
-setErrorMessage("");
-setLoading(true);
-
-try {
-  const rideData = {
-    ...formData,
-    availableSeats: Number(formData.availableSeats),
-    pricePerSeat: Number(formData.pricePerSeat),
-  };
-
-  const response = await createRide(rideData);
-
-  console.log("Create ride response:", response);
-
-  setMessage(
-    response.message || "Ride created successfully."
-  );
-
-  setFormData({
+  const [formData, setFormData] = useState({
     source: "",
     destination: "",
     travelDate: "",
@@ -64,224 +15,346 @@ try {
     description: "",
   });
 
-} catch (error) {
-  console.error("Create ride error:", error);
+  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  if (error.response?.data?.message) {
-    setErrorMessage(error.response.data.message);
-  } else if (error.response?.data) {
-    setErrorMessage(
-      JSON.stringify(error.response.data)
-    );
-  } else {
-    setErrorMessage(
-      error.message ||
-      "Unable to create the ride."
-    );
-  }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
-} finally {
-  setLoading(false);
-}
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]: value,
+    }));
+  };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-};
+    setMessage("");
+    setErrorMessage("");
+    setLoading(true);
 
-return ( <div className="page-container"> <div className="form-card">
+    try {
+      const rideData = {
+        ...formData,
+        availableSeats: Number(formData.availableSeats),
+        pricePerSeat: Number(formData.pricePerSeat),
+      };
 
-    <h1>Post a Ride</h1>
+      const response = await createRide(rideData);
 
-    <p className="page-description">
-      Share your journey and allow other users
-      to book available seats.
-    </p>
+      console.log("Create ride response:", response);
 
-    <form onSubmit={handleSubmit}>
+      setMessage(
+        response.message || "Ride created successfully."
+      );
 
-      <div className="form-grid">
+      setFormData({
+        source: "",
+        destination: "",
+        travelDate: "",
+        travelTime: "",
+        availableSeats: "",
+        pricePerSeat: "",
+        vehicleType: "",
+        brand: "",
+        registrationNumber: "",
+        description: "",
+      });
+    } catch (error) {
+      console.error("Create ride error:", error);
 
-        <div className="form-group">
-          <label>Source</label>
+      if (error.response?.data?.message) {
+        setErrorMessage(error.response.data.message);
+      } else if (error.response?.data) {
+        setErrorMessage(
+          JSON.stringify(error.response.data)
+        );
+      } else {
+        setErrorMessage(
+          error.message ||
+            "Unable to create the ride."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          <input
-            type="text"
-            name="source"
-            placeholder="Enter source"
-            value={formData.source}
-            onChange={handleChange}
-            required
-          />
-        </div>
+  return (
+    <div className="page-container">
+      <div className="form-card">
 
-        <div className="form-group">
-          <label>Destination</label>
+        <h1>Post a Ride</h1>
 
-          <input
-            type="text"
-            name="destination"
-            placeholder="Enter destination"
-            value={formData.destination}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <p className="page-description">
+          Share your journey and allow other users
+          to book available seats.
+        </p>
 
-        <div className="form-group">
-          <label>Travel Date</label>
+        <form onSubmit={handleSubmit}>
 
-          <input
-            type="date"
-            name="travelDate"
-            value={formData.travelDate}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <div className="form-grid">
 
-        <div className="form-group">
-          <label>Travel Time</label>
+            {/* Source */}
+            <div className="form-group">
+              <label htmlFor="source">
+                Source
+              </label>
 
-          <input
-            type="time"
-            name="travelTime"
-            value={formData.travelTime}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <input
+                id="source"
+                type="text"
+                name="source"
+                placeholder="Enter source"
+                value={formData.source}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div className="form-group">
-          <label>Available Seats</label>
+            {/* Destination */}
+            <div className="form-group">
+              <label htmlFor="destination">
+                Destination
+              </label>
 
-          <input
-            type="number"
-            name="availableSeats"
-            placeholder="Enter available seats"
-            min="1"
-            value={formData.availableSeats}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <input
+                id="destination"
+                type="text"
+                name="destination"
+                placeholder="Enter destination"
+                value={formData.destination}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div className="form-group">
-          <label>Price per Seat</label>
+            {/* Travel Date */}
+            <div className="form-group">
+              <label htmlFor="travelDate">
+                Travel Date
+              </label>
 
-          <input
-            type="number"
-            name="pricePerSeat"
-            placeholder="Enter price"
-            min="1"
-            step="0.01"
-            value={formData.pricePerSeat}
-            onChange={handleChange}
-            required
-          />
-        </div>
+              <input
+                id="travelDate"
+                type="date"
+                name="travelDate"
+                value={formData.travelDate}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div className="form-group">
-          <label>Vehicle Type</label>
+            {/* Travel Time */}
+            <div className="form-group">
+              <label htmlFor="travelTime">
+                Travel Time
+              </label>
 
-          <select
-            name="vehicleType"
-            value={formData.vehicleType}
-            onChange={handleChange}
-            required
+              <input
+                id="travelTime"
+                type="time"
+                name="travelTime"
+                value={formData.travelTime}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Available Seats */}
+            <div className="form-group">
+              <label htmlFor="availableSeats">
+                Available Seats
+              </label>
+
+              <input
+                id="availableSeats"
+                type="number"
+                name="availableSeats"
+                placeholder="Enter available seats"
+                min="1"
+                value={formData.availableSeats}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Price Per Seat */}
+            <div className="form-group">
+              <label htmlFor="pricePerSeat">
+                Price per Seat
+              </label>
+
+              <input
+                id="pricePerSeat"
+                type="number"
+                name="pricePerSeat"
+                placeholder="Enter price"
+                min="1"
+                step="0.01"
+                value={formData.pricePerSeat}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Vehicle Type */}
+            <div className="form-group">
+              <label htmlFor="vehicleType">
+                Vehicle Type
+              </label>
+
+              <select
+                id="vehicleType"
+                name="vehicleType"
+                value={formData.vehicleType}
+                onChange={handleChange}
+                required
+              >
+                <option value="">
+                  Select vehicle type
+                </option>
+
+                <option value="CAR">
+                  Car
+                </option>
+
+                <option value="BIKE">
+                  Bike
+                </option>
+
+                <option value="BUS">
+                  Bus
+                </option>
+
+                <option value="VAN">
+                  Van
+                </option>
+
+                <option value="CONTAINER">
+                  Container
+                </option>
+
+                <option value="AUTO">
+                  Auto
+                </option>
+
+                <option value="PICKUP_TRUCK">
+                  Pickup Truck
+                </option>
+
+                <option value="OTHER">
+                  Other
+                </option>
+              </select>
+            </div>
+
+            {/* Custom Vehicle Name */}
+            {formData.vehicleType === "OTHER" && (
+              <div className="form-group">
+                <label htmlFor="customVehicleType">
+                  Enter Vehicle Name
+                </label>
+
+                <input
+                  id="customVehicleType"
+                  type="text"
+                  name="customVehicleType"
+                  placeholder="Example: Tractor, Tempo Traveller"
+                  value={formData.customVehicleType || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            )}
+
+            {/* Vehicle Brand */}
+            <div className="form-group">
+              <label htmlFor="brand">
+                Vehicle Brand
+              </label>
+
+              <input
+                id="brand"
+                type="text"
+                name="brand"
+                placeholder="Example: Honda, Toyota"
+                value={formData.brand}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Registration Number */}
+            <div className="form-group">
+              <label htmlFor="registrationNumber">
+                Registration Number
+              </label>
+
+              <input
+                id="registrationNumber"
+                type="text"
+                name="registrationNumber"
+                placeholder="Enter vehicle number"
+                value={formData.registrationNumber}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+          </div>
+
+          {/* Description */}
+          <div className="form-group">
+
+            <label htmlFor="description">
+              Description (Optional)
+            </label>
+
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Add additional ride details"
+              rows="4"
+              maxLength="500"
+              value={formData.description}
+              onChange={handleChange}
+            />
+
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={loading}
           >
-            <option value="">
-              Select vehicle type
-            </option>
+            {loading
+              ? "Creating Ride..."
+              : "Post Ride"}
+          </button>
 
-            <option value="BIKE">
-              Bike
-            </option>
+          {/* Success */}
+          {message && (
+            <p className="success-message">
+              {message}
+            </p>
+          )}
 
-            <option value="CAR">
-              Car
-            </option>
+          {/* Error */}
+          {errorMessage && (
+            <p className="error-message">
+              {errorMessage}
+            </p>
+          )}
 
-            <option value="VAN">
-              Van
-            </option>
-
-            <option value="BUS">
-              Bus
-            </option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Vehicle Brand</label>
-
-          <input
-            type="text"
-            name="brand"
-            placeholder="Example: Honda, Toyota"
-            value={formData.brand}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Registration Number</label>
-
-          <input
-            type="text"
-            name="registrationNumber"
-            placeholder="Enter vehicle number"
-            value={formData.registrationNumber}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        </form>
 
       </div>
-
-      <div className="form-group">
-        
-        <label>
-          Description (Optional)
-        </label>
-    
-        <textarea
-          name="description"
-          placeholder="Add additional ride details"
-          rows="4"
-          maxLength="500"
-          value={formData.description}
-          onChange={handleChange}
-        />
-        
-      </div>
-
-      <button
-        type="submit"
-        className="primary-button"
-        disabled={loading}
-      >
-        {loading
-          ? "Creating Ride..."
-          : "Post Ride"}
-      </button>
-
-      {message && (
-        <p className="success-message">
-          {message}
-        </p>
-      )}
-
-      {errorMessage && (
-        <p className="error-message">
-          {errorMessage}
-        </p>
-      )}
-
-    </form>
-
-  </div>
-</div>
-);
+    </div>
+  );
 }
 
 export default PostRide;

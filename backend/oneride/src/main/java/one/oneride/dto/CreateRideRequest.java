@@ -41,7 +41,9 @@ public class CreateRideRequest {
     @NotBlank(message = "Registration number is required")
     private String registrationNumber;
 
-    @Size(max = 500, message = "Description cannot exceed 500 characters")
+    @Size(
+        max = 500,
+        message = "Description cannot exceed 500 characters"
+    )
     private String description;
-
 }

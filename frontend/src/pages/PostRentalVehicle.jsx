@@ -4,6 +4,7 @@ import { createRental } from "../services/rentalService.js";
 function PostRentalVehicle() {
   const [formData, setFormData] = useState({
     vehicleType: "",
+    customVehicleType: "",
     brand: "",
     vehicleModel: "",
     vehicleNumber: "",
@@ -35,7 +36,11 @@ function PostRentalVehicle() {
 
     try {
       const rentalData = {
-        vehicleType: formData.vehicleType,
+        vehicleType:
+          formData.vehicleType === "OTHER"
+            ? formData.customVehicleType
+            : formData.vehicleType,
+
         brand: formData.brand,
         vehicleModel: formData.vehicleModel,
         vehicleNumber: formData.vehicleNumber,
@@ -49,7 +54,10 @@ function PostRentalVehicle() {
 
       const response = await createRental(rentalData);
 
-      console.log("Create rental response:", response);
+      console.log(
+        "Create rental response:",
+        response
+      );
 
       setMessage(
         "Rental vehicle posted successfully."
@@ -57,6 +65,7 @@ function PostRentalVehicle() {
 
       setFormData({
         vehicleType: "",
+        customVehicleType: "",
         brand: "",
         vehicleModel: "",
         vehicleNumber: "",
@@ -126,26 +135,63 @@ function PostRentalVehicle() {
                   Select vehicle type
                 </option>
 
-                <option value="BIKE">
-                  Bike
-                </option>
-
                 <option value="CAR">
                   Car
                 </option>
 
-                <option value="VAN">
-                  Van
+                <option value="BIKE">
+                  Bike
                 </option>
 
                 <option value="BUS">
                   Bus
                 </option>
 
+                <option value="VAN">
+                  Van
+                </option>
+
+                <option value="CONTAINER">
+                  Container
+                </option>
+
+                <option value="AUTO">
+                  Auto
+                </option>
+
+                <option value="PICKUP_TRUCK">
+                  Pickup Truck
+                </option>
+
+                <option value="OTHER">
+                  Other
+                </option>
               </select>
 
             </div>
 
+            {/* Custom Vehicle Name */}
+            {formData.vehicleType === "OTHER" && (
+              <div className="form-group">
+
+                <label htmlFor="customVehicleType">
+                  Enter Vehicle Name
+                </label>
+
+                <input
+                  id="customVehicleType"
+                  type="text"
+                  name="customVehicleType"
+                  placeholder="Example: Tractor, Tempo Traveller"
+                  value={
+                    formData.customVehicleType
+                  }
+                  onChange={handleChange}
+                  required
+                />
+
+              </div>
+            )}
 
             {/* Brand */}
             <div className="form-group">
@@ -166,7 +212,6 @@ function PostRentalVehicle() {
 
             </div>
 
-
             {/* Model */}
             <div className="form-group">
 
@@ -185,7 +230,6 @@ function PostRentalVehicle() {
               />
 
             </div>
-
 
             {/* Registration Number */}
             <div className="form-group">
@@ -206,7 +250,6 @@ function PostRentalVehicle() {
 
             </div>
 
-
             {/* Seats */}
             <div className="form-group">
 
@@ -226,7 +269,6 @@ function PostRentalVehicle() {
               />
 
             </div>
-
 
             {/* Price */}
             <div className="form-group">
@@ -249,7 +291,6 @@ function PostRentalVehicle() {
 
             </div>
 
-
             {/* Location */}
             <div className="form-group">
 
@@ -271,7 +312,6 @@ function PostRentalVehicle() {
 
           </div>
 
-
           {/* Description */}
           <div className="form-group">
 
@@ -291,7 +331,6 @@ function PostRentalVehicle() {
 
           </div>
 
-
           {/* Submit */}
           <button
             type="submit"
@@ -303,14 +342,12 @@ function PostRentalVehicle() {
               : "Post Vehicle"}
           </button>
 
-
           {/* Success */}
           {message && (
             <p className="success-message">
               {message}
             </p>
           )}
-
 
           {/* Error */}
           {errorMessage && (

@@ -3,6 +3,7 @@ package one.oneride.dto;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+
 @Getter
 @Setter
 public class CreateRentalRequest {
@@ -30,9 +31,11 @@ public class CreateRentalRequest {
     @NotBlank(message = "Location is required")
     private String location;
 
-    @Size(max = 500, message = "Description cannot exceed 500 characters")
+    @Size(
+        max = 500,
+        message = "Description cannot exceed 500 characters"
+    )
     private String description;
-
 
     // Custom getters
     public String getModel() {
