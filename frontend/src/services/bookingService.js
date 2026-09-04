@@ -22,11 +22,14 @@ export const createBooking = async (rideId, seatsBooked) => {
 export const getMyBookings = async () => {
   const token = localStorage.getItem("token");
 
-  const response = await api.get("/bookings/my", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await api.get(
+    "/bookings/my",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   return response.data;
 };
