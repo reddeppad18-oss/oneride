@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class BookingResponse {
+
     private Long bookingId;
 
     private Long rideId;
@@ -29,4 +30,11 @@ public class BookingResponse {
     private Double totalAmount;
 
     private String bookingStatus;
+
+    // Vehicle details
+    private String vehicleType;
+
+    private String brand;
+
+    private String registrationNumber;
 }
