@@ -38,7 +38,7 @@ function MyBookings() {
 
   const handleCancel = async (bookingId) => {
     const confirmed = window.confirm(
-      "Are you sure you want to cancel this booking?"
+      "Are you sure you want to cancel this ride?"
     );
 
     if (!confirmed) {
@@ -48,18 +48,15 @@ function MyBookings() {
     try {
       await cancelBooking(bookingId);
 
-      alert("Booking cancelled successfully.");
+      alert("Ride cancelled successfully.");
 
       await loadBookings();
     } catch (error) {
-      console.error(
-        "Error cancelling booking:",
-        error
-      );
+      console.error("Error cancelling booking:", error);
 
       alert(
         error.response?.data?.message ||
-          "Unable to cancel booking."
+          "Unable to cancel ride."
       );
     }
   };
@@ -103,13 +100,11 @@ function MyBookings() {
 
       {!errorMessage && bookings.length === 0 && (
         <div className="form-card">
-
           <h3>No bookings found.</h3>
 
           <p>
             Your ride bookings will appear here.
           </p>
-
         </div>
       )}
 
@@ -217,9 +212,10 @@ function MyBookings() {
               </div>
 
 
-              {/* CANCEL BUTTON */}
+              {/* CANCEL RIDE BUTTON */}
 
-              {booking.bookingStatus === "PENDING" && (
+              {(booking.bookingStatus === "PENDING" ||
+                booking.bookingStatus === "CONFIRMED") && (
                 <div className="booking-action">
 
                   <button
@@ -231,7 +227,7 @@ function MyBookings() {
                       )
                     }
                   >
-                    Cancel Booking
+                    Cancel Ride
                   </button>
 
                 </div>
