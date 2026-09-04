@@ -8,11 +8,15 @@ import {
 import Login from "./pages/Login";
 import VerifyOtp from "./pages/VerifyOtp";
 import Dashboard from "./pages/Dashboard";
+
 import PostRide from "./pages/PostRide";
 import SearchRides from "./pages/SearchRides";
 import MyRides from "./pages/MyRides";
+
 import MyBookings from "./pages/MyBookings";
 import RideBookings from "./pages/RideBookings";
+
+import PostRentalVehicle from "./pages/PostRentalVehicle";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -21,6 +25,7 @@ function App() {
     <BrowserRouter>
       <Routes>
 
+        {/* LOGIN */}
         <Route
           path="/"
           element={
@@ -32,6 +37,7 @@ function App() {
           }
         />
 
+        {/* VERIFY OTP */}
         <Route
           path="/verify-otp"
           element={
@@ -43,6 +49,7 @@ function App() {
           }
         />
 
+        {/* DASHBOARD */}
         <Route
           path="/dashboard"
           element={
@@ -54,6 +61,7 @@ function App() {
           }
         />
 
+        {/* POST RIDE */}
         <Route
           path="/post-ride"
           element={
@@ -65,6 +73,7 @@ function App() {
           }
         />
 
+        {/* SEARCH RIDES */}
         <Route
           path="/search-rides"
           element={
@@ -76,6 +85,7 @@ function App() {
           }
         />
 
+        {/* MY RIDES */}
         <Route
           path="/my-rides"
           element={
@@ -87,6 +97,7 @@ function App() {
           }
         />
 
+        {/* MY BOOKINGS */}
         <Route
           path="/my-bookings"
           element={
@@ -98,6 +109,7 @@ function App() {
           }
         />
 
+        {/* RIDE BOOKINGS */}
         <Route
           path="/ride-bookings/:rideId"
           element={
@@ -109,6 +121,19 @@ function App() {
           }
         />
 
+        {/* POST RENTAL VEHICLE */}
+        <Route
+          path="/post-rental-vehicle"
+          element={
+            token ? (
+              <PostRentalVehicle />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        {/* UNKNOWN ROUTES */}
         <Route
           path="*"
           element={

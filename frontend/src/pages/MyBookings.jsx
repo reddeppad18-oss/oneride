@@ -18,7 +18,7 @@ function MyBookings() {
 
       console.log("My bookings:", data);
 
-      setBookings(data);
+      setBookings(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error loading bookings:", error);
 
@@ -56,6 +56,7 @@ function MyBookings() {
 
       alert(
         error.response?.data?.message ||
+          error.message ||
           "Unable to cancel ride."
       );
     }
@@ -74,7 +75,9 @@ function MyBookings() {
   return (
     <div className="page-container">
 
-      {/* PAGE HEADING */}
+      {/* =========================================
+          PAGE HEADER
+      ========================================= */}
 
       <div className="form-card">
         <h1>My Bookings</h1>
@@ -85,7 +88,9 @@ function MyBookings() {
       </div>
 
 
-      {/* ERROR */}
+      {/* =========================================
+          ERROR MESSAGE
+      ========================================= */}
 
       {errorMessage && (
         <div className="form-card">
@@ -96,7 +101,9 @@ function MyBookings() {
       )}
 
 
-      {/* NO BOOKINGS */}
+      {/* =========================================
+          NO BOOKINGS
+      ========================================= */}
 
       {!errorMessage && bookings.length === 0 && (
         <div className="form-card">
@@ -109,132 +116,157 @@ function MyBookings() {
       )}
 
 
-      {/* BOOKINGS */}
+      {/* =========================================
+          BOOKINGS
+      ========================================= */}
 
       {bookings.length > 0 && (
         <div className="my-bookings-list">
 
-          {bookings.map((booking) => (
-            <div
-              key={booking.bookingId}
-              className="my-booking-card"
-            >
+          {bookings.map((booking) => {
 
-              {/* SOURCE */}
+            /*
+             * Normalize booking status.
+             *
+             * This handles:
+             * PENDING
+             * pending
+             * Pending
+             * CONFIRMED
+             * confirmed
+             * etc.
+             */
 
-              <div className="booking-row">
-                <strong>Source :</strong>
-
-                <span>
-                  {booking.source}
-                </span>
-              </div>
-
-
-              {/* DESTINATION */}
-
-              <div className="booking-row">
-                <strong>Destination :</strong>
-
-                <span>
-                  {booking.destination}
-                </span>
-              </div>
+            const status = String(
+              booking.bookingStatus || ""
+            ).toUpperCase();
 
 
-              {/* TRAVEL DATE */}
+            return (
+              <div
+                key={booking.bookingId}
+                className="my-booking-card"
+              >
 
-              <div className="booking-row">
-                <strong>Travel Date :</strong>
+                {/* SOURCE */}
 
-                <span>
-                  {booking.travelDate}
-                </span>
-              </div>
+                <div className="booking-row">
+                  <strong>Source :</strong>
 
-
-              {/* TRAVEL TIME */}
-
-              <div className="booking-row">
-                <strong>Travel Time :</strong>
-
-                <span>
-                  {booking.travelTime}
-                </span>
-              </div>
-
-
-              {/* SEATS */}
-
-              <div className="booking-row">
-                <strong>Seats Booked :</strong>
-
-                <span>
-                  {booking.seatsBooked}
-                </span>
-              </div>
-
-
-              {/* PRICE */}
-
-              <div className="booking-row">
-                <strong>Price Per Seat :</strong>
-
-                <span>
-                  ₹{booking.pricePerSeat}
-                </span>
-              </div>
-
-
-              {/* TOTAL */}
-
-              <div className="booking-row">
-                <strong>Total Amount :</strong>
-
-                <span>
-                  ₹{booking.totalAmount}
-                </span>
-              </div>
-
-
-              {/* STATUS */}
-
-              <div className="booking-row">
-                <strong>Status :</strong>
-
-                <span
-                  className={`booking-status ${String(
-                    booking.bookingStatus
-                  ).toLowerCase()}`}
-                >
-                  {booking.bookingStatus}
-                </span>
-              </div>
-
-
-              {/* CANCEL RIDE BUTTON */}
-
-              {(booking.bookingStatus === "PENDING" ||
-                booking.bookingStatus === "CONFIRMED") && (
-                <div className="booking-action">
-
-                  <button
-                    type="button"
-                    className="secondary-button cancel-booking-button"
-                    onClick={() =>
-                      handleCancel(
-                        booking.bookingId
-                      )
-                    }
-                  >
-                    Cancel Ride
-                  </button>
-
+                  <span>
+                    {booking.source}
+                  </span>
                 </div>
-              )}
 
-            </div>
-          ))}
+
+                {/* DESTINATION */}
+
+                <div className="booking-row">
+                  <strong>Destination :</strong>
+
+                  <span>
+                    {booking.destination}
+                  </span>
+                </div>
+
+
+                {/* TRAVEL DATE */}
+
+                <div className="booking-row">
+                  <strong>Travel Date :</strong>
+
+                  <span>
+                    {booking.travelDate}
+                  </span>
+                </div>
+
+
+                {/* TRAVEL TIME */}
+
+                <div className="booking-row">
+                  <strong>Travel Time :</strong>
+
+                  <span>
+                    {booking.travelTime}
+                  </span>
+                </div>
+
+
+                {/* SEATS */}
+
+                <div className="booking-row">
+                  <strong>Seats Booked :</strong>
+
+                  <span>
+                    {booking.seatsBooked}
+                  </span>
+                </div>
+
+
+                {/* PRICE */}
+
+                <div className="booking-row">
+                  <strong>Price Per Seat :</strong>
+
+                  <span>
+                    ₹{booking.pricePerSeat}
+                  </span>
+                </div>
+
+
+                {/* TOTAL */}
+
+                <div className="booking-row">
+                  <strong>Total Amount :</strong>
+
+                  <span>
+                    ₹{booking.totalAmount}
+                  </span>
+                </div>
+
+
+                {/* STATUS */}
+
+                <div className="booking-row">
+                  <strong>Status :</strong>
+
+                  <span
+                    className={`booking-status ${status.toLowerCase()}`}
+                  >
+                    {status || "UNKNOWN"}
+                  </span>
+                </div>
+
+
+                {/* =================================
+                    CANCEL RIDE
+                ================================= */}
+
+                {status !== "CANCELLED" &&
+                  status !== "REJECTED" &&
+                  status !== "COMPLETED" && (
+
+                  <div className="booking-action">
+
+                    <button
+                      type="button"
+                      className="cancel-booking-button"
+                      onClick={() =>
+                        handleCancel(
+                          booking.bookingId
+                        )
+                      }
+                    >
+                      Cancel Ride
+                    </button>
+
+                  </div>
+
+                )}
+
+              </div>
+            );
+          })}
 
         </div>
       )}
