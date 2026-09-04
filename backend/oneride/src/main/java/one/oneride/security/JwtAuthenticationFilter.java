@@ -6,10 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import one.oneride.entity.User;
+import one.oneride.service.UserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,7 +19,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserService userService;
 
     @Override
     protected void doFilterInternal(
@@ -29,75 +28,52 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("=================================");
-        System.out.println("JWT FILTER EXECUTED");
-        System.out.println("Request URI : " + request.getRequestURI());
-        System.out.println("=================================");
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         final String authHeader = request.getHeader("Authorization");
 
-        System.out.println("Authorization Header : " + authHeader);
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
-            System.out.println("No Bearer Token Found");
+        if (authHeader == null ||
+                !authHeader.startsWith("Bearer ")) {
 
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwt = authHeader.substring(7);
-
-        System.out.println("JWT Token : " + jwt);
+        final String jwt = authHeader.substring(7);
 
         try {
 
-            String phoneNumber = jwtService.extractPhoneNumber(jwt);
-
-            System.out.println("Phone Number : " + phoneNumber);
+            String phoneNumber =
+                    jwtService.extractPhoneNumber(jwt);
 
             if (phoneNumber != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
+                    SecurityContextHolder
+                            .getContext()
+                            .getAuthentication() == null) {
 
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(phoneNumber);
+                User user =
+                        userService.createUserIfNotExists(phoneNumber);
 
-                System.out.println("User Loaded : " + userDetails.getUsername());
-
-                boolean isValid =
-                        jwtService.isTokenValid(jwt, (User) userDetails);
-
-                System.out.println("Token Valid : " + isValid);
-
-                if (isValid) {
+                if (jwtService.isTokenValid(jwt, user)) {
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
-                                    userDetails,
+                                    phoneNumber,
                                     null,
-                                    userDetails.getAuthorities()
+                                    user.getAuthorities()
                             );
-
-                    authentication.setDetails(
-                            new WebAuthenticationDetailsSource()
-                                    .buildDetails(request)
-                    );
 
                     SecurityContextHolder
                             .getContext()
                             .setAuthentication(authentication);
-
-                    System.out.println("Authentication Stored Successfully");
-                } else {
-
-                    System.out.println("Token Validation Failed");
                 }
             }
 
-        } catch (Exception ex) {
-
-            System.out.println("JWT Exception : " + ex.getMessage());
-            ex.printStackTrace();
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
