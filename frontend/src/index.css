@@ -1,6 +1,26 @@
-body {
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
   font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 /* =========================
@@ -8,15 +28,18 @@ body {
 ========================= */
 
 .login-container {
-  height: 100vh;
+  min-height: 100vh;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #f5f5f5;
+  padding: 20px;
 }
 
 .login-card {
   width: 350px;
+  max-width: 100%;
   padding: 30px;
   background: white;
   border-radius: 10px;
@@ -52,6 +75,9 @@ body {
   cursor: pointer;
 }
 
+.login-card button:hover {
+  background: #125ea8;
+}
 
 /* =========================
    DASHBOARD LAYOUT
@@ -59,19 +85,12 @@ body {
 
 .dashboard-layout {
   display: flex;
-
   width: 100%;
+  min-width: 0;
   height: 100vh;
-
   background-color: #f4f6f8;
-
-  /*
-    Prevent the entire browser page
-    from scrolling.
-  */
   overflow: hidden;
 }
-
 
 /* =========================
    SIDEBAR
@@ -79,32 +98,20 @@ body {
 
 .sidebar {
   width: 250px;
+  min-width: 250px;
+  max-width: 250px;
   height: 100vh;
-
   padding: 25px 18px;
-
   display: flex;
   flex-direction: column;
-
   background-color: #173b5e;
   color: white;
-
-  /*
-    Keep sidebar fixed while
-    right side is scrolling.
-  */
   position: fixed;
   top: 0;
   left: 0;
-
   box-sizing: border-box;
-
-  /*
-    Sidebar itself can scroll if
-    there are too many menu items.
-  */
   overflow-y: auto;
-
+  overflow-x: hidden;
   flex-shrink: 0;
 }
 
@@ -123,11 +130,6 @@ body {
   color: #c9d7e4;
 }
 
-
-/* =========================
-   SIDEBAR MENU
-========================= */
-
 .sidebar-menu {
   display: flex;
   flex-direction: column;
@@ -138,16 +140,12 @@ body {
 .menu-item {
   width: 100%;
   padding: 13px;
-
   border: none;
   border-radius: 7px;
-
   background: transparent;
   color: white;
-
   text-align: left;
   font-size: 15px;
-
   cursor: pointer;
 }
 
@@ -156,25 +154,19 @@ body {
   background-color: #2d638f;
 }
 
-
 /* =========================
    LOGOUT
 ========================= */
 
 .logout-button {
   width: 100%;
-
   margin-top: auto;
   padding: 13px;
-
   border: none;
   border-radius: 7px;
-
   background-color: #c53b3b;
   color: white;
-
   font-size: 15px;
-
   cursor: pointer;
 }
 
@@ -182,38 +174,21 @@ body {
   background-color: #a83232;
 }
 
-
 /* =========================
    RIGHT SIDE CONTENT
 ========================= */
 
 .dashboard-content {
-  /*
-    Leave space for fixed sidebar.
-  */
   margin-left: 250px;
-
-  /*
-    Take remaining screen width.
-  */
   width: calc(100% - 250px);
-
-  /*
-    Make right side exactly screen height.
-  */
+  max-width: calc(100% - 250px);
   height: 100vh;
-
-  /*
-    ONLY RIGHT SIDE SCROLLS.
-  */
+  min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
-
   padding: 35px;
-
   box-sizing: border-box;
 }
-
 
 /* =========================
    DASHBOARD HEADER
@@ -232,30 +207,23 @@ body {
   color: #667085;
 }
 
-
 /* =========================
    DASHBOARD CARDS
 ========================= */
 
 .dashboard-cards {
   display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(220px, 1fr));
-
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
   gap: 20px;
+  width: 100%;
 }
 
 .dashboard-card {
   padding: 25px;
-
   border-radius: 12px;
-
   background-color: white;
-
-  box-shadow:
-    0 4px 15px
-    rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  min-width: 0;
 }
 
 .dashboard-card h3 {
@@ -265,21 +233,16 @@ body {
 
 .dashboard-card p {
   min-height: 65px;
-
   color: #667085;
-
   line-height: 1.5;
 }
 
 .dashboard-card button {
   padding: 10px 18px;
-
   border: none;
   border-radius: 6px;
-
   background-color: #1976d2;
   color: white;
-
   cursor: pointer;
 }
 
@@ -287,40 +250,29 @@ body {
   background-color: #125ea8;
 }
 
-
 /* =========================
    PAGE CONTAINER
 ========================= */
 
 .page-container {
   min-height: 100%;
-
   padding: 40px;
-
   background-color: #f4f6f8;
-
   box-sizing: border-box;
 }
-
 
 /* =========================
    FORM CARD
 ========================= */
 
 .form-card {
+  width: 100%;
   max-width: 900px;
-
   margin: 0 auto;
-
   padding: 30px;
-
   border-radius: 12px;
-
   background-color: white;
-
-  box-shadow:
-    0 4px 18px
-    rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
 }
 
 .form-card h1 {
@@ -333,44 +285,36 @@ body {
   color: #667085;
 }
 
-
 /* =========================
    FORM GRID
 ========================= */
 
 .form-grid {
   display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   gap: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-
   margin-bottom: 20px;
 }
 
 .form-group label {
   margin-bottom: 7px;
-
   font-weight: 600;
-
   color: #344054;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
+  width: 100%;
   padding: 12px;
-
   border: 1px solid #d0d5dd;
   border-radius: 7px;
-
   font-size: 15px;
-
   box-sizing: border-box;
 }
 
@@ -378,22 +322,17 @@ body {
   resize: vertical;
 }
 
-
 /* =========================
    BUTTONS
 ========================= */
 
 .primary-button {
   padding: 12px 24px;
-
   border: none;
   border-radius: 7px;
-
   background-color: #1976d2;
   color: white;
-
   font-size: 16px;
-
   cursor: pointer;
 }
 
@@ -406,27 +345,21 @@ body {
   cursor: not-allowed;
 }
 
-
 /* =========================
    MESSAGES
 ========================= */
 
 .success-message {
   margin-top: 15px;
-
   color: #198754;
-
   font-weight: 600;
 }
 
 .error-message {
   margin-top: 15px;
-
   color: #c62828;
-
   font-weight: 600;
 }
-
 
 /* =========================
    MY RIDES
@@ -435,20 +368,15 @@ body {
 .my-rides-list {
   display: flex;
   flex-direction: column;
-
   gap: 32px;
-
   margin-top: 20px;
 }
 
 .ride-action .primary-button {
   padding: 8px 14px;
-
   font-size: 13px;
-
   border-radius: 6px;
 }
-
 
 /* =========================
    BOOKINGS
@@ -457,70 +385,52 @@ body {
 .booking-list {
   display: flex;
   flex-direction: column;
-
   gap: 32px;
-
   margin-top: 20px;
 }
 
 .booking-card {
+  width: 100%;
   background: #ffffff;
-
   border: 1px solid #dddddd;
-
   border-radius: 10px;
-
   overflow: hidden;
-
-  box-shadow:
-    0 3px 10px
-    rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
 .booking-row {
   display: flex;
-
   align-items: center;
-
   gap: 6px;
-
   padding: 15px 20px;
-
   border-bottom: 1px solid #e5e5e5;
+  min-width: 0;
 }
 
 .booking-row strong {
   font-weight: 700;
-
   color: #222222;
-
   white-space: nowrap;
 }
 
 .booking-row span {
   font-weight: 400;
-
   color: #555555;
+  overflow-wrap: anywhere;
 }
 
 .booking-actions {
   display: flex;
-
   justify-content: flex-end;
-
   gap: 10px;
-
   padding: 14px 20px;
 }
 
 .booking-button {
   padding: 8px 14px;
-
   font-size: 13px;
-
   border-radius: 6px;
 }
-
 
 /* =========================
    MY BOOKINGS
@@ -529,32 +439,18 @@ body {
 .my-bookings-list {
   display: flex;
   flex-direction: column;
-
   gap: 32px;
-
   margin-top: 20px;
 }
 
 .my-booking-card {
+  width: 100%;
   background: #ffffff;
-
   border: 1px solid #dddddd;
-
   border-radius: 10px;
-
   overflow: hidden;
-
-  box-shadow:
-    0 3px 10px
-    rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
-
-
-/*
-  booking-row is already defined above.
-  This section keeps the same styling
-  for My Bookings.
-*/
 
 .booking-status {
   font-weight: 600 !important;
@@ -562,189 +458,9 @@ body {
 
 .booking-action {
   display: flex;
-
   justify-content: flex-end;
-
   padding: 12px 20px;
 }
-
-.cancel-booking-button {
-  padding: 8px 14px;
-
-  font-size: 13px;
-
-  border-radius: 6px;
-}
-
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 850px) {
-
-  .sidebar {
-    width: 210px;
-  }
-
-  .dashboard-content {
-    margin-left: 210px;
-
-    width: calc(100% - 210px);
-  }
-
-  .dashboard-cards {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-@media (max-width: 700px) {
-
-  .page-container {
-    padding: 20px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.my-rental-bookings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  margin-top: 25px;
-}
-
-.my-rental-booking-card {
-  background: #ffffff;
-  border: 1px solid #dddddd;
-  border-radius: 10px;
-  padding: 25px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-}
-
-.my-rental-booking-card h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #173b5e;
-}
-
-.my-rental-booking-card p {
-  margin: 12px 0;
-  color: #555555;
-  line-height: 1.5;
-}
-
-.my-rental-booking-card p strong {
-  color: #222222;
-  font-weight: 700;
-}
-
-.rental-booking-actions {
-  margin-top: 22px;
-  padding-top: 15px;
-  border-top: 1px solid #e5e5e5;
-}
-
-.cancel-booking-button {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  background-color: #c53b3b;
-  color: white;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.cancel-booking-button:hover {
-  background-color: #a82f2f;
-}
-
-.booking-info {
-  font-size: 14px;
-  font-weight: 600;
-  color: #667085;
-}
-
-.rental-booking-status {
-  font-weight: 600;
-}
-
-.rental-booking-status.pending {
-  color: #d97706;
-}
-
-.rental-booking-status.confirmed {
-  color: #198754;
-}
-
-.rental-booking-status.cancelled {
-  color: #c53b3b;
-}
-
-.rental-booking-status.rejected {
-  color: #c53b3b;
-}
-
-.rental-booking-status.completed {
-  color: #1976d2;
-}
-/* =========================================
-   MY RENTAL BOOKINGS
-========================================= */
-
-.my-rental-bookings-list {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  margin-top: 25px;
-}
-
-
-.my-rental-booking-card {
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
-  border-radius: 10px;
-  padding: 25px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-}
-
-
-.my-rental-booking-card h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #173b5e;
-}
-
-
-.my-rental-booking-card p {
-  margin: 12px 0;
-  color: #555555;
-  line-height: 1.5;
-}
-
-
-.my-rental-booking-card p strong {
-  color: #222222;
-  font-weight: 700;
-}
-
-
-/* =========================================
-   BOOKING ACTIONS
-========================================= */
-
-.rental-booking-actions {
-  margin-top: 22px;
-  padding-top: 15px;
-  border-top: 1px solid #e5e5e5;
-}
-
-
-/* =========================================
-   CANCEL BUTTON
-========================================= */
 
 .cancel-booking-button {
   display: inline-block;
@@ -757,15 +473,52 @@ body {
   cursor: pointer;
 }
 
-
 .cancel-booking-button:hover {
   background-color: #a82f2f;
 }
 
+/* =========================
+   MY RENTAL BOOKINGS
+========================= */
 
-/* =========================================
-   BOOKING INFO
-========================================= */
+.my-rental-bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 25px;
+}
+
+.my-rental-booking-card {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.my-rental-booking-card h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #173b5e;
+}
+
+.my-rental-booking-card p {
+  margin: 12px 0;
+  color: #555555;
+  line-height: 1.5;
+}
+
+.my-rental-booking-card p strong {
+  color: #222222;
+  font-weight: 700;
+}
+
+.rental-booking-actions {
+  margin-top: 22px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e5e5;
+}
 
 .booking-info {
   font-size: 14px;
@@ -773,36 +526,222 @@ body {
   color: #667085;
 }
 
-
-/* =========================================
-   BOOKING STATUS
-========================================= */
-
 .rental-booking-status {
   font-weight: 600;
 }
-
 
 .rental-booking-status.pending {
   color: #d97706;
 }
 
-
 .rental-booking-status.confirmed {
   color: #198754;
 }
-
 
 .rental-booking-status.cancelled {
   color: #c53b3b;
 }
 
-
 .rental-booking-status.rejected {
   color: #c53b3b;
 }
 
-
 .rental-booking-status.completed {
   color: #1976d2;
+}
+
+/* =========================
+   RESPONSIVE TABLET
+========================= */
+
+@media (max-width: 1000px) {
+  .dashboard-content {
+    padding: 25px;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   RESPONSIVE MOBILE
+========================= */
+
+@media (max-width: 700px) {
+  .dashboard-layout {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  .sidebar {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    min-height: auto;
+    padding: 20px 15px;
+    overflow: visible;
+  }
+
+  .logo {
+    padding-bottom: 15px;
+  }
+
+  .logo h2 {
+    font-size: 22px;
+  }
+
+  .logo p {
+    font-size: 12px;
+  }
+
+  .sidebar-menu {
+    margin-top: 15px;
+    gap: 6px;
+  }
+
+  .menu-item {
+    padding: 11px;
+    font-size: 14px;
+  }
+
+  .logout-button {
+    margin-top: 20px;
+  }
+
+  .dashboard-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    padding: 15px;
+    overflow: visible;
+  }
+
+  .dashboard-header {
+    margin-bottom: 20px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 26px;
+    line-height: 1.2;
+  }
+
+  .dashboard-header p {
+    line-height: 1.5;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 15px;
+  }
+
+  .dashboard-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .dashboard-card p {
+    min-height: auto;
+  }
+
+  .page-container {
+    width: 100%;
+    min-width: 0;
+    padding: 15px;
+  }
+
+  .form-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .booking-card,
+  .my-booking-card,
+  .my-rental-booking-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .booking-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 12px 15px;
+  }
+
+  .booking-row strong {
+    white-space: normal;
+  }
+
+  .booking-actions {
+    justify-content: stretch;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .booking-actions button {
+    width: 100%;
+  }
+
+  .booking-action {
+    justify-content: stretch;
+    padding: 12px 15px;
+  }
+
+  .booking-action button {
+    width: 100%;
+  }
+
+  .my-rental-booking-card {
+    padding: 20px;
+  }
+}
+
+/* =========================
+   VERY SMALL MOBILE
+========================= */
+
+@media (max-width: 400px) {
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 23px;
+  }
+
+  .dashboard-card {
+    padding: 17px;
+  }
+
+  .form-card {
+    padding: 16px;
+  }
+
+  .my-rental-booking-card {
+    padding: 16px;
+  }
 }
