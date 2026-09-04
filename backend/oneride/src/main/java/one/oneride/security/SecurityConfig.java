@@ -26,33 +26,18 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                // Disable CSRF because we are using JWT authentication
                 .csrf(csrf -> csrf.disable())
-
-                // Enable CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Stateless authentication
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
-
-                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-
-                        // Authentication endpoints do NOT require JWT
                         .requestMatchers("/api/auth/**").permitAll()
-
-                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
-
-                // Authentication provider
                 .authenticationProvider(authenticationProvider)
-
-                // JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -66,15 +51,14 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Frontend URLs allowed to communicate with backend
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5173",
-                        "https://oneride.vercel.app"
+                        "https://oneride.vercel.app",
+                        "https://oneride-6mnkc2vix-reddy-f930.vercel.app"
                 )
         );
 
-        // HTTP methods allowed
         configuration.setAllowedMethods(
                 List.of(
                         "GET",
@@ -85,22 +69,13 @@ public class SecurityConfig {
                 )
         );
 
-        // Headers allowed
-        configuration.setAllowedHeaders(
-                List.of("*")
-        );
-
-        // Allow cookies/authorization headers
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
-        // Apply CORS configuration to all endpoints
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration(
-                "/**",
-                configuration
-        );
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
