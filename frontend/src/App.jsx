@@ -17,6 +17,7 @@ import MyBookings from "./pages/MyBookings";
 import RideBookings from "./pages/RideBookings";
 
 import PostRentalVehicle from "./pages/PostRentalVehicle";
+import RentalBooking from "./pages/RentalBooking";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -145,6 +146,20 @@ function App() {
           element={
             token ? (
               <PostRentalVehicle />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        {/* =========================
+            RENTAL BOOKING
+        ========================= */}
+        <Route
+          path="/rental-booking/:rentalId"
+          element={
+            token ? (
+              <RentalBooking />
             ) : (
               <Navigate to="/" replace />
             )
