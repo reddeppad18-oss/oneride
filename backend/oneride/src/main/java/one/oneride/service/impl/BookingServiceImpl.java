@@ -488,19 +488,37 @@ public class BookingServiceImpl implements BookingService {
 
 
         // -----------------------------------------------------
-        // Customer can cancel ONLY PENDING bookings
+        // Customer can cancel PENDING or CONFIRMED bookings
         // -----------------------------------------------------
 
-        if (booking.getStatus() != BookingStatus.PENDING) {
+        if (booking.getStatus() != BookingStatus.PENDING
+                && booking.getStatus() != BookingStatus.CONFIRMED) {
 
             throw new RuntimeException(
-                    "Only pending bookings can be cancelled"
+                    "Only pending or confirmed bookings can be cancelled"
             );
         }
 
 
-        // Get the ride
-        Ride ride = booking.getRide();
+        // -----------------------------------------------------
+        // Get the ride with a database lock
+        // -----------------------------------------------------
+
+        Ride ride = rideRepository.findByIdForUpdate(
+                booking.getRide().getId()
+        )
+        .orElseThrow(() ->
+                new RuntimeException(
+                        "Ride not found"
+                ));
+
+
+        // -----------------------------------------------------
+        // Remember whether booking was confirmed
+        // -----------------------------------------------------
+
+        boolean wasConfirmed =
+                booking.getStatus() == BookingStatus.CONFIRMED;
 
 
         // -----------------------------------------------------
@@ -512,8 +530,37 @@ public class BookingServiceImpl implements BookingService {
         );
 
 
-        // Save updated booking
+        // -----------------------------------------------------
+        // Return seats ONLY if booking was CONFIRMED
+        // -----------------------------------------------------
+
+        if (wasConfirmed) {
+
+            ride.setAvailableSeats(
+                    ride.getAvailableSeats()
+                            + booking.getSeatsBooked()
+            );
+
+
+            // If the ride was FULL and seats are now available,
+            // change it back to ACTIVE
+            if (ride.getStatus() == RideStatus.FULL
+                    && ride.getAvailableSeats() > 0) {
+
+                ride.setStatus(
+                        RideStatus.ACTIVE
+                );
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // Save changes
+        // -----------------------------------------------------
+
         bookingRepository.save(booking);
+
+        rideRepository.save(ride);
 
 
         // -----------------------------------------------------
@@ -530,7 +577,10 @@ public class BookingServiceImpl implements BookingService {
         );
 
 
+        // -----------------------------------------------------
         // Return success response
+        // -----------------------------------------------------
+
         return MessageResponse.builder()
                 .message(
                         "Booking cancelled successfully"
