@@ -1,7 +1,6 @@
-package one.oneride.config;
+package one.oneride.security;
 
 import lombok.RequiredArgsConstructor;
-import one.oneride.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,40 +23,31 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
 
         http
-                // Disable CSRF
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors ->
+                        cors.configurationSource(corsConfigurationSource())
+                )
 
-                // JWT authentication is stateless
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
-                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-
-                        // Allow browser CORS preflight requests
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Authentication APIs don't require JWT
                         .requestMatchers("/api/auth/**").permitAll()
-
-                        // All other APIs require authentication
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
-                // Authentication provider
                 .authenticationProvider(authenticationProvider)
 
-                // JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -71,41 +61,37 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Frontend URLs allowed to access backend
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://oneride-4cc6c7rpz-reddy-f930.vercel.app"
-        ));
+        configuration.setAllowedOriginPatterns(
+                List.of(
+                        "http://localhost:5173",
+                        "https://oneride.vercel.app",
+                        "https://*.vercel.app"
+                )
+        );
 
-        // Allowed HTTP methods
-        configuration.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-        ));
+        configuration.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "OPTIONS"
+                )
+        );
 
-        // Allowed request headers
-        configuration.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type",
-                "Accept"
-        ));
+        configuration.setAllowedHeaders(
+                List.of("*")
+        );
 
-        // Headers frontend is allowed to read
-        configuration.setExposedHeaders(List.of(
-                "Authorization"
-        ));
-
-        // Allow credentials
         configuration.setAllowCredentials(true);
 
-        // Apply CORS configuration to every endpoint
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration(
+                "/**",
+                configuration
+        );
 
         return source;
     }
