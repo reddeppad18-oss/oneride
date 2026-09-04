@@ -1,4 +1,3 @@
-jsx
 import {
   BrowserRouter,
   Routes,
@@ -9,7 +8,11 @@ import {
 import Login from "./pages/Login";
 import VerifyOtp from "./pages/VerifyOtp";
 import Dashboard from "./pages/Dashboard";
+import PostRide from "./pages/PostRide";
+import SearchRides from "./pages/SearchRides";
+import MyRides from "./pages/MyRides";
 import MyBookings from "./pages/MyBookings";
+import RideBookings from "./pages/RideBookings";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -18,47 +21,27 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* =========================
-            LOGIN
-        ========================= */}
-
         <Route
           path="/"
           element={
             token ? (
-              <Navigate
-                to="/dashboard"
-                replace
-              />
+              <Navigate to="/dashboard" replace />
             ) : (
               <Login />
             )
           }
         />
 
-
-        {/* =========================
-            OTP VERIFICATION
-        ========================= */}
-
         <Route
           path="/verify-otp"
           element={
             token ? (
-              <Navigate
-                to="/dashboard"
-                replace
-              />
+              <Navigate to="/dashboard" replace />
             ) : (
               <VerifyOtp />
             )
           }
         />
-
-
-        {/* =========================
-            DASHBOARD
-        ========================= */}
 
         <Route
           path="/dashboard"
@@ -66,18 +49,43 @@ function App() {
             token ? (
               <Dashboard />
             ) : (
-              <Navigate
-                to="/"
-                replace
-              />
+              <Navigate to="/" replace />
             )
           }
         />
 
+        <Route
+          path="/post-ride"
+          element={
+            token ? (
+              <PostRide />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
-        {/* =========================
-            MY RIDE BOOKINGS
-        ========================= */}
+        <Route
+          path="/search-rides"
+          element={
+            token ? (
+              <SearchRides />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/my-rides"
+          element={
+            token ? (
+              <MyRides />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
         <Route
           path="/my-bookings"
@@ -85,26 +93,26 @@ function App() {
             token ? (
               <MyBookings />
             ) : (
-              <Navigate
-                to="/"
-                replace
-              />
+              <Navigate to="/" replace />
             )
           }
         />
 
-
-        {/* =========================
-            UNKNOWN URL
-        ========================= */}
+        <Route
+          path="/ride-bookings/:rideId"
+          element={
+            token ? (
+              <RideBookings />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
 
         <Route
           path="*"
           element={
-            <Navigate
-              to="/dashboard"
-              replace
-            />
+            <Navigate to="/dashboard" replace />
           }
         />
 
@@ -114,4 +122,3 @@ function App() {
 }
 
 export default App;
-
