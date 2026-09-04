@@ -84,110 +84,72 @@ textarea {
 ========================= */
 
 .dashboard-layout {
-  display: flex;
   width: 100%;
-  min-width: 0;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #f4f6f8;
-  overflow: hidden;
+  overflow-x: hidden;
+  padding-bottom: 85px;
 }
 
 /* =========================
-   SIDEBAR
+   APP HEADER
 ========================= */
 
-.sidebar {
-  width: 250px;
-  min-width: 250px;
-  max-width: 250px;
-  height: 100vh;
-  padding: 25px 18px;
+.mobile-app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  height: 72px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  padding: 0 30px;
   background-color: #173b5e;
   color: white;
-  position: fixed;
-  top: 0;
-  left: 0;
-  box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 }
 
-.logo {
-  padding-bottom: 25px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.logo h2 {
+.app-logo {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: white;
+  color: #173b5e;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.app-brand h2 {
   margin: 0;
+  font-size: 20px;
 }
 
-.logo p {
-  margin: 7px 0 0;
-  font-size: 13px;
+.app-brand span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
   color: #c9d7e4;
 }
 
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 25px;
-}
-
-.menu-item {
-  width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: white;
-  text-align: left;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.menu-item:hover,
-.menu-item.active {
-  background-color: #2d638f;
-}
-
 /* =========================
-   LOGOUT
-========================= */
-
-.logout-button {
-  width: 100%;
-  margin-top: auto;
-  padding: 13px;
-  border: none;
-  border-radius: 7px;
-  background-color: #c53b3b;
-  color: white;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.logout-button:hover {
-  background-color: #a83232;
-}
-
-/* =========================
-   RIGHT SIDE CONTENT
+   DASHBOARD CONTENT
 ========================= */
 
 .dashboard-content {
-  margin-left: 250px;
-  width: calc(100% - 250px);
-  max-width: calc(100% - 250px);
-  height: 100vh;
-  min-width: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  width: 100%;
+  min-height: calc(100vh - 72px);
   padding: 35px;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* =========================
@@ -219,11 +181,24 @@ textarea {
 }
 
 .dashboard-card {
+  position: relative;
   padding: 25px;
   border-radius: 12px;
   background-color: white;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   min-width: 0;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  background-color: #eef5fb;
+  font-size: 24px;
 }
 
 .dashboard-card h3 {
@@ -248,6 +223,105 @@ textarea {
 
 .dashboard-card button:hover {
   background-color: #125ea8;
+}
+
+/* =========================
+   BOTTOM NAVIGATION
+========================= */
+
+.bottom-navigation {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 72px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.08);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  max-width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: #667085;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.bottom-nav-item:hover {
+  color: #1976d2;
+}
+
+.bottom-nav-item.active {
+  color: #1976d2;
+  font-weight: 700;
+}
+
+.nav-icon {
+  font-size: 23px;
+  line-height: 1;
+}
+
+/* =========================
+   BOTTOM POPUP MENUS
+========================= */
+
+.bottom-popup {
+  position: fixed;
+  left: 50%;
+  bottom: 82px;
+  z-index: 999;
+  width: min(420px, calc(100% - 30px));
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 15px;
+  background-color: white;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+.bottom-popup button {
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background-color: white;
+  color: #173b5e;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.bottom-popup button:hover {
+  background-color: #f4f8fc;
+}
+
+.bottom-popup button span {
+  font-size: 24px;
+}
+
+.profile-popup {
+  grid-template-columns: 1fr 1fr;
+}
+
+.bottom-popup .popup-logout {
+  color: #c53b3b;
 }
 
 /* =========================
@@ -551,7 +625,7 @@ textarea {
 }
 
 /* =========================
-   RESPONSIVE TABLET
+   TABLET
 ========================= */
 
 @media (max-width: 1000px) {
@@ -569,68 +643,43 @@ textarea {
 }
 
 /* =========================
-   RESPONSIVE MOBILE
+   MOBILE
 ========================= */
 
 @media (max-width: 700px) {
   .dashboard-layout {
-    display: block;
     width: 100%;
-    min-width: 0;
-    height: auto;
     min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: visible;
+    padding-bottom: 75px;
   }
 
-  .sidebar {
-    position: relative;
-    top: auto;
-    left: auto;
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    height: auto;
-    min-height: auto;
-    padding: 20px 15px;
-    overflow: visible;
+  .mobile-app-header {
+    height: 64px;
+    padding: 0 16px;
   }
 
-  .logo {
-    padding-bottom: 15px;
+  .app-logo {
+    width: 38px;
+    height: 38px;
+    font-size: 20px;
   }
 
-  .logo h2 {
-    font-size: 22px;
+  .app-brand {
+    gap: 10px;
   }
 
-  .logo p {
-    font-size: 12px;
+  .app-brand h2 {
+    font-size: 18px;
   }
 
-  .sidebar-menu {
-    margin-top: 15px;
-    gap: 6px;
-  }
-
-  .menu-item {
-    padding: 11px;
-    font-size: 14px;
-  }
-
-  .logout-button {
-    margin-top: 20px;
+  .app-brand span {
+    font-size: 10px;
   }
 
   .dashboard-content {
-    margin-left: 0;
     width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    height: auto;
-    min-height: 0;
-    padding: 15px;
-    overflow: visible;
+    min-height: calc(100vh - 64px);
+    padding: 18px 15px;
   }
 
   .dashboard-header {
@@ -638,7 +687,7 @@ textarea {
   }
 
   .dashboard-header h1 {
-    font-size: 26px;
+    font-size: 25px;
     line-height: 1.2;
   }
 
@@ -648,18 +697,45 @@ textarea {
 
   .dashboard-cards {
     grid-template-columns: 1fr;
-    width: 100%;
     gap: 15px;
   }
 
   .dashboard-card {
     width: 100%;
-    max-width: 100%;
     padding: 20px;
   }
 
   .dashboard-card p {
     min-height: auto;
+  }
+
+  .card-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+  }
+
+  .bottom-navigation {
+    height: 70px;
+  }
+
+  .bottom-nav-item {
+    min-width: 0;
+    font-size: 10px;
+  }
+
+  .nav-icon {
+    font-size: 21px;
+  }
+
+  .bottom-popup {
+    bottom: 78px;
+    width: calc(100% - 24px);
+  }
+
+  .bottom-popup button {
+    min-height: 65px;
+    font-size: 12px;
   }
 
   .page-container {
@@ -726,11 +802,11 @@ textarea {
 
 @media (max-width: 400px) {
   .dashboard-content {
-    padding: 12px;
+    padding: 15px 12px;
   }
 
   .dashboard-header h1 {
-    font-size: 23px;
+    font-size: 22px;
   }
 
   .dashboard-card {
@@ -743,5 +819,23 @@ textarea {
 
   .my-rental-booking-card {
     padding: 16px;
+  }
+
+  .bottom-nav-item {
+    font-size: 9px;
+  }
+
+  .nav-icon {
+    font-size: 19px;
+  }
+
+  .bottom-popup {
+    width: calc(100% - 20px);
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .bottom-popup button {
+    min-height: 60px;
   }
 }

@@ -15,6 +15,7 @@ function Dashboard() {
   const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [activeMenu, setActiveMenu] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -23,187 +24,50 @@ function Dashboard() {
 
   const handleMenuClick = (section) => {
     setActiveSection(section);
+    setActiveMenu(null);
+  };
+
+  const handleBottomMenu = (menu) => {
+    if (activeMenu === menu) {
+      setActiveMenu(null);
+    } else {
+      setActiveMenu(menu);
+    }
   };
 
   return (
     <div className="dashboard-layout">
 
-      {/* ========================= */}
-      {/* LEFT SIDEBAR */}
-      {/* ========================= */}
+      <header className="mobile-app-header">
+        <div className="app-brand">
+          <div className="app-logo">O</div>
 
-      <aside className="sidebar">
-
-        <div className="logo">
-          <h2>One Ride</h2>
-          <p>Ride Sharing Made Easy</p>
+          <div>
+            <h2>OneRide</h2>
+            <span>Ride Sharing Made Easy</span>
+          </div>
         </div>
-
-        <nav className="sidebar-menu">
-
-          {/* Dashboard */}
-          <button
-            className={`menu-item ${
-              activeSection === "dashboard" ? "active" : ""
-            }`}
-            onClick={() => handleMenuClick("dashboard")}
-          >
-            Dashboard
-          </button>
-
-          {/* Post Ride */}
-          <button
-            className={`menu-item ${
-              activeSection === "post-ride" ? "active" : ""
-            }`}
-            onClick={() => handleMenuClick("post-ride")}
-          >
-            Post a Ride
-          </button>
-
-          {/* Search Rides */}
-          <button
-            className={`menu-item ${
-              activeSection === "search-rides" ? "active" : ""
-            }`}
-            onClick={() => handleMenuClick("search-rides")}
-          >
-            Search Rides
-          </button>
-
-          {/* My Bookings */}
-          <button
-            className={`menu-item ${
-              activeSection === "my-bookings" ? "active" : ""
-            }`}
-            onClick={() => handleMenuClick("my-bookings")}
-          >
-            Ride Booking History
-          </button>
-
-          {/* My Rides */}
-          <button
-            className={`menu-item ${
-              activeSection === "my-rides" ? "active" : ""
-            }`}
-            onClick={() => handleMenuClick("my-rides")}
-          >
-            My Posted Rides
-          </button>
-
-          {/* Rental Vehicles */}
-          <button
-            className={`menu-item ${
-              activeSection === "rental-vehicles"
-                ? "active"
-                : ""
-            }`}
-            onClick={() =>
-              handleMenuClick("rental-vehicles")
-            }
-          >
-            Rental Vehicles
-          </button>
-
-          {/* My Rentals */}
-          <button
-            className={`menu-item ${
-              activeSection === "my-rentals"
-                ? "active"
-                : ""
-            }`}
-            onClick={() =>
-              handleMenuClick("my-rentals")
-            }
-          >
-            My Rental Vehicles
-          </button>
-
-          {/* Rental Booking History */}
-          <button
-            className={`menu-item ${
-              activeSection === "rental-booking-history"
-                ? "active"
-                : ""
-            }`}
-            onClick={() =>
-              handleMenuClick(
-                "rental-booking-history"
-              )
-            }
-          >
-            Rental Booking History
-          </button>
-
-          {/* My Activity */}
-          <button
-            className={`menu-item ${
-              activeSection === "my-activity"
-                ? "active"
-                : ""
-            }`}
-            onClick={() =>
-              handleMenuClick("my-activity")
-            }
-          >
-            My Activity
-          </button>
-
-          {/* My Profile */}
-          <button
-            className={`menu-item ${
-              activeSection === "my-profile"
-                ? "active"
-                : ""
-            }`}
-            onClick={() =>
-              handleMenuClick("my-profile")
-            }
-          >
-            My Profile
-          </button>
-
-        </nav>
-
-        {/* Logout */}
-        <button
-          className="logout-button"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-
-      </aside>
-
-      {/* ========================= */}
-      {/* RIGHT CONTENT */}
-      {/* ========================= */}
+      </header>
 
       <main className="dashboard-content">
-
-        {/* ========================= */}
-        {/* DASHBOARD HOME */}
-        {/* ========================= */}
 
         {activeSection === "dashboard" && (
           <>
             <header className="dashboard-header">
-
               <div>
-                <h1>Welcome to One Ride</h1>
+                <h1>Welcome to OneRide</h1>
 
                 <p>
                   Find a ride, share a ride,
                   or rent a vehicle.
                 </p>
               </div>
-
             </header>
 
             <section className="dashboard-cards">
 
-              {/* Post Ride */}
               <div className="dashboard-card">
+                <div className="card-icon">🚗</div>
 
                 <h3>Post a Ride</h3>
 
@@ -220,11 +84,10 @@ function Dashboard() {
                 >
                   Post Ride
                 </button>
-
               </div>
 
-              {/* Search Rides */}
               <div className="dashboard-card">
+                <div className="card-icon">🔍</div>
 
                 <h3>Search Rides</h3>
 
@@ -241,11 +104,10 @@ function Dashboard() {
                 >
                   Search Rides
                 </button>
-
               </div>
 
-              {/* My Posted Rides */}
               <div className="dashboard-card">
+                <div className="card-icon">📋</div>
 
                 <h3>My Posted Rides</h3>
 
@@ -262,11 +124,10 @@ function Dashboard() {
                 >
                   Manage Rides
                 </button>
-
               </div>
 
-              {/* Rental Vehicles */}
               <div className="dashboard-card">
+                <div className="card-icon">🚙</div>
 
                 <h3>Rental Vehicles</h3>
 
@@ -277,18 +138,15 @@ function Dashboard() {
 
                 <button
                   onClick={() =>
-                    handleMenuClick(
-                      "rental-vehicles"
-                    )
+                    handleMenuClick("rental-vehicles")
                   }
                 >
                   View Vehicles
                 </button>
-
               </div>
 
-              {/* My Rentals */}
               <div className="dashboard-card">
+                <div className="card-icon">🔑</div>
 
                 <h3>My Rental Vehicles</h3>
 
@@ -304,86 +162,247 @@ function Dashboard() {
                 >
                   Manage Rentals
                 </button>
-
               </div>
 
             </section>
           </>
         )}
 
-        {/* ========================= */}
-        {/* POST RIDE */}
-        {/* ========================= */}
-
         {activeSection === "post-ride" && (
           <PostRide />
         )}
-
-        {/* ========================= */}
-        {/* SEARCH RIDES */}
-        {/* ========================= */}
 
         {activeSection === "search-rides" && (
           <SearchRides />
         )}
 
-        {/* ========================= */}
-        {/* MY BOOKINGS */}
-        {/* ========================= */}
-
         {activeSection === "my-bookings" && (
           <MyBookings />
         )}
-
-        {/* ========================= */}
-        {/* MY POSTED RIDES */}
-        {/* ========================= */}
 
         {activeSection === "my-rides" && (
           <MyRides />
         )}
 
-        {/* ========================= */}
-        {/* RENTAL VEHICLES */}
-        {/* ========================= */}
-
         {activeSection === "rental-vehicles" && (
           <RentalVehicles />
         )}
-
-        {/* ========================= */}
-        {/* MY RENTAL VEHICLES */}
-        {/* ========================= */}
 
         {activeSection === "my-rentals" && (
           <MyRentals />
         )}
 
-        {/* ========================= */}
-        {/* RENTAL BOOKING HISTORY */}
-        {/* ========================= */}
-
         {activeSection === "rental-booking-history" && (
           <RentalBookingHistory />
         )}
-
-        {/* ========================= */}
-        {/* MY ACTIVITY */}
-        {/* ========================= */}
 
         {activeSection === "my-activity" && (
           <MyActivity />
         )}
 
-        {/* ========================= */}
-        {/* MY PROFILE */}
-        {/* ========================= */}
-
         {activeSection === "my-profile" && (
           <MyProfile />
         )}
 
+        {activeSection === "settings" && (
+          <div className="page-container">
+            <div className="form-card">
+              <h1>Settings</h1>
+
+              <p className="page-description">
+                Application settings will be available here.
+              </p>
+            </div>
+          </div>
+        )}
+
       </main>
+
+      {activeMenu === "rides" && (
+        <div className="bottom-popup">
+          <button
+            onClick={() =>
+              handleMenuClick("post-ride")
+            }
+          >
+            <span>🚗</span>
+            Post Ride
+          </button>
+
+          <button
+            onClick={() =>
+              handleMenuClick("search-rides")
+            }
+          >
+            <span>🔍</span>
+            Search Rides
+          </button>
+
+          <button
+            onClick={() =>
+              handleMenuClick("my-rides")
+            }
+          >
+            <span>📋</span>
+            My Posted Rides
+          </button>
+        </div>
+      )}
+
+      {activeMenu === "rentals" && (
+        <div className="bottom-popup">
+          <button
+            onClick={() =>
+              handleMenuClick("rental-vehicles")
+            }
+          >
+            <span>🚙</span>
+            Post Rental
+          </button>
+
+          <button
+            onClick={() =>
+              handleMenuClick("rental-vehicles")
+            }
+          >
+            <span>🔍</span>
+            Search Rental
+          </button>
+
+          <button
+            onClick={() =>
+              handleMenuClick("my-rentals")
+            }
+          >
+            <span>🚘</span>
+            My Rentals
+          </button>
+
+          <button
+            onClick={() =>
+              handleMenuClick("rental-booking-history")
+            }
+          >
+            <span>📋</span>
+            Rental Bookings
+          </button>
+        </div>
+      )}
+
+      {activeMenu === "profile" && (
+        <div className="bottom-popup profile-popup">
+
+          <button
+            onClick={() =>
+              handleMenuClick("my-profile")
+            }
+          >
+            <span>👤</span>
+            My Profile
+          </button>
+
+          <button
+            onClick={() =>
+              handleMenuClick("my-activity")
+            }
+          >
+            <span>📊</span>
+            My Activity
+          </button>
+
+          <button
+            onClick={() =>
+              handleMenuClick("settings")
+            }
+          >
+            <span>⚙️</span>
+            Settings
+          </button>
+
+          <button
+            className="popup-logout"
+            onClick={handleLogout}
+          >
+            <span>🚪</span>
+            Logout
+          </button>
+
+        </div>
+      )}
+
+      <nav className="bottom-navigation">
+
+        <button
+          className={
+            activeSection === "dashboard"
+              ? "bottom-nav-item active"
+              : "bottom-nav-item"
+          }
+          onClick={() =>
+            handleMenuClick("dashboard")
+          }
+        >
+          <span className="nav-icon">⌂</span>
+          <span>Home</span>
+        </button>
+
+        <button
+          className={
+            activeMenu === "rides"
+              ? "bottom-nav-item active"
+              : "bottom-nav-item"
+          }
+          onClick={() =>
+            handleBottomMenu("rides")
+          }
+        >
+          <span className="nav-icon">🚗</span>
+          <span>Rides</span>
+        </button>
+
+        <button
+          className={
+            activeMenu === "rentals"
+              ? "bottom-nav-item active"
+              : "bottom-nav-item"
+          }
+          onClick={() =>
+            handleBottomMenu("rentals")
+          }
+        >
+          <span className="nav-icon">🚙</span>
+          <span>Rentals</span>
+        </button>
+
+        <button
+          className={
+            activeSection === "my-bookings"
+              ? "bottom-nav-item active"
+              : "bottom-nav-item"
+          }
+          onClick={() =>
+            handleMenuClick("my-bookings")
+          }
+        >
+          <span className="nav-icon">📋</span>
+          <span>Bookings</span>
+        </button>
+
+        <button
+          className={
+            activeMenu === "profile"
+              ? "bottom-nav-item active"
+              : "bottom-nav-item"
+          }
+          onClick={() =>
+            handleBottomMenu("profile")
+          }
+        >
+          <span className="nav-icon">👤</span>
+          <span>Profile</span>
+        </button>
+
+      </nav>
 
     </div>
   );
