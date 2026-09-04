@@ -25,7 +25,9 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* LOGIN */}
+        {/* =========================
+            LOGIN
+        ========================= */}
         <Route
           path="/"
           element={
@@ -37,7 +39,9 @@ function App() {
           }
         />
 
-        {/* VERIFY OTP */}
+        {/* =========================
+            VERIFY OTP
+        ========================= */}
         <Route
           path="/verify-otp"
           element={
@@ -49,7 +53,9 @@ function App() {
           }
         />
 
-        {/* DASHBOARD */}
+        {/* =========================
+            DASHBOARD
+        ========================= */}
         <Route
           path="/dashboard"
           element={
@@ -61,7 +67,9 @@ function App() {
           }
         />
 
-        {/* POST RIDE */}
+        {/* =========================
+            POST RIDE
+        ========================= */}
         <Route
           path="/post-ride"
           element={
@@ -73,7 +81,9 @@ function App() {
           }
         />
 
-        {/* SEARCH RIDES */}
+        {/* =========================
+            SEARCH RIDES
+        ========================= */}
         <Route
           path="/search-rides"
           element={
@@ -85,7 +95,9 @@ function App() {
           }
         />
 
-        {/* MY RIDES */}
+        {/* =========================
+            MY RIDES
+        ========================= */}
         <Route
           path="/my-rides"
           element={
@@ -97,7 +109,9 @@ function App() {
           }
         />
 
-        {/* MY BOOKINGS */}
+        {/* =========================
+            MY BOOKINGS
+        ========================= */}
         <Route
           path="/my-bookings"
           element={
@@ -109,7 +123,9 @@ function App() {
           }
         />
 
-        {/* RIDE BOOKINGS */}
+        {/* =========================
+            RIDE BOOKINGS
+        ========================= */}
         <Route
           path="/ride-bookings/:rideId"
           element={
@@ -121,7 +137,9 @@ function App() {
           }
         />
 
-        {/* POST RENTAL VEHICLE */}
+        {/* =========================
+            POST RENTAL VEHICLE
+        ========================= */}
         <Route
           path="/post-rental-vehicle"
           element={
@@ -133,7 +151,9 @@ function App() {
           }
         />
 
-        {/* UNKNOWN ROUTES */}
+        {/* =========================
+            UNKNOWN ROUTES
+        ========================= */}
         <Route
           path="*"
           element={
