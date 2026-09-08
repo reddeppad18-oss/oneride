@@ -7,7 +7,9 @@ import {
 
 import Login from "./pages/Login";
 import VerifyOtp from "./pages/VerifyOtp";
+
 import Dashboard from "./pages/Dashboard";
+import DashboardLayout from "./pages/DashboardLayout";
 
 import PostRide from "./pages/PostRide";
 import SearchRides from "./pages/SearchRides";
@@ -17,7 +19,13 @@ import MyBookings from "./pages/MyBookings";
 import RideBookings from "./pages/RideBookings";
 
 import PostRentalVehicle from "./pages/PostRentalVehicle";
+import RentalVehicles from "./pages/RentalVehicles";
 import RentalBooking from "./pages/RentalBooking";
+import RentalBookingHistory from "./pages/RentalBookingHistory";
+import MyRentals from "./pages/MyRentals";
+
+import MyProfile from "./pages/MyProfile";
+import MyActivity from "./pages/MyActivity";
 
 
 /* =========================
@@ -25,6 +33,7 @@ import RentalBooking from "./pages/RentalBooking";
 ========================= */
 
 function ProtectedRoute({ children }) {
+
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -36,14 +45,43 @@ function ProtectedRoute({ children }) {
 
 
 /* =========================
+   SETTINGS
+========================= */
+
+function Settings() {
+
+  return (
+
+    <div className="page-container">
+
+      <div className="form-card">
+
+        <h1>Settings</h1>
+
+        <p className="page-description">
+          Application settings will be available here.
+        </p>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+/* =========================
    APP
 ========================= */
 
 function App() {
+
   const token = localStorage.getItem("token");
 
   return (
+
     <BrowserRouter>
+
       <Routes>
 
         {/* =========================
@@ -79,115 +117,105 @@ function App() {
 
 
         {/* =========================
-            DASHBOARD
+            PROTECTED APPLICATION
         ========================= */}
 
         <Route
-          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardLayout />
             </ProtectedRoute>
           }
-        />
+        >
+
+          {/* DASHBOARD */}
+
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
 
 
-        {/* =========================
-            POST RIDE
-        ========================= */}
+          {/* =========================
+              RIDES
+          ========================= */}
 
-        <Route
-          path="/post-ride"
-          element={
-            <ProtectedRoute>
-              <PostRide />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/post-ride"
+            element={<PostRide />}
+          />
 
+          <Route
+            path="/search-rides"
+            element={<SearchRides />}
+          />
 
-        {/* =========================
-            SEARCH RIDES
-        ========================= */}
+          <Route
+            path="/my-rides"
+            element={<MyRides />}
+          />
 
-        <Route
-          path="/search-rides"
-          element={
-            <ProtectedRoute>
-              <SearchRides />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/my-bookings"
+            element={<MyBookings />}
+          />
 
-
-        {/* =========================
-            MY RIDES
-        ========================= */}
-
-        <Route
-          path="/my-rides"
-          element={
-            <ProtectedRoute>
-              <MyRides />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/ride-bookings/:rideId"
+            element={<RideBookings />}
+          />
 
 
-        {/* =========================
-            MY BOOKINGS
-        ========================= */}
+          {/* =========================
+              RENTALS
+          ========================= */}
 
-        <Route
-          path="/my-bookings"
-          element={
-            <ProtectedRoute>
-              <MyBookings />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/post-rental-vehicle"
+            element={<PostRentalVehicle />}
+          />
 
+          <Route
+            path="/rental-vehicles"
+            element={<RentalVehicles />}
+          />
 
-        {/* =========================
-            RIDE BOOKINGS
-        ========================= */}
+          <Route
+            path="/my-rentals"
+            element={<MyRentals />}
+          />
 
-        <Route
-          path="/ride-bookings/:rideId"
-          element={
-            <ProtectedRoute>
-              <RideBookings />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/rental-booking/:rentalId"
+            element={<RentalBooking />}
+          />
 
-
-        {/* =========================
-            POST RENTAL VEHICLE
-        ========================= */}
-
-        <Route
-          path="/post-rental-vehicle"
-          element={
-            <ProtectedRoute>
-              <PostRentalVehicle />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/rental-booking-history"
+            element={<RentalBookingHistory />}
+          />
 
 
-        {/* =========================
-            RENTAL BOOKING
-        ========================= */}
+          {/* =========================
+              PROFILE
+          ========================= */}
 
-        <Route
-          path="/rental-booking/:rentalId"
-          element={
-            <ProtectedRoute>
-              <RentalBooking />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/my-profile"
+            element={<MyProfile />}
+          />
+
+          <Route
+            path="/my-activity"
+            element={<MyActivity />}
+          />
+
+          <Route
+            path="/settings"
+            element={<Settings />}
+          />
+
+        </Route>
 
 
         {/* =========================
@@ -202,7 +230,9 @@ function App() {
         />
 
       </Routes>
+
     </BrowserRouter>
+
   );
 }
 
