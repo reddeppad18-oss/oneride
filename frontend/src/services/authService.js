@@ -1,4 +1,4 @@
-import api from "./axios";
+import api from "../api/axios";
 
 export const sendOtp = async (phoneNumber) => {
   const response = await api.post("/auth/send-otp", {
@@ -16,4 +16,3 @@ export const verifyOtp = async (phoneNumber, otp) => {
 
   return response.data;
 };
-
