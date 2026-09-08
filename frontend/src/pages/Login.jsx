@@ -10,22 +10,28 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSendOtp = async () => {
-    if (!phoneNumber.trim()) {
-      setMessage("Please enter your phone number.");
+    setMessage("");
+
+    // Validate Indian 10-digit mobile number
+    if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
+      setMessage("Please enter a valid 10-digit mobile number.");
       return;
     }
 
+    // Add +91 automatically
+    const formattedPhoneNumber = `+91${phoneNumber}`;
+
     try {
       setLoading(true);
-      setMessage("");
 
-      const response = await sendOtp(phoneNumber);
+      const response = await sendOtp(formattedPhoneNumber);
 
       console.log("Send OTP response:", response);
 
+      // Pass the same formatted number to OTP verification page
       navigate("/verify-otp", {
         state: {
-          phoneNumber: phoneNumber,
+          phoneNumber: formattedPhoneNumber,
         },
       });
 
@@ -50,12 +56,27 @@ function Login() {
 
         <p>Ride Sharing Made Easy</p>
 
-        <input
-          type="tel"
-          placeholder="Enter phone number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
+        <div className="phone-input-container">
+
+          <span className="country-code">
+            +91
+          </span>
+
+          <input
+            type="tel"
+            placeholder="Enter phone number"
+            value={phoneNumber}
+            maxLength={10}
+            onChange={(e) => {
+              // Allow only numbers
+              const value = e.target.value.replace(/\D/g, "");
+
+              // Allow maximum 10 digits
+              setPhoneNumber(value.slice(0, 10));
+            }}
+          />
+
+        </div>
 
         <button
           onClick={handleSendOtp}
@@ -76,3 +97,4 @@ function Login() {
 }
 
 export default Login;
+

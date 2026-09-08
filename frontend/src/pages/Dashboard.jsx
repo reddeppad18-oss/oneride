@@ -43,7 +43,7 @@ function Dashboard() {
           <div className="app-logo">O</div>
 
           <div>
-            <h2>OneRide</h2>
+            <h2>Alrides</h2>
             <span>Ride Sharing Made Easy</span>
           </div>
         </div>
