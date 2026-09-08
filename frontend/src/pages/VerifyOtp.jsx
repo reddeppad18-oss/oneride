@@ -3,104 +3,102 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { verifyOtp } from "../services/authService.js";
 
 function VerifyOtp() {
-const [otp, setOtp] = useState("");
-const [message, setMessage] = useState("");
-const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const location = useLocation();
-const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-const phoneNumber = location.state?.phoneNumber;
+  const phoneNumber = location.state?.phoneNumber;
 
-const handleVerifyOtp = async () => {
-console.log("1. Verify button clicked");
-console.log("2. verifyOtp type:", typeof verifyOtp);
-console.log("3. navigate type:", typeof navigate);
-console.log("4. setLoading type:", typeof setLoading);
-console.log("5. setMessage type:", typeof setMessage);
+  const handleVerifyOtp = async () => {
+    console.log("Verify button clicked");
 
-if (!phoneNumber) {
-  setMessage("Phone number is missing. Please login again.");
-  return;
-}
+    if (!phoneNumber) {
+      setMessage("Phone number is missing. Please login again.");
+      return;
+    }
 
-if (!otp.trim()) {
-  setMessage("Please enter the OTP.");
-  return;
-}
+    if (!otp.trim()) {
+      setMessage("Please enter the OTP.");
+      return;
+    }
 
-try {
-  console.log("6. Starting verification");
+    try {
+      setLoading(true);
+      setMessage("");
 
-  setLoading(true);
+      console.log("Calling verify OTP API...");
 
-  console.log("7. Loading state updated");
+      const response = await verifyOtp(phoneNumber, otp);
 
-  setMessage("");
+      console.log("Backend response:", response);
 
-  console.log("8. Calling backend");
+      const token = response?.token;
 
-  const response = await verifyOtp(phoneNumber, otp);
+      if (!token) {
+        setMessage("JWT token was not received from the backend.");
+        return;
+      }
 
-  console.log("9. Backend response:", response);
+      // Save JWT permanently in browser storage
+      localStorage.setItem("token", token);
 
-  const token = response.token;
+      console.log("JWT saved successfully");
+      console.log("Token exists:", !!localStorage.getItem("token"));
 
-  if (!token) {
-    setMessage("JWT token was not received from the backend.");
-    return;
-  }
+      // Go directly to dashboard
+      navigate("/dashboard", { replace: true });
 
-  localStorage.setItem("token", token);
+    } catch (error) {
+      console.error("OTP verification failed:", error);
 
-  console.log("10. JWT saved");
+      setMessage(
+        error.response?.data?.message ||
+        "OTP verification failed."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  navigate("/dashboard");
+  return (
+    <div className="login-container">
+      <div className="login-card">
 
-  console.log("11. Navigation called");
+        <h1>Verify OTP</h1>
 
-} catch (error) {
-  console.error("OTP verification failed:", error);
+        <p>Enter the OTP sent to your mobile number</p>
 
-  setMessage(
-    error.response?.data?.message ||
-    "OTP verification failed."
+        <input
+          type="text"
+          placeholder="Enter OTP"
+          value={otp}
+          maxLength={6}
+          onChange={(event) => {
+            const value = event.target.value.replace(/\D/g, "");
+            setOtp(value.slice(0, 6));
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={handleVerifyOtp}
+          disabled={loading}
+        >
+          {loading ? "Verifying..." : "Verify OTP"}
+        </button>
+
+        {message && (
+          <p className="message">
+            {message}
+          </p>
+        )}
+
+      </div>
+    </div>
   );
-} finally {
-  setLoading(false);
-}
-
-};
-
-return ( <div className="login-container"> <div className="login-card"> <h1>Verify OTP</h1>
-
-    <p>Enter the OTP sent to your mobile number</p>
-
-    <input
-      type="text"
-      placeholder="Enter OTP"
-      value={otp}
-      maxLength="6"
-      onChange={(event) => setOtp(event.target.value)}
-    />
-
-    <button
-      type="button"
-      onClick={handleVerifyOtp}
-      disabled={loading}
-    >
-      {loading ? "Verifying..." : "Verify OTP"}
-    </button>
-
-    {message && (
-      <p className="message">
-        {message}
-      </p>
-    )}
-  </div>
-</div>
-
-);
 }
 
 export default VerifyOtp;

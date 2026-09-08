@@ -19,6 +19,26 @@ import RideBookings from "./pages/RideBookings";
 import PostRentalVehicle from "./pages/PostRentalVehicle";
 import RentalBooking from "./pages/RentalBooking";
 
+
+/* =========================
+   PROTECTED ROUTE
+========================= */
+
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+
+/* =========================
+   APP
+========================= */
+
 function App() {
   const token = localStorage.getItem("token");
 
@@ -29,6 +49,7 @@ function App() {
         {/* =========================
             LOGIN
         ========================= */}
+
         <Route
           path="/"
           element={
@@ -40,9 +61,11 @@ function App() {
           }
         />
 
+
         {/* =========================
             VERIFY OTP
         ========================= */}
+
         <Route
           path="/verify-otp"
           element={
@@ -54,125 +77,127 @@ function App() {
           }
         />
 
+
         {/* =========================
             DASHBOARD
         ========================= */}
+
         <Route
           path="/dashboard"
           element={
-            token ? (
+            <ProtectedRoute>
               <Dashboard />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             POST RIDE
         ========================= */}
+
         <Route
           path="/post-ride"
           element={
-            token ? (
+            <ProtectedRoute>
               <PostRide />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             SEARCH RIDES
         ========================= */}
+
         <Route
           path="/search-rides"
           element={
-            token ? (
+            <ProtectedRoute>
               <SearchRides />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             MY RIDES
         ========================= */}
+
         <Route
           path="/my-rides"
           element={
-            token ? (
+            <ProtectedRoute>
               <MyRides />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             MY BOOKINGS
         ========================= */}
+
         <Route
           path="/my-bookings"
           element={
-            token ? (
+            <ProtectedRoute>
               <MyBookings />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             RIDE BOOKINGS
         ========================= */}
+
         <Route
           path="/ride-bookings/:rideId"
           element={
-            token ? (
+            <ProtectedRoute>
               <RideBookings />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             POST RENTAL VEHICLE
         ========================= */}
+
         <Route
           path="/post-rental-vehicle"
           element={
-            token ? (
+            <ProtectedRoute>
               <PostRentalVehicle />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             RENTAL BOOKING
         ========================= */}
+
         <Route
           path="/rental-booking/:rentalId"
           element={
-            token ? (
+            <ProtectedRoute>
               <RentalBooking />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           }
         />
+
 
         {/* =========================
             UNKNOWN ROUTES
         ========================= */}
+
         <Route
           path="*"
           element={
-            <Navigate to="/dashboard" replace />
+            <Navigate to="/" replace />
           }
         />
 
