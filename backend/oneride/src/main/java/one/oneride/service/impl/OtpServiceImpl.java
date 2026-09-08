@@ -1,45 +1,51 @@
 package one.oneride.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import one.oneride.entity.OtpDetails;
-import one.oneride.entity.User;
-import one.oneride.repository.OtpRepository;
-import one.oneride.service.OtpService;
-import one.oneride.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Random;
+import com.twilio.rest.verify.v2.service.Verification;
+import com.twilio.rest.verify.v2.service.VerificationCheck;
+
+import lombok.RequiredArgsConstructor;
+import one.oneride.entity.User;
+import one.oneride.service.OtpService;
+import one.oneride.service.UserService;
 
 @Service
 @RequiredArgsConstructor
 public class OtpServiceImpl implements OtpService {
 
-    private final OtpRepository otpRepository;
     private final UserService userService;
+
+    @Value("${twilio.verify-service-sid}")
+    private String serviceSid;
 
     @Override
     public void sendOtp(String phoneNumber) {
 
-        String otp =
-                String.valueOf(
-                        100000 + new Random().nextInt(900000)
-                );
+        try {
 
-        OtpDetails otpDetails = OtpDetails.builder()
-                .phoneNumber(phoneNumber)
-                .otp(otp)
-                .verified(false)
-                .expiryTime(
-                        LocalDateTime.now().plusMinutes(5)
-                )
-                .build();
+            Verification.creator(
+                    serviceSid,
+                    phoneNumber,
+                    "sms"
+            ).create();
 
-        otpRepository.save(otpDetails);
+            System.out.println(
+                    "Twilio OTP sent to: " + phoneNumber
+            );
 
-        System.out.println(
-                "OTP for " + phoneNumber + " : " + otp
-        );
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Twilio OTP send failed: "
+                            + e.getMessage()
+            );
+
+            throw new RuntimeException(
+                    "Failed to send OTP"
+            );
+        }
     }
 
     @Override
@@ -47,35 +53,37 @@ public class OtpServiceImpl implements OtpService {
             String phoneNumber,
             String otp) {
 
-        OtpDetails otpDetails =
-                otpRepository
-                        .findTopByPhoneNumberOrderByIdDesc(
-                                phoneNumber
-                        )
-                        .orElse(null);
+        try {
 
-        if (otpDetails == null) {
+            VerificationCheck verificationCheck =
+                    VerificationCheck.creator(serviceSid)
+                            .setTo(phoneNumber)
+                            .setCode(otp)
+                            .create();
+
+            System.out.println(
+                    "Twilio verification status: "
+                            + verificationCheck.getStatus()
+            );
+
+            if (!"approved".equals(
+                    verificationCheck.getStatus()
+            )) {
+                return null;
+            }
+
+            return userService.createUserIfNotExists(
+                    phoneNumber
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Twilio OTP verification failed: "
+                            + e.getMessage()
+            );
+
             return null;
         }
-
-        if (LocalDateTime.now()
-                .isAfter(
-                        otpDetails.getExpiryTime()
-                )) {
-            return null;
-        }
-
-        if (!otpDetails.getOtp().equals(otp)) {
-            return null;
-        }
-
-        otpDetails.setVerified(true);
-
-        otpRepository.save(otpDetails);
-
-        return userService
-                .createUserIfNotExists(
-                        phoneNumber
-                );
     }
 }

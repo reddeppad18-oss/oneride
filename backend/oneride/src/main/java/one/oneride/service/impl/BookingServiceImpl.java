@@ -1,5 +1,11 @@
 package one.oneride.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.BookingResponse;
 import one.oneride.dto.CreateBookingRequest;
@@ -14,11 +20,6 @@ import one.oneride.repository.RideRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.BookingService;
 import one.oneride.service.NotificationService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -221,6 +222,22 @@ public class BookingServiceImpl implements BookingService {
 
                 .bookingStatus(
                         booking.getStatus().name()
+                )
+
+                // =================================================
+                // VEHICLE DETAILS
+                // =================================================
+
+                .vehicleType(
+                        ride.getVehicleType()
+                )
+
+                .brand(
+                        ride.getVehicleName()
+                )
+
+                .registrationNumber(
+                        ride.getVehicleNumber()
                 )
 
                 .build();
