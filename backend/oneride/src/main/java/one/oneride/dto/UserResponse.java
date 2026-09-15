@@ -1,5 +1,7 @@
 package one.oneride.dto;
 
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +21,16 @@ public class UserResponse {
 
     private Boolean verified;
 
+    private String city;
+
+    private String aboutMe;
+
     private Double averageRating;
 
     private Long totalRatings;
+
+    private List<String> languages;
+
+    private String profilePhotoUrl;
 }
+

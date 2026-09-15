@@ -1,19 +1,13 @@
 package one.oneride.controller;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.MessageResponse;
 import one.oneride.dto.UpdateProfileRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.service.UserService;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -23,22 +17,20 @@ public class UserController {
 
     private final UserService userService;
 
-
     @GetMapping("/me")
     public UserResponse getCurrentUser(
-            Authentication authentication) {
-
+            Authentication authentication
+    ) {
         String phoneNumber = authentication.getName();
 
         return userService.getCurrentUser(phoneNumber);
     }
 
-
     @PutMapping("/profile")
     public MessageResponse updateProfile(
             Authentication authentication,
-            @Valid @RequestBody UpdateProfileRequest request) {
-
+            @Valid @RequestBody UpdateProfileRequest request
+    ) {
         String phoneNumber = authentication.getName();
 
         userService.updateProfile(
@@ -51,3 +43,4 @@ public class UserController {
                 .build();
     }
 }
+

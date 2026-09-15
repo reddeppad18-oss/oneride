@@ -6,9 +6,16 @@ import one.oneride.entity.User;
 
 public interface UserService {
 
-    User createUserIfNotExists(String phoneNumber);
+    User createUserIfNotExists(
+            String phoneNumber
+    );
 
-    UserResponse getCurrentUser(String phoneNumber);
+    UserResponse getCurrentUser(
+            String phoneNumber
+    );
 
-    void updateProfile(String phoneNumber, UpdateProfileRequest request);
+    void updateProfile(
+            String phoneNumber,
+            UpdateProfileRequest request
+    );
 }

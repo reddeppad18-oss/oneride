@@ -58,6 +58,11 @@ public class User implements UserDetails {
 
     private String city;
 
+    @Column(length = 1000)
+    private String profilePhotoUrl;
+
+
+
     @Column(length = 500)
     private String aboutMe;
 

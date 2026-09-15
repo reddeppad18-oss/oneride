@@ -1,4 +1,3 @@
-```java
 package one.oneride.config;
 
 import java.util.List;
@@ -52,14 +51,8 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         System.out.println(
-                "===================================="
-        );
-        System.out.println(
                 "Language initialization completed"
-        );
-        System.out.println(
-                "===================================="
         );
     }
 }
-```
+
