@@ -1,15 +1,31 @@
 package one.oneride.entity;
 
-import one.oneride.enums.UserRole;
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import one.oneride.enums.UserRole;
 
 @Entity
 @Table(name = "users")
@@ -36,6 +52,35 @@ public class User implements UserDetails {
 
     private LocalDateTime createdAt;
 
+    /*
+     * Optional profile information
+     */
+
+    private String city;
+
+    @Column(length = 500)
+    private String aboutMe;
+
+    /*
+     * Languages spoken by the user
+     *
+     * One user can speak multiple languages.
+     * One language can belong to multiple users.
+     *
+     * Example:
+     *
+     * Ramesh -> Telugu, English
+     */
+    @ManyToMany
+    @JoinTable(
+            name = "user_languages",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id")
+    )
+    @Builder.Default
+    private List<Language> languages = new ArrayList<>();
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
@@ -44,34 +89,40 @@ public class User implements UserDetails {
         );
     }
 
+
     @Override
     public String getPassword() {
         return null;
     }
 
+
     /**
-     * Spring Security uses this as the username.
-     * In One Ride, the phone number is our username.
+     * Spring Security uses the phone number
+     * as the username.
      */
     @Override
     public String getUsername() {
         return phoneNumber;
     }
 
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
+
 
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
 
     @Override
     public boolean isEnabled() {

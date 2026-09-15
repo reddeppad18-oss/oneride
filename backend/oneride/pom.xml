@@ -91,10 +91,16 @@
         </dependency>
 
 		<dependency>
-    <groupId>com.twilio.sdk</groupId>
-    <artifactId>twilio</artifactId>
-    <version>10.6.0</version>
-    </dependency>
+        <groupId>com.twilio.sdk</groupId>
+        <artifactId>twilio</artifactId>
+        <version>10.6.0</version>
+        </dependency>
+	
+        <dependency>
+        <groupId>com.cloudinary</groupId>
+        <artifactId>cloudinary-http5</artifactId>
+        <version>2.1.0</version>
+        </dependency>
 	</dependencies>
 
 	<build>
