@@ -1,5 +1,10 @@
 package one.oneride.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.CreateRentalRequest;
 import one.oneride.dto.MessageResponse;
@@ -10,32 +15,24 @@ import one.oneride.enums.RentalStatus;
 import one.oneride.repository.RentalRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.RentalService;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RentalServiceImpl implements RentalService {
 
-
     private final RentalRepository rentalRepository;
 
     private final UserRepository userRepository;
-
 
     @Override
     public RentalResponse createRental(
             String phoneNumber,
             CreateRentalRequest request) {
 
-
         User owner = userRepository
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
-
 
         RentalListing rental = RentalListing.builder()
                 .owner(owner)
@@ -53,24 +50,19 @@ public class RentalServiceImpl implements RentalService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-
         rentalRepository.save(rental);
-
 
         return mapToResponse(rental);
     }
-
 
     @Override
     public List<RentalResponse> getMyRentals(
             String phoneNumber) {
 
-
         User owner = userRepository
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
-
 
         return rentalRepository
                 .findByOwner(owner)
@@ -79,11 +71,9 @@ public class RentalServiceImpl implements RentalService {
                 .toList();
     }
 
-
     @Override
     public List<RentalResponse> searchRentals(
             String location) {
-
 
         return rentalRepository
                 .findByLocationIgnoreCaseAndStatus(
@@ -95,11 +85,9 @@ public class RentalServiceImpl implements RentalService {
                 .toList();
     }
 
-
     @Override
     public RentalResponse getRentalById(
             Long rentalId) {
-
 
         RentalListing rental =
                 rentalRepository.findById(rentalId)
@@ -107,10 +95,8 @@ public class RentalServiceImpl implements RentalService {
                                 new RuntimeException(
                                         "Rental not found"));
 
-
         return mapToResponse(rental);
     }
-
 
     @Override
     public MessageResponse updateRentalStatus(
@@ -118,13 +104,11 @@ public class RentalServiceImpl implements RentalService {
             String phoneNumber,
             String status) {
 
-
         RentalListing rental =
                 rentalRepository.findById(rentalId)
                         .orElseThrow(() ->
                                 new RuntimeException(
                                         "Rental not found"));
-
 
         if (!rental.getOwner()
                 .getPhoneNumber()
@@ -134,14 +118,11 @@ public class RentalServiceImpl implements RentalService {
                     "Unauthorized");
         }
 
-
         rental.setStatus(
                 RentalStatus.valueOf(status)
         );
 
-
         rentalRepository.save(rental);
-
 
         return MessageResponse.builder()
                 .message(
@@ -150,19 +131,16 @@ public class RentalServiceImpl implements RentalService {
                 .build();
     }
 
-
     @Override
     public MessageResponse deleteRental(
             Long rentalId,
             String phoneNumber) {
-
 
         RentalListing rental =
                 rentalRepository.findById(rentalId)
                         .orElseThrow(() ->
                                 new RuntimeException(
                                         "Rental not found"));
-
 
         if (!rental.getOwner()
                 .getPhoneNumber()
@@ -172,9 +150,7 @@ public class RentalServiceImpl implements RentalService {
                     "Unauthorized");
         }
 
-
         rentalRepository.delete(rental);
-
 
         return MessageResponse.builder()
                 .message(
@@ -183,44 +159,62 @@ public class RentalServiceImpl implements RentalService {
                 .build();
     }
 
-
     private RentalResponse mapToResponse(
             RentalListing rental) {
 
-
         return RentalResponse.builder()
                 .id(rental.getId())
-                .ownerName(
-                        rental.getOwner()
-                                .getFullName()
+
+                .ownerId(
+                        rental.getOwner() != null
+                                ? rental.getOwner().getId()
+                                : null
                 )
+
+                .ownerName(
+                        rental.getOwner() != null
+                                ? rental.getOwner().getFullName()
+                                : null
+                )
+
                 .vehicleType(
                         rental.getVehicleType()
                 )
+
                 .brand(
                         rental.getBrand()
                 )
+
                 .model(
                         rental.getModel()
                 )
+
                 .registrationNumber(
                         rental.getRegistrationNumber()
                 )
+
                 .seats(
                         rental.getSeats()
                 )
+
                 .pricePerDay(
                         rental.getPricePerDay()
                 )
+
                 .location(
                         rental.getLocation()
                 )
+
                 .description(
                         rental.getDescription()
                 )
+
                 .status(
-                        rental.getStatus().name()
+                        rental.getStatus() != null
+                                ? rental.getStatus().name()
+                                : null
                 )
+
                 .build();
     }
 }

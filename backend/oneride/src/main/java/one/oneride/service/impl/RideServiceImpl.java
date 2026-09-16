@@ -1,14 +1,23 @@
-package one.oneride.service.impl;
 
-import one.oneride.entity.Booking;
-import one.oneride.enums.BookingStatus;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.CreateRideRequest;
 import one.oneride.dto.MessageResponse;
 import one.oneride.dto.RideResponse;
+import one.oneride.entity.Booking;
 import one.oneride.entity.Ride;
 import one.oneride.entity.User;
+import one.oneride.enums.BookingStatus;
 import one.oneride.enums.RideStatus;
 import one.oneride.exception.InvalidRideStateException;
 import one.oneride.exception.RideNotFoundException;
@@ -19,22 +28,9 @@ import one.oneride.repository.UserRepository;
 import one.oneride.service.RideService;
 import one.oneride.specification.RideSpecification;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-
 @Service
 @RequiredArgsConstructor
 public class RideServiceImpl implements RideService {
-
 
     private final RideRepository rideRepository;
 
@@ -42,17 +38,17 @@ public class RideServiceImpl implements RideService {
 
     private final BookingRepository bookingRepository;
 
-
     @Override
     public void createRide(
             String phoneNumber,
             CreateRideRequest request) {
 
-
-        User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
-
+        User user =
+                userRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                ));
 
         Ride ride = Ride.builder()
                 .source(request.getSource())
@@ -68,21 +64,19 @@ public class RideServiceImpl implements RideService {
                 .user(user)
                 .build();
 
-
         rideRepository.save(ride);
     }
-
-
 
     @Override
     public List<RideResponse> getMyRides(
             String phoneNumber) {
 
-
-        User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
-
+        User user =
+                userRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                ));
 
         return rideRepository.findByUser(user)
                 .stream()
@@ -90,11 +84,8 @@ public class RideServiceImpl implements RideService {
                 .toList();
     }
 
-
-
     @Override
     public Page<RideResponse> searchRides(
-
             String source,
             String destination,
             LocalDate travelDate,
@@ -102,10 +93,7 @@ public class RideServiceImpl implements RideService {
             Double maxPrice,
             int page,
             int size,
-            String sortBy
-
-    ) {
-
+            String sortBy) {
 
         Pageable pageable =
                 PageRequest.of(
@@ -113,7 +101,6 @@ public class RideServiceImpl implements RideService {
                         size,
                         Sort.by(sortBy).ascending()
                 );
-
 
         return rideRepository.findAll(
                         RideSpecification.searchRide(
@@ -128,113 +115,65 @@ public class RideServiceImpl implements RideService {
                 .map(this::mapToRideResponse);
     }
 
-
-
     @Override
     public RideResponse getRideById(Long rideId) {
 
-
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() ->
-                        new RideNotFoundException("Ride not found"));
-
+        Ride ride =
+                rideRepository.findById(rideId)
+                        .orElseThrow(() ->
+                                new RideNotFoundException(
+                                        "Ride not found"
+                                ));
 
         return mapToRideResponse(ride);
     }
-
-
 
     @Override
     public void cancelRide(
             Long rideId,
             String phoneNumber) {
 
-
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() ->
-                        new RideNotFoundException("Ride not found"));
-
-
+        Ride ride =
+                rideRepository.findById(rideId)
+                        .orElseThrow(() ->
+                                new RideNotFoundException(
+                                        "Ride not found"
+                                ));
 
         if (!ride.getUser()
                 .getPhoneNumber()
                 .equals(phoneNumber)) {
 
-
             throw new UnauthorizedRideException(
-                    "You can cancel only your own ride");
+                    "You can cancel only your own ride"
+            );
         }
-
-
 
         if (ride.getStatus() != RideStatus.ACTIVE) {
 
-
             throw new InvalidRideStateException(
-                    "Only active rides can be cancelled");
+                    "Only active rides can be cancelled"
+            );
         }
 
-
-        ride.setStatus(RideStatus.CANCELLED);
+        ride.setStatus(
+                RideStatus.CANCELLED
+        );
 
         rideRepository.save(ride);
     }
-
-
 
     @Override
     public MessageResponse startRide(
             Long rideId,
             String phoneNumber) {
 
-
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() ->
-                        new RuntimeException("Ride not found"));
-
-
-
-        if (!ride.getUser()
-                .getPhoneNumber()
-                .equals(phoneNumber)) {
-
-
-            throw new RuntimeException("Unauthorized");
-        }
-
-
-
-        if (ride.getStatus() != RideStatus.ACTIVE &&
-                ride.getStatus() != RideStatus.FULL) {
-
-
-            throw new RuntimeException(
-                    "Ride cannot be started");
-        }
-
-
-
-        ride.setStatus(RideStatus.STARTED);
-
-        rideRepository.save(ride);
-
-
-
-        return MessageResponse.builder()
-                .message("Ride started successfully")
-                .build();
-    }
-    @Override
-    @Transactional
-    public MessageResponse completeRide(
-            Long rideId,
-            String phoneNumber) {
-
-
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() ->
-                        new RuntimeException("Ride not found"));
-
+        Ride ride =
+                rideRepository.findById(rideId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Ride not found"
+                                ));
 
         if (!ride.getUser()
                 .getPhoneNumber()
@@ -245,6 +184,48 @@ public class RideServiceImpl implements RideService {
             );
         }
 
+        if (ride.getStatus() != RideStatus.ACTIVE &&
+                ride.getStatus() != RideStatus.FULL) {
+
+            throw new RuntimeException(
+                    "Ride cannot be started"
+            );
+        }
+
+        ride.setStatus(
+                RideStatus.STARTED
+        );
+
+        rideRepository.save(ride);
+
+        return MessageResponse.builder()
+                .message(
+                        "Ride started successfully"
+                )
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse completeRide(
+            Long rideId,
+            String phoneNumber) {
+
+        Ride ride =
+                rideRepository.findById(rideId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Ride not found"
+                                ));
+
+        if (!ride.getUser()
+                .getPhoneNumber()
+                .equals(phoneNumber)) {
+
+            throw new RuntimeException(
+                    "Unauthorized"
+            );
+        }
 
         if (ride.getStatus() != RideStatus.STARTED) {
 
@@ -253,22 +234,16 @@ public class RideServiceImpl implements RideService {
             );
         }
 
-
-        // Change ride status
         ride.setStatus(
                 RideStatus.COMPLETED
         );
 
-
-        // Find all confirmed bookings
         List<Booking> bookings =
                 bookingRepository.findByRideAndStatus(
                         ride,
                         BookingStatus.CONFIRMED
                 );
 
-
-        // Complete all bookings
         for (Booking booking : bookings) {
 
             booking.setStatus(
@@ -276,11 +251,13 @@ public class RideServiceImpl implements RideService {
             );
         }
 
+        bookingRepository.saveAll(
+                bookings
+        );
 
-        bookingRepository.saveAll(bookings);
-
-        rideRepository.save(ride);
-
+        rideRepository.save(
+                ride
+        );
 
         return MessageResponse.builder()
                 .message(
@@ -293,35 +270,42 @@ public class RideServiceImpl implements RideService {
     public List<RideResponse> getRideHistory(
             String phoneNumber) {
 
+        User user =
+                userRepository.findByPhoneNumber(phoneNumber)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                ));
 
-        User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
-
-
-
-        List<RideStatus> statuses = List.of(
-                RideStatus.COMPLETED,
-                RideStatus.CANCELLED
-        );
-
+        List<RideStatus> statuses =
+                List.of(
+                        RideStatus.COMPLETED,
+                        RideStatus.CANCELLED
+                );
 
         return rideRepository
-                .findByUserAndStatusIn(user, statuses)
+                .findByUserAndStatusIn(
+                        user,
+                        statuses
+                )
                 .stream()
                 .map(this::mapToRideResponse)
                 .toList();
     }
 
-
-
-
     private RideResponse mapToRideResponse(
             Ride ride) {
 
-
         return RideResponse.builder()
                 .id(ride.getId())
+
+                // Driver who posted the ride
+                .driverId(
+                        ride.getUser() != null
+                                ? ride.getUser().getId()
+                                : null
+                )
+
                 .source(ride.getSource())
                 .destination(ride.getDestination())
                 .travelDate(ride.getTravelDate())
@@ -332,7 +316,11 @@ public class RideServiceImpl implements RideService {
                 .availableSeats(ride.getAvailableSeats())
                 .pricePerSeat(ride.getPricePerSeat())
                 .description(ride.getDescription())
-                .status(ride.getStatus().name())
+                .status(
+                        ride.getStatus() != null
+                                ? ride.getStatus().name()
+                                : null
+                )
                 .build();
     }
 }

@@ -1,13 +1,20 @@
 package one.oneride.controller;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.MessageResponse;
 import one.oneride.dto.UpdateProfileRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.service.UserService;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -21,9 +28,23 @@ public class UserController {
     public UserResponse getCurrentUser(
             Authentication authentication
     ) {
-        String phoneNumber = authentication.getName();
 
-        return userService.getCurrentUser(phoneNumber);
+        String phoneNumber =
+                authentication.getName();
+
+        return userService.getCurrentUser(
+                phoneNumber
+        );
+    }
+
+    @GetMapping("/public/{userId}")
+    public UserResponse getPublicProfile(
+            @PathVariable Long userId
+    ) {
+
+        return userService.getPublicProfile(
+                userId
+        );
     }
 
     @PutMapping("/profile")
@@ -31,7 +52,9 @@ public class UserController {
             Authentication authentication,
             @Valid @RequestBody UpdateProfileRequest request
     ) {
-        String phoneNumber = authentication.getName();
+
+        String phoneNumber =
+                authentication.getName();
 
         userService.updateProfile(
                 phoneNumber,
@@ -39,8 +62,9 @@ public class UserController {
         );
 
         return MessageResponse.builder()
-                .message("Profile updated successfully")
+                .message(
+                        "Profile updated successfully"
+                )
                 .build();
     }
 }
-

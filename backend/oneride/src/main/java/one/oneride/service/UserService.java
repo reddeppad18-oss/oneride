@@ -14,6 +14,10 @@ public interface UserService {
             String phoneNumber
     );
 
+    UserResponse getPublicProfile(
+            Long userId
+    );
+
     void updateProfile(
             String phoneNumber,
             UpdateProfileRequest request

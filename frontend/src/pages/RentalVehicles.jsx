@@ -44,6 +44,19 @@ function RentalVehicles() {
     }
   };
 
+  const handleViewOwnerProfile = (ownerId) => {
+    if (!ownerId) {
+      alert("Owner profile is not available for this vehicle.");
+      return;
+    }
+
+    navigate(`/user-profile/${ownerId}`);
+  };
+
+  const handleBookVehicle = (rentalId) => {
+    navigate(`/rental-booking/${rentalId}`);
+  };
+
   return (
     <div className="page-container">
 
@@ -112,7 +125,6 @@ function RentalVehicles() {
 
       </div>
 
-
       {/* No Results */}
       {searched &&
         !loading &&
@@ -131,7 +143,6 @@ function RentalVehicles() {
 
           </div>
         )}
-
 
       {/* Rental Results */}
       {rentals.length > 0 && (
@@ -188,18 +199,47 @@ function RentalVehicles() {
                   {rental.description}
                 </p>
               )}
-              <button
-  type="button"
-  className="primary-button"
-  onClick={() =>
-    navigate(`/rental-booking/${rental.id}`)
-  }
-  disabled={rental.status !== "AVAILABLE"}
->
-  {rental.status === "AVAILABLE"
-    ? "Book Vehicle"
-    : "Vehicle Unavailable"}
-</button>
+
+              {/* Action Buttons */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "15px",
+                  flexWrap: "wrap",
+                }}
+              >
+
+                {/* View Owner Profile */}
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() =>
+                    handleViewOwnerProfile(
+                      rental.ownerId
+                    )
+                  }
+                >
+                  View Owner Profile
+                </button>
+
+                {/* Book Vehicle */}
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() =>
+                    handleBookVehicle(rental.id)
+                  }
+                  disabled={
+                    rental.status !== "AVAILABLE"
+                  }
+                >
+                  {rental.status === "AVAILABLE"
+                    ? "Book Vehicle"
+                    : "Vehicle Unavailable"}
+                </button>
+
+              </div>
 
             </div>
           ))}
@@ -212,3 +252,4 @@ function RentalVehicles() {
 }
 
 export default RentalVehicles;
+

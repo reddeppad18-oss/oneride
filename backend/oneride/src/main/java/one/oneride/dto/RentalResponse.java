@@ -9,6 +9,8 @@ public class RentalResponse {
 
     private Long id;
 
+    private Long ownerId;
+
     private String ownerName;
 
     private String vehicleType;

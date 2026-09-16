@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { searchRides } from "../services/rideService.js";
 import { createBooking } from "../services/bookingService.js";
 
 function SearchRides() {
+  const navigate = useNavigate();
+
   const [searchData, setSearchData] = useState({
     source: "",
     destination: "",
@@ -42,10 +46,62 @@ function SearchRides() {
       }
     } catch (error) {
       console.error("Search Error:", error);
-      setMessage("Unable to search rides.");
+
+      setMessage(
+        error.response?.data?.message ||
+        "Unable to search rides."
+      );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBookRide = async (rideId) => {
+    const seats = prompt(
+      "How many seats do you want to book?",
+      "1"
+    );
+
+    if (!seats) {
+      return;
+    }
+
+    const numberOfSeats = Number(seats);
+
+    if (
+      !Number.isInteger(numberOfSeats) ||
+      numberOfSeats < 1
+    ) {
+      alert("Please enter a valid number of seats.");
+      return;
+    }
+
+    try {
+      const response = await createBooking(
+        rideId,
+        numberOfSeats
+      );
+
+      alert(
+        `Booking successful!\n\nBooking ID: ${response.bookingId}\nStatus: ${response.bookingStatus}`
+      );
+    } catch (error) {
+      console.error("Booking Error:", error);
+
+      alert(
+        error.response?.data?.message ||
+        "Booking failed."
+      );
+    }
+  };
+
+  const handleViewDriverProfile = (driverId) => {
+    if (!driverId) {
+      alert("Driver profile is not available for this ride.");
+      return;
+    }
+
+    navigate(`/user-profile/${driverId}`);
   };
 
   return (
@@ -61,7 +117,10 @@ function SearchRides() {
           <div className="form-grid">
 
             <div className="form-group">
-              <label htmlFor="source">Source</label>
+              <label htmlFor="source">
+                Source
+              </label>
+
               <input
                 id="source"
                 type="text"
@@ -73,7 +132,10 @@ function SearchRides() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="destination">Destination</label>
+              <label htmlFor="destination">
+                Destination
+              </label>
+
               <input
                 id="destination"
                 type="text"
@@ -85,7 +147,10 @@ function SearchRides() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="travelDate">Travel Date</label>
+              <label htmlFor="travelDate">
+                Travel Date
+              </label>
+
               <input
                 id="travelDate"
                 type="date"
@@ -96,7 +161,10 @@ function SearchRides() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="availableSeats">Required Seats</label>
+              <label htmlFor="availableSeats">
+                Required Seats
+              </label>
+
               <input
                 id="availableSeats"
                 type="number"
@@ -108,7 +176,10 @@ function SearchRides() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="maxPrice">Maximum Price</label>
+              <label htmlFor="maxPrice">
+                Maximum Price
+              </label>
+
               <input
                 id="maxPrice"
                 type="number"
@@ -126,7 +197,9 @@ function SearchRides() {
             className="primary-button"
             disabled={loading}
           >
-            {loading ? "Searching..." : "Search Rides"}
+            {loading
+              ? "Searching..."
+              : "Search Rides"}
           </button>
         </form>
       </div>
@@ -134,59 +207,101 @@ function SearchRides() {
       <div className="results-container">
 
         {message && (
-          <p className="search-message">{message}</p>
+          <p className="search-message">
+            {message}
+          </p>
         )}
 
         {rides.map((ride) => (
-          <div key={ride.id} className="ride-card">
+          <div
+            key={ride.id}
+            className="ride-card"
+          >
 
             <h2>
               {ride.source} → {ride.destination}
             </h2>
 
             <p>
-              <strong>Date:</strong> {ride.travelDate}
+              <strong>Date:</strong>{" "}
+              {ride.travelDate}
             </p>
 
             <p>
-              <strong>Time:</strong> {ride.travelTime}
+              <strong>Time:</strong>{" "}
+              {ride.travelTime}
             </p>
 
             <p>
-              <strong>Seats:</strong> {ride.availableSeats}
+              <strong>Seats:</strong>{" "}
+              {ride.availableSeats}
             </p>
 
             <p>
-              <strong>Price:</strong> ₹{ride.pricePerSeat}
+              <strong>Price:</strong>{" "}
+              ₹{ride.pricePerSeat}
             </p>
 
             <p>
-              <strong>Vehicle:</strong> {ride.vehicleType}
+              <strong>Vehicle:</strong>{" "}
+              {ride.vehicleType}
             </p>
 
             <p>
-              <strong>Name:</strong> {ride.vehicleName}
+              <strong>Name:</strong>{" "}
+              {ride.vehicleName}
             </p>
 
             <p>
-              <strong>Number:</strong> {ride.vehicleNumber}
+              <strong>Number:</strong>{" "}
+              {ride.vehicleNumber}
             </p>
 
             <p>
-              <strong>Status:</strong> {ride.status}
+              <strong>Status:</strong>{" "}
+              {ride.status}
             </p>
 
             {ride.description && (
               <p>
-                <strong>Description:</strong> {ride.description}
+                <strong>Description:</strong>{" "}
+                {ride.description}
               </p>
             )}
-            <button
-             className="primary-button"
-             onClick={() => handleBookRide(ride.id)}
+
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                marginTop: "15px",
+                flexWrap: "wrap",
+              }}
             >
-             Book Ride
-            </button>
+
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() =>
+                  handleViewDriverProfile(
+                    ride.driverId
+                  )
+                }
+              >
+                View Driver Profile
+              </button>
+
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() =>
+                  handleBookRide(ride.id)
+                }
+              >
+                Book Ride
+              </button>
+
+            </div>
+
           </div>
         ))}
 
@@ -194,31 +309,5 @@ function SearchRides() {
     </div>
   );
 }
-const handleBookRide = async (rideId) => {
-  const seats = prompt("How many seats do you want to book?", "1");
-
-  if (!seats) {
-    return;
-  }
-
-  try {
-    const response = await createBooking(
-      rideId,
-      Number(seats)
-    );
-
-    alert(
-      `Booking successful!\n\nBooking ID: ${response.bookingId}\nStatus: ${response.bookingStatus}`
-    );
-
-  } catch (error) {
-    console.error(error);
-
-    alert(
-      error.response?.data?.message ||
-      "Booking failed."
-    );
-  }
-};
 
 export default SearchRides;

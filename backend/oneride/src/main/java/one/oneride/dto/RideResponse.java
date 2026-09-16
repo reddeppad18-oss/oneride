@@ -1,16 +1,18 @@
 package one.oneride.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 @Builder
 public class RideResponse {
 
     private Long id;
+
+    private Long driverId;
 
     private String source;
 

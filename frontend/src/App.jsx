@@ -27,6 +27,7 @@ import MyRentals from "./pages/MyRentals";
 
 import MyProfile from "./pages/MyProfile";
 import MyActivity from "./pages/MyActivity";
+import UserProfile from "./pages/UserProfile";
 
 
 /* =========================
@@ -220,6 +221,15 @@ function App() {
             element={<MyActivity />}
           />
 
+          {/* =========================
+              PUBLIC DRIVER / OWNER PROFILE
+          ========================= */}
+
+          <Route
+            path="/user-profile/:userId"
+            element={<UserProfile />}
+          />
+
           <Route
             path="/settings"
             element={<Settings />}
@@ -247,3 +257,4 @@ function App() {
 }
 
 export default App;
+
