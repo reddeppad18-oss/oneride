@@ -1,722 +1,1203 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  FiCamera,
+  FiEdit2,
+  FiMapPin,
+  FiPhone,
+  FiUser,
+  FiStar,
+  FiTrash2,
+  FiX,
+  FiCheck,
+} from "react-icons/fi";
+
 import api from "../api/axios";
 
-function MyProfile() {
+const MyProfile = () => {
+  const fileInputRef = useRef(null);
 
   const [profile, setProfile] = useState(null);
-
   const [languages, setLanguages] = useState([]);
 
-  const [selectedLanguages, setSelectedLanguages] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [deletingPhoto, setDeletingPhoto] = useState(false);
 
-  const [message, setMessage] = useState("");
+  const [editing, setEditing] = useState(false);
+
+  const [form, setForm] = useState({
+    fullName: "",
+    city: "",
+    aboutMe: "",
+    languages: [],
+  });
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  // ----------------------------------------
-  // Load profile and languages
-  // ----------------------------------------
+  // --------------------------------------------------
+  // Load profile
+  // --------------------------------------------------
+
+  const loadProfile = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await api.get("/user/me");
+
+      setProfile(response.data);
+
+      setForm({
+        fullName: response.data.fullName || "",
+        city: response.data.city || "",
+        aboutMe: response.data.aboutMe || "",
+        languages: response.data.languages || [],
+      });
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError(
+          "Your session is no longer valid. Please log in again."
+        );
+      } else {
+        setError("Failed to load profile. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --------------------------------------------------
+  // Load available languages
+  // --------------------------------------------------
+
+  const loadLanguages = async () => {
+    try {
+      const response = await api.get("/languages");
+      setLanguages(response.data || []);
+    } catch (err) {
+      console.error("Failed to load languages:", err);
+    }
+  };
 
   useEffect(() => {
-
-    const loadData = async () => {
-
-      try {
-
-        setLoading(true);
-
-        setError("");
-
-        // Get current user profile
-        const profileResponse =
-          await api.get("/user/me");
-
-        setProfile(profileResponse.data);
-
-        // Set already selected languages
-        setSelectedLanguages(
-          profileResponse.data.languages || []
-        );
-
-        // Get available languages
-        const languageResponse =
-          await api.get("/languages");
-
-        setLanguages(languageResponse.data);
-
-      } catch (err) {
-
-        console.error(
-          "Failed to load profile:",
-          err
-        );
-
-        setError(
-          "Failed to load profile. Please try again."
-        );
-
-      } finally {
-
-        setLoading(false);
-      }
-    };
-
-    loadData();
-
+    loadProfile();
+    loadLanguages();
   }, []);
 
-  // ----------------------------------------
-  // Handle input changes
-  // ----------------------------------------
+  // --------------------------------------------------
+  // Form changes
+  // --------------------------------------------------
 
   const handleChange = (event) => {
-
     const { name, value } = event.target;
 
-    setProfile((previous) => ({
+    setForm((previous) => ({
       ...previous,
       [name]: value,
     }));
-
   };
 
-  // ----------------------------------------
-  // Handle language selection
-  // ----------------------------------------
+  // --------------------------------------------------
+  // Language selection
+  // --------------------------------------------------
 
-  const handleLanguageChange = (event) => {
+  const toggleLanguage = (languageName) => {
+    setForm((previous) => {
+      const exists = previous.languages.includes(languageName);
 
-    const selectedOptions =
-      Array.from(event.target.selectedOptions);
-
-    const selectedNames =
-      selectedOptions.map(
-        (option) => option.value
-      );
-
-    setSelectedLanguages(selectedNames);
-
+      return {
+        ...previous,
+        languages: exists
+          ? previous.languages.filter(
+              (language) => language !== languageName
+            )
+          : [...previous.languages, languageName],
+      };
+    });
   };
 
-  // ----------------------------------------
+  // --------------------------------------------------
+  // Start editing
+  // --------------------------------------------------
+
+  const handleEdit = () => {
+    setError("");
+    setSuccess("");
+
+    setForm({
+      fullName: profile?.fullName || "",
+      city: profile?.city || "",
+      aboutMe: profile?.aboutMe || "",
+      languages: profile?.languages || [],
+    });
+
+    setEditing(true);
+  };
+
+  // --------------------------------------------------
+  // Cancel editing
+  // --------------------------------------------------
+
+  const handleCancel = () => {
+    setForm({
+      fullName: profile?.fullName || "",
+      city: profile?.city || "",
+      aboutMe: profile?.aboutMe || "",
+      languages: profile?.languages || [],
+    });
+
+    setEditing(false);
+    setError("");
+    setSuccess("");
+  };
+
+  // --------------------------------------------------
   // Save profile
-  // ----------------------------------------
+  // --------------------------------------------------
 
-  const handleSave = async (event) => {
-
-    event.preventDefault();
+  const handleSave = async () => {
+    if (!form.fullName.trim()) {
+      setError("Name is required.");
+      return;
+    }
 
     try {
-
       setSaving(true);
-
-      setMessage("");
-
       setError("");
+      setSuccess("");
 
-      const requestData = {
+      await api.put("/user/profile", {
+        fullName: form.fullName.trim(),
+        city: form.city.trim(),
+        aboutMe: form.aboutMe.trim(),
+        languages: form.languages,
+      });
 
-        fullName: profile.fullName,
+      await loadProfile();
 
-        city: profile.city,
+      setEditing(false);
+      setSuccess("Profile updated successfully.");
 
-        aboutMe: profile.aboutMe,
-
-        languages: selectedLanguages,
-
-      };
-
-      await api.put(
-        "/user/profile",
-        requestData
-      );
-
-      // Update local profile
-      setProfile((previous) => ({
-        ...previous,
-        languages: selectedLanguages,
-      }));
-
-      setMessage(
-        "Profile updated successfully!"
-      );
-
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
     } catch (err) {
+      console.error("Failed to update profile:", err);
 
-      console.error(
-        "Failed to update profile:",
-        err
-      );
-
-      setError(
+      const message =
         err.response?.data?.message ||
-        "Failed to update profile. Please try again."
-      );
+        "Failed to update profile. Please try again.";
 
+      setError(message);
     } finally {
-
       setSaving(false);
     }
   };
 
-  // ----------------------------------------
-  // Loading state
-  // ----------------------------------------
+  // --------------------------------------------------
+  // Open file picker
+  // --------------------------------------------------
+
+  const handleChoosePhoto = () => {
+    if (!editing) {
+      return;
+    }
+
+    fileInputRef.current?.click();
+  };
+
+  // --------------------------------------------------
+  // Upload profile photo
+  // --------------------------------------------------
+
+  const handlePhotoChange = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Reset input so the same file can be selected again.
+    event.target.value = "";
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Profile photo must be less than 5 MB.");
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      setError("");
+      setSuccess("");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await api.post(
+        "/user/profile/photo",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      await loadProfile();
+
+      setSuccess("Profile photo updated successfully.");
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+    } catch (err) {
+      console.error("Failed to upload profile photo:", err);
+
+      const message =
+        err.response?.data?.message ||
+        "Failed to upload profile photo. Please try again.";
+
+      setError(message);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  // --------------------------------------------------
+  // Delete profile photo
+  // --------------------------------------------------
+
+  const handleDeletePhoto = async () => {
+    if (!profile?.profilePhotoUrl) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to remove your profile photo?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingPhoto(true);
+      setError("");
+      setSuccess("");
+
+      await api.delete("/user/profile/photo");
+
+      await loadProfile();
+
+      setSuccess("Profile photo removed successfully.");
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+    } catch (err) {
+      console.error("Failed to delete profile photo:", err);
+
+      const message =
+        err.response?.data?.message ||
+        "Failed to remove profile photo. Please try again.";
+
+      setError(message);
+    } finally {
+      setDeletingPhoto(false);
+    }
+  };
+
+  // --------------------------------------------------
+  // Generate Alrides User ID
+  // --------------------------------------------------
+
+  const getAlridesUserId = () => {
+    if (!profile?.id) {
+      return "ALR-000000";
+    }
+
+    return `ALR-${String(profile.id).padStart(6, "0")}`;
+  };
+
+  // --------------------------------------------------
+  // Loading
+  // --------------------------------------------------
 
   if (loading) {
-
     return (
-      <div style={styles.container}>
-
-        <div style={styles.loading}>
-          Loading profile...
+      <div style={styles.page}>
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p>Loading profile...</p>
         </div>
-
       </div>
     );
   }
 
-  // ----------------------------------------
-  // Error state
-  // ----------------------------------------
+  // --------------------------------------------------
+  // Error without profile
+  // --------------------------------------------------
 
   if (!profile) {
-
     return (
-      <div style={styles.container}>
+      <div style={styles.page}>
+        <div style={styles.errorCard}>
+          <h2>Unable to load profile</h2>
 
-        <div style={styles.error}>
-          {error || "Profile not found."}
+          <p>{error || "Something went wrong."}</p>
+
+          <button
+            type="button"
+            style={styles.primaryButton}
+            onClick={loadProfile}
+          >
+            Try Again
+          </button>
         </div>
-
       </div>
     );
   }
 
-  // ----------------------------------------
-  // User ID formatting
-  // ----------------------------------------
-
-  const alridesUserId =
-    `ALR-${String(profile.id).padStart(6, "0")}`;
+  // --------------------------------------------------
+  // Main UI
+  // --------------------------------------------------
 
   return (
+    <div style={styles.page}>
+      <div style={styles.container}>
 
-    <div style={styles.container}>
-
-      <div style={styles.card}>
-
-        {/* -------------------------------- */}
         {/* Header */}
-        {/* -------------------------------- */}
 
         <div style={styles.header}>
-
-          <div style={styles.avatar}>
-
-            {profile.fullName
-              ? profile.fullName
-                  .charAt(0)
-                  .toUpperCase()
-              : "U"}
-
-          </div>
-
           <div>
-
-            <h1 style={styles.title}>
-              My Profile
-            </h1>
+            <h1 style={styles.title}>My Profile</h1>
 
             <p style={styles.subtitle}>
-              Manage your Alrides profile
+              Manage your Alrides profile information
             </p>
-
           </div>
 
+          {!editing ? (
+            <button
+              type="button"
+              style={styles.editButton}
+              onClick={handleEdit}
+            >
+              <FiEdit2 size={17} />
+              Edit Profile
+            </button>
+          ) : (
+            <div style={styles.actionGroup}>
+              <button
+                type="button"
+                style={styles.cancelButton}
+                onClick={handleCancel}
+                disabled={saving}
+              >
+                <FiX size={17} />
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                style={styles.saveButton}
+                onClick={handleSave}
+                disabled={saving}
+              >
+                <FiCheck size={17} />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* -------------------------------- */}
         {/* Messages */}
-        {/* -------------------------------- */}
-
-        {message && (
-          <div style={styles.success}>
-            {message}
-          </div>
-        )}
 
         {error && (
-          <div style={styles.error}>
+          <div style={styles.errorMessage}>
             {error}
           </div>
         )}
 
-        {/* -------------------------------- */}
-        {/* Profile Form */}
-        {/* -------------------------------- */}
-
-        <form onSubmit={handleSave}>
-
-          {/* Full Name */}
-
-          <div style={styles.formGroup}>
-
-            <label style={styles.label}>
-              Full Name
-            </label>
-
-            <input
-              type="text"
-              name="fullName"
-              value={profile.fullName || ""}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              style={styles.input}
-              required
-            />
-
+        {success && (
+          <div style={styles.successMessage}>
+            {success}
           </div>
+        )}
 
-          {/* Phone Number */}
+        {/* Profile card */}
 
-          <div style={styles.formGroup}>
+        <div style={styles.card}>
 
-            <label style={styles.label}>
-              Phone Number
-            </label>
+          {/* Profile photo */}
 
-            <input
-              type="text"
-              value={profile.phoneNumber || ""}
-              style={{
-                ...styles.input,
-                ...styles.readOnly,
-              }}
-              readOnly
-            />
+          <div style={styles.photoSection}>
 
-            <small style={styles.helpText}>
-              Phone number cannot be changed.
-            </small>
+            <div style={styles.photoWrapper}>
 
-          </div>
+              {profile.profilePhotoUrl ? (
+                <img
+                  src={profile.profilePhotoUrl}
+                  alt="Profile"
+                  style={styles.profileImage}
+                />
+              ) : (
+                <div style={styles.profilePlaceholder}>
+                  <FiUser size={58} />
+                </div>
+              )}
 
-          {/* Alrides User ID */}
-
-          <div style={styles.formGroup}>
-
-            <label style={styles.label}>
-              Alrides User ID
-            </label>
-
-            <input
-              type="text"
-              value={alridesUserId}
-              style={{
-                ...styles.input,
-                ...styles.readOnly,
-              }}
-              readOnly
-            />
-
-            <small style={styles.helpText}>
-              Your unique Alrides user ID.
-            </small>
-
-          </div>
-
-          {/* Role */}
-
-          <div style={styles.formGroup}>
-
-            <label style={styles.label}>
-              Role
-            </label>
-
-            <input
-              type="text"
-              value={profile.role || ""}
-              style={{
-                ...styles.input,
-                ...styles.readOnly,
-              }}
-              readOnly
-            />
-
-          </div>
-
-          {/* City */}
-
-          <div style={styles.formGroup}>
-
-            <label style={styles.label}>
-              City
-            </label>
-
-            <input
-              type="text"
-              name="city"
-              value={profile.city || ""}
-              onChange={handleChange}
-              placeholder="Enter your city"
-              style={styles.input}
-            />
-
-          </div>
-
-          {/* Languages */}
-
-          <div style={styles.formGroup}>
-
-            <label style={styles.label}>
-              Languages Spoken
-            </label>
-
-            <select
-              multiple
-              value={selectedLanguages}
-              onChange={handleLanguageChange}
-              style={styles.multiSelect}
-            >
-
-              {languages.map((language) => (
-
-                <option
-                  key={language.id}
-                  value={language.name}
+              {editing && (
+                <button
+                  type="button"
+                  style={styles.cameraButton}
+                  onClick={handleChoosePhoto}
+                  disabled={uploadingPhoto || deletingPhoto}
+                  title="Change profile photo"
                 >
-                  {language.name}
-                </option>
-
-              ))}
-
-            </select>
-
-            <small style={styles.helpText}>
-              Hold Ctrl and select multiple languages.
-            </small>
-
-          </div>
-
-          {/* Selected Languages Preview */}
-
-          {selectedLanguages.length > 0 && (
-
-            <div style={styles.selectedSection}>
-
-              <div style={styles.selectedTitle}>
-                Selected Languages
-              </div>
-
-              <div style={styles.languageContainer}>
-
-                {selectedLanguages.map(
-                  (language) => (
-
-                    <span
-                      key={language}
-                      style={styles.languageBadge}
-                    >
-                      {language}
-                    </span>
-
-                  )
-                )}
-
-              </div>
-
+                  <FiCamera size={18} />
+                </button>
+              )}
             </div>
 
-          )}
+            {editing && (
+              <div style={styles.photoActions}>
 
-          {/* About Me */}
+                <button
+                  type="button"
+                  style={styles.photoButton}
+                  onClick={handleChoosePhoto}
+                  disabled={uploadingPhoto || deletingPhoto}
+                >
+                  <FiCamera size={16} />
 
-          <div style={styles.formGroup}>
+                  {uploadingPhoto
+                    ? "Uploading..."
+                    : profile.profilePhotoUrl
+                    ? "Change Photo"
+                    : "Add Photo"}
+                </button>
 
-            <label style={styles.label}>
-              About Me
-            </label>
+                {profile.profilePhotoUrl && (
+                  <button
+                    type="button"
+                    style={styles.removePhotoButton}
+                    onClick={handleDeletePhoto}
+                    disabled={uploadingPhoto || deletingPhoto}
+                  >
+                    <FiTrash2 size={16} />
 
-            <textarea
-              name="aboutMe"
-              value={profile.aboutMe || ""}
-              onChange={handleChange}
-              placeholder="Tell other Alrides users something about yourself..."
-              maxLength={500}
-              rows={5}
-              style={styles.textarea}
+                    {deletingPhoto
+                      ? "Removing..."
+                      : "Remove Photo"}
+                  </button>
+                )}
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handlePhotoChange}
             />
 
-            <small style={styles.helpText}>
-              Maximum 500 characters.
-            </small>
-
+            <p style={styles.photoHint}>
+              {editing
+                ? "JPG, PNG or other image formats. Maximum 5 MB."
+                : "Profile photo"}
+            </p>
           </div>
 
-          {/* Rating */}
+          {/* User information */}
 
-          <div style={styles.ratingCard}>
+          <div style={styles.infoGrid}>
 
-            <div>
+            {/* Name */}
 
-              <div style={styles.ratingTitle}>
-                Your Rating
+            <div style={styles.field}>
+              <label style={styles.label}>
+                <FiUser size={16} />
+                Full Name
+              </label>
+
+              {editing ? (
+                <input
+                  type="text"
+                  name="fullName"
+                  value={form.fullName}
+                  onChange={handleChange}
+                  maxLength={100}
+                  style={styles.input}
+                  placeholder="Enter your name"
+                />
+              ) : (
+                <div style={styles.value}>
+                  {profile.fullName || "Not provided"}
+                </div>
+              )}
+            </div>
+
+            {/* Phone */}
+
+            <div style={styles.field}>
+              <label style={styles.label}>
+                <FiPhone size={16} />
+                Phone Number
+              </label>
+
+              <div style={styles.readOnlyValue}>
+                {profile.phoneNumber || "Not available"}
               </div>
+
+              <span style={styles.readOnlyHint}>
+                Phone number cannot be changed
+              </span>
+            </div>
+
+            {/* Alrides User ID */}
+
+            <div style={styles.field}>
+              <label style={styles.label}>
+                <FiUser size={16} />
+                Alrides User ID
+              </label>
+
+              <div style={styles.readOnlyValue}>
+                {getAlridesUserId()}
+              </div>
+
+              <span style={styles.readOnlyHint}>
+                Automatically generated
+              </span>
+            </div>
+
+            {/* Rating */}
+
+            <div style={styles.field}>
+              <label style={styles.label}>
+                <FiStar size={16} />
+                Rating
+              </label>
 
               <div style={styles.ratingValue}>
-                ⭐{" "}
-                {profile.averageRating
-                  ? profile.averageRating.toFixed(1)
-                  : "0.0"}
+                <FiStar
+                  size={19}
+                  fill="currentColor"
+                />
+
+                <strong>
+                  {profile.averageRating
+                    ? Number(profile.averageRating).toFixed(1)
+                    : "0.0"}
+                </strong>
+
+                <span>
+                  ({profile.totalRatings || 0} ratings)
+                </span>
               </div>
-
             </div>
 
-            <div style={styles.ratingCount}>
+            {/* City */}
 
-              {profile.totalRatings || 0}{" "}
-              ratings
+            <div style={styles.field}>
+              <label style={styles.label}>
+                <FiMapPin size={16} />
+                City
+              </label>
 
+              {editing ? (
+                <input
+                  type="text"
+                  name="city"
+                  value={form.city}
+                  onChange={handleChange}
+                  maxLength={100}
+                  style={styles.input}
+                  placeholder="Enter your city"
+                />
+              ) : (
+                <div style={styles.value}>
+                  {profile.city || "Not provided"}
+                </div>
+              )}
             </div>
 
+            {/* Languages */}
+
+            <div style={styles.field}>
+              <label style={styles.label}>
+                Languages Spoken
+              </label>
+
+              {editing ? (
+                <div style={styles.languageContainer}>
+                  {languages.length === 0 ? (
+                    <p style={styles.noLanguages}>
+                      No languages available.
+                    </p>
+                  ) : (
+                    languages.map((language) => {
+                      const selected =
+                        form.languages.includes(language.name);
+
+                      return (
+                        <button
+                          type="button"
+                          key={language.id}
+                          onClick={() =>
+                            toggleLanguage(language.name)
+                          }
+                          style={{
+                            ...styles.languageButton,
+                            ...(selected
+                              ? styles.languageButtonSelected
+                              : {}),
+                          }}
+                        >
+                          {selected && (
+                            <FiCheck size={14} />
+                          )}
+
+                          {language.name}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              ) : (
+                <div style={styles.languageDisplay}>
+                  {profile.languages &&
+                  profile.languages.length > 0 ? (
+                    profile.languages.map((language) => (
+                      <span
+                        key={language}
+                        style={styles.languageTag}
+                      >
+                        {language}
+                      </span>
+                    ))
+                  ) : (
+                    <span style={styles.emptyText}>
+                      No languages added
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* About Me */}
+
+            <div
+              style={{
+                ...styles.field,
+                gridColumn: "1 / -1",
+              }}
+            >
+              <label style={styles.label}>
+                About Me
+              </label>
+
+              {editing ? (
+                <textarea
+                  name="aboutMe"
+                  value={form.aboutMe}
+                  onChange={handleChange}
+                  maxLength={500}
+                  rows={5}
+                  style={styles.textarea}
+                  placeholder="Tell other Alrides users a little about yourself..."
+                />
+              ) : (
+                <div style={styles.aboutValue}>
+                  {profile.aboutMe ||
+                    "No information added yet."}
+                </div>
+              )}
+
+              {editing && (
+                <div style={styles.characterCount}>
+                  {form.aboutMe.length}/500
+                </div>
+              )}
+            </div>
           </div>
+        </div>
 
-          {/* Save Button */}
+        {/* Bottom actions */}
 
-          <button
-            type="submit"
-            disabled={saving}
-            style={{
-              ...styles.button,
-              ...(saving
-                ? styles.buttonDisabled
-                : {}),
-            }}
-          >
+        {editing && (
+          <div style={styles.bottomActions}>
+            <button
+              type="button"
+              style={styles.cancelButtonLarge}
+              onClick={handleCancel}
+              disabled={saving}
+            >
+              <FiX size={17} />
+              Cancel
+            </button>
 
-            {saving
-              ? "Saving..."
-              : "Save Profile"}
-
-          </button>
-
-        </form>
-
+            <button
+              type="button"
+              style={styles.saveButtonLarge}
+              onClick={handleSave}
+              disabled={saving}
+            >
+              <FiCheck size={17} />
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        )}
       </div>
-
     </div>
   );
-}
+};
 
-// ========================================
+// ======================================================
 // Styles
-// ========================================
+// ======================================================
 
 const styles = {
-
-  container: {
-    minHeight: "100vh",
-    padding: "30px",
-    backgroundColor: "#f5f7fb",
+  page: {
+    minHeight: "100%",
+    padding: "24px",
+    background: "#f6f8fb",
+    boxSizing: "border-box",
   },
 
-  card: {
-    maxWidth: "800px",
+  container: {
+    maxWidth: "1100px",
     margin: "0 auto",
-    backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    padding: "30px",
-    boxShadow:
-      "0 4px 20px rgba(0, 0, 0, 0.08)",
   },
 
   header: {
     display: "flex",
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: "18px",
-    marginBottom: "30px",
-  },
-
-  avatar: {
-    width: "70px",
-    height: "70px",
-    borderRadius: "50%",
-    backgroundColor: "#4f46e5",
-    color: "#ffffff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "28px",
-    fontWeight: "bold",
+    gap: "20px",
+    marginBottom: "24px",
+    flexWrap: "wrap",
   },
 
   title: {
     margin: 0,
-    fontSize: "28px",
-    color: "#1f2937",
+    fontSize: "30px",
+    fontWeight: 700,
+    color: "#172033",
   },
 
   subtitle: {
-    marginTop: "6px",
-    marginBottom: 0,
+    margin: "6px 0 0",
     color: "#6b7280",
+    fontSize: "15px",
   },
 
-  formGroup: {
-    marginBottom: "22px",
+  editButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    border: "none",
+    borderRadius: "10px",
+    padding: "12px 18px",
+    background: "#2563eb",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+
+  actionGroup: {
+    display: "flex",
+    gap: "10px",
+    alignItems: "center",
+  },
+
+  cancelButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    border: "1px solid #d1d5db",
+    borderRadius: "10px",
+    padding: "11px 16px",
+    background: "#ffffff",
+    color: "#374151",
+    fontSize: "14px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+
+  saveButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    border: "none",
+    borderRadius: "10px",
+    padding: "12px 17px",
+    background: "#16a34a",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+
+  card: {
+    background: "#ffffff",
+    borderRadius: "18px",
+    padding: "30px",
+    boxShadow: "0 5px 20px rgba(0, 0, 0, 0.06)",
+  },
+
+  photoSection: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    paddingBottom: "30px",
+    marginBottom: "30px",
+    borderBottom: "1px solid #e5e7eb",
+  },
+
+  photoWrapper: {
+    position: "relative",
+    width: "130px",
+    height: "130px",
+  },
+
+  profileImage: {
+    width: "130px",
+    height: "130px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "4px solid #ffffff",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.12)",
+  },
+
+  profilePlaceholder: {
+    width: "130px",
+    height: "130px",
+    borderRadius: "50%",
+    background: "#e8eefc",
+    color: "#2563eb",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "4px solid #ffffff",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.12)",
+  },
+
+  cameraButton: {
+    position: "absolute",
+    right: "2px",
+    bottom: "2px",
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
+    border: "3px solid #ffffff",
+    background: "#2563eb",
+    color: "#ffffff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+  },
+
+  photoActions: {
+    display: "flex",
+    gap: "10px",
+    marginTop: "16px",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+
+  photoButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    border: "1px solid #2563eb",
+    borderRadius: "9px",
+    padding: "9px 14px",
+    background: "#eff6ff",
+    color: "#2563eb",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+
+  removePhotoButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    border: "1px solid #dc2626",
+    borderRadius: "9px",
+    padding: "9px 14px",
+    background: "#fef2f2",
+    color: "#dc2626",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+
+  photoHint: {
+    margin: "10px 0 0",
+    color: "#9ca3af",
+    fontSize: "12px",
+    textAlign: "center",
+  },
+
+  infoGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: "24px",
+  },
+
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
   },
 
   label: {
-    display: "block",
-    marginBottom: "8px",
-    fontWeight: "600",
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
     color: "#374151",
+    fontSize: "13px",
+    fontWeight: 600,
   },
 
   input: {
     width: "100%",
     boxSizing: "border-box",
-    padding: "12px",
     border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    fontSize: "15px",
+    borderRadius: "9px",
+    padding: "12px 13px",
+    fontSize: "14px",
+    color: "#172033",
     outline: "none",
-  },
-
-  readOnly: {
-    backgroundColor: "#f3f4f6",
-    color: "#6b7280",
-    cursor: "not-allowed",
+    background: "#ffffff",
   },
 
   textarea: {
     width: "100%",
     boxSizing: "border-box",
-    padding: "12px",
     border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    fontSize: "15px",
+    borderRadius: "9px",
+    padding: "12px 13px",
+    fontSize: "14px",
+    color: "#172033",
+    outline: "none",
     resize: "vertical",
     fontFamily: "inherit",
   },
 
-  multiSelect: {
-    width: "100%",
-    minHeight: "180px",
-    padding: "8px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    fontSize: "15px",
-    backgroundColor: "#ffffff",
+  value: {
+    minHeight: "20px",
+    padding: "12px 13px",
+    borderRadius: "9px",
+    background: "#f9fafb",
+    color: "#172033",
+    fontSize: "14px",
   },
 
-  helpText: {
-    display: "block",
-    marginTop: "6px",
-    color: "#6b7280",
-    fontSize: "13px",
+  readOnlyValue: {
+    padding: "12px 13px",
+    borderRadius: "9px",
+    background: "#f3f4f6",
+    color: "#4b5563",
+    fontSize: "14px",
   },
 
-  selectedSection: {
-    marginBottom: "22px",
-    padding: "15px",
-    backgroundColor: "#f9fafb",
-    borderRadius: "10px",
+  readOnlyHint: {
+    color: "#9ca3af",
+    fontSize: "11px",
   },
 
-  selectedTitle: {
-    fontWeight: "600",
-    marginBottom: "10px",
-    color: "#374151",
+  ratingValue: {
+    minHeight: "20px",
+    padding: "12px 13px",
+    borderRadius: "9px",
+    background: "#fff7ed",
+    color: "#d97706",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    fontSize: "14px",
   },
 
   languageContainer: {
     display: "flex",
     flexWrap: "wrap",
     gap: "8px",
+    padding: "4px 0",
   },
 
-  languageBadge: {
-    padding: "6px 12px",
-    borderRadius: "20px",
-    backgroundColor: "#e0e7ff",
-    color: "#3730a3",
-    fontSize: "13px",
-    fontWeight: "600",
-  },
-
-  ratingCard: {
+  languageButton: {
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: "18px",
-    marginBottom: "25px",
-    backgroundColor: "#f9fafb",
-    borderRadius: "10px",
-  },
-
-  ratingTitle: {
-    color: "#6b7280",
-    fontSize: "14px",
-    marginBottom: "5px",
-  },
-
-  ratingValue: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#111827",
-  },
-
-  ratingCount: {
-    color: "#6b7280",
-    fontSize: "14px",
-  },
-
-  button: {
-    width: "100%",
-    padding: "13px",
-    border: "none",
-    borderRadius: "8px",
-    backgroundColor: "#4f46e5",
-    color: "#ffffff",
-    fontSize: "16px",
-    fontWeight: "600",
+    gap: "5px",
+    border: "1px solid #d1d5db",
+    borderRadius: "20px",
+    padding: "8px 13px",
+    background: "#ffffff",
+    color: "#374151",
+    fontSize: "13px",
     cursor: "pointer",
   },
 
-  buttonDisabled: {
-    opacity: 0.6,
-    cursor: "not-allowed",
+  languageButtonSelected: {
+    border: "1px solid #2563eb",
+    background: "#eff6ff",
+    color: "#2563eb",
+    fontWeight: 600,
   },
 
-  success: {
-    marginBottom: "20px",
-    padding: "12px",
-    borderRadius: "8px",
-    backgroundColor: "#dcfce7",
-    color: "#166534",
+  languageDisplay: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+    minHeight: "42px",
+    alignItems: "center",
   },
 
-  error: {
-    marginBottom: "20px",
-    padding: "12px",
-    borderRadius: "8px",
-    backgroundColor: "#fee2e2",
-    color: "#991b1b",
+  languageTag: {
+    borderRadius: "20px",
+    padding: "7px 12px",
+    background: "#eff6ff",
+    color: "#2563eb",
+    fontSize: "13px",
+    fontWeight: 500,
   },
 
-  loading: {
-    textAlign: "center",
-    padding: "50px",
+  emptyText: {
+    color: "#9ca3af",
+    fontSize: "14px",
+  },
+
+  aboutValue: {
+    padding: "13px",
+    borderRadius: "9px",
+    background: "#f9fafb",
+    color: "#4b5563",
+    fontSize: "14px",
+    lineHeight: 1.6,
+    minHeight: "60px",
+  },
+
+  characterCount: {
+    alignSelf: "flex-end",
+    color: "#9ca3af",
+    fontSize: "11px",
+  },
+
+  errorMessage: {
+    marginBottom: "18px",
+    padding: "12px 15px",
+    borderRadius: "9px",
+    background: "#fef2f2",
+    border: "1px solid #fecaca",
+    color: "#b91c1c",
+    fontSize: "14px",
+  },
+
+  successMessage: {
+    marginBottom: "18px",
+    padding: "12px 15px",
+    borderRadius: "9px",
+    background: "#f0fdf4",
+    border: "1px solid #bbf7d0",
+    color: "#15803d",
+    fontSize: "14px",
+  },
+
+  bottomActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "10px",
+    marginTop: "20px",
+  },
+
+  cancelButtonLarge: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    border: "1px solid #d1d5db",
+    borderRadius: "10px",
+    padding: "12px 18px",
+    background: "#ffffff",
+    color: "#374151",
+    fontSize: "14px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+
+  saveButtonLarge: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    border: "none",
+    borderRadius: "10px",
+    padding: "12px 18px",
+    background: "#16a34a",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+
+  loadingContainer: {
+    minHeight: "400px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     color: "#6b7280",
-    fontSize: "18px",
+  },
+
+  spinner: {
+    width: "35px",
+    height: "35px",
+    border: "4px solid #e5e7eb",
+    borderTop: "4px solid #2563eb",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    marginBottom: "15px",
+  },
+
+  errorCard: {
+    maxWidth: "500px",
+    margin: "80px auto",
+    padding: "35px",
+    background: "#ffffff",
+    borderRadius: "16px",
+    textAlign: "center",
+    boxShadow: "0 5px 20px rgba(0, 0, 0, 0.06)",
+  },
+
+  primaryButton: {
+    border: "none",
+    borderRadius: "9px",
+    padding: "11px 18px",
+    background: "#2563eb",
+    color: "#ffffff",
+    fontWeight: 600,
+    cursor: "pointer",
+    marginTop: "10px",
+  },
+
+  noLanguages: {
+    color: "#9ca3af",
+    fontSize: "13px",
   },
 };
 
 export default MyProfile;
-
