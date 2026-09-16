@@ -22,6 +22,7 @@ import PostRentalVehicle from "./pages/PostRentalVehicle";
 import RentalVehicles from "./pages/RentalVehicles";
 import RentalBooking from "./pages/RentalBooking";
 import RentalBookingHistory from "./pages/RentalBookingHistory";
+import RentalBookingRequests from "./pages/RentalBookingRequests";
 import MyRentals from "./pages/MyRentals";
 
 import MyProfile from "./pages/MyProfile";
@@ -128,7 +129,9 @@ function App() {
           }
         >
 
-          {/* DASHBOARD */}
+          {/* =========================
+              DASHBOARD
+          ========================= */}
 
           <Route
             path="/dashboard"
@@ -193,6 +196,13 @@ function App() {
           <Route
             path="/rental-booking-history"
             element={<RentalBookingHistory />}
+          />
+
+          {/* RENTAL BOOKING REQUESTS */}
+
+          <Route
+            path="/rental-booking-requests/:rentalId"
+            element={<RentalBookingRequests />}
           />
 
 
