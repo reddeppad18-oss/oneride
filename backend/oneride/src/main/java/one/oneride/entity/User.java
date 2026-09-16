@@ -61,8 +61,6 @@ public class User implements UserDetails {
     @Column(length = 1000)
     private String profilePhotoUrl;
 
-
-
     @Column(length = 500)
     private String aboutMe;
 
@@ -85,21 +83,21 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Language> languages = new ArrayList<>();
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
         return List.of(
-                new SimpleGrantedAuthority(role.name())
+                new SimpleGrantedAuthority(
+                        role != null
+                                ? role.name()
+                                : "RIDER"
+                )
         );
     }
-
 
     @Override
     public String getPassword() {
         return null;
     }
-
 
     /**
      * Spring Security uses the phone number
@@ -110,27 +108,34 @@ public class User implements UserDetails {
         return phoneNumber;
     }
 
-
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
-
 
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-
     @Override
     public boolean isEnabled() {
         return Boolean.TRUE.equals(verified);
+    }
+
+    /*
+     * Explicit getter for profile photo.
+     *
+     * Lombok @Getter should normally generate this method,
+     * but this explicit getter ensures that
+     * user.getProfilePhotoUrl() is available during compilation.
+     */
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
     }
 }
