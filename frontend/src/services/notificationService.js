@@ -1,4 +1,4 @@
-import api from "./axios";
+import api from "../api/axios";
 
 /*
  * =========================
@@ -45,7 +45,7 @@ export const getUnreadCount = async () => {
 
 /*
  * =========================
- * MARK ONE AS READ
+ * MARK ONE NOTIFICATION AS READ
  * =========================
  */
 
@@ -62,7 +62,7 @@ export const markNotificationAsRead = async (
 
 /*
  * =========================
- * MARK ALL AS READ
+ * MARK ALL NOTIFICATIONS AS READ
  * =========================
  */
 
