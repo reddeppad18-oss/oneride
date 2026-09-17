@@ -33,12 +33,13 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 
 
-/* =========================
-   PROTECTED ROUTE
-========================= */
+/*
+ * =========================
+ * PROTECTED ROUTE
+ * =========================
+ */
 
 function ProtectedRoute({ children }) {
-
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -49,16 +50,16 @@ function ProtectedRoute({ children }) {
 }
 
 
-/* =========================
-   APP
-========================= */
+/*
+ * =========================
+ * APP
+ * =========================
+ */
 
 function App() {
-
   const token = localStorage.getItem("token");
 
   return (
-
     <BrowserRouter>
 
       <Routes>
@@ -71,7 +72,10 @@ function App() {
           path="/"
           element={
             token ? (
-              <Navigate to="/dashboard" replace />
+              <Navigate
+                to="/dashboard"
+                replace
+              />
             ) : (
               <Login />
             )
@@ -87,7 +91,10 @@ function App() {
           path="/verify-otp"
           element={
             token ? (
-              <Navigate to="/dashboard" replace />
+              <Navigate
+                to="/dashboard"
+                replace
+              />
             ) : (
               <VerifyOtp />
             )
@@ -216,14 +223,17 @@ function App() {
             element={<Settings />}
           />
 
+
+          {/* =========================
+              NOTIFICATIONS
+          ========================= */}
+
           <Route
-           path="/notifications"
-           element={<Notifications />}
-         />
+            path="/notifications"
+            element={<Notifications />}
+          />
 
         </Route>
-        
-        
 
 
         {/* =========================

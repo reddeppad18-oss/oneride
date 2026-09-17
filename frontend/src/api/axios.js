@@ -7,14 +7,21 @@ const api = axios.create({
   },
 });
 
-// Automatically attach JWT to every API request
+/*
+ * =========================
+ * ATTACH JWT TOKEN
+ * =========================
+ */
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
     if (token) {
       config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${token}`;
+
+      config.headers.Authorization =
+        `Bearer ${token}`;
     }
 
     return config;
@@ -24,14 +31,21 @@ api.interceptors.request.use(
   }
 );
 
-// Handle authentication errors
+
+/*
+ * =========================
+ * RESPONSE INTERCEPTOR
+ * =========================
+ */
+
 api.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    if (error.response?.status === 401 ||
-        error.response?.status === 403) {
-
+    if (
+      error.response?.status === 401 ||
+      error.response?.status === 403
+    ) {
       console.error(
         "Authentication failed:",
         error.response.status
@@ -43,4 +57,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-

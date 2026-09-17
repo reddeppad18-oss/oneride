@@ -1,25 +1,57 @@
 import api from "./axios";
 
-// Get all notifications
+/*
+ * =========================
+ * GET ALL NOTIFICATIONS
+ * =========================
+ */
+
 export const getNotifications = async () => {
   const response = await api.get("/notifications");
+
   return response.data;
 };
 
-// Get unread notifications
+
+/*
+ * =========================
+ * GET UNREAD NOTIFICATIONS
+ * =========================
+ */
+
 export const getUnreadNotifications = async () => {
-  const response = await api.get("/notifications/unread");
+  const response = await api.get(
+    "/notifications/unread"
+  );
+
   return response.data;
 };
 
-// Get unread notification count
+
+/*
+ * =========================
+ * GET UNREAD COUNT
+ * =========================
+ */
+
 export const getUnreadCount = async () => {
-  const response = await api.get("/notifications/unread-count");
+  const response = await api.get(
+    "/notifications/unread-count"
+  );
+
   return response.data;
 };
 
-// Mark one notification as read
-export const markNotificationAsRead = async (notificationId) => {
+
+/*
+ * =========================
+ * MARK ONE AS READ
+ * =========================
+ */
+
+export const markNotificationAsRead = async (
+  notificationId
+) => {
   const response = await api.put(
     `/notifications/${notificationId}/read`
   );
@@ -27,9 +59,17 @@ export const markNotificationAsRead = async (notificationId) => {
   return response.data;
 };
 
-// Mark all notifications as read
+
+/*
+ * =========================
+ * MARK ALL AS READ
+ * =========================
+ */
+
 export const markAllNotificationsAsRead = async () => {
-  const response = await api.put("/notifications/read-all");
+  const response = await api.put(
+    "/notifications/read-all"
+  );
 
   return response.data;
 };

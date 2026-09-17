@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { Bell } from "lucide-react";
 
 import { getUnreadCount } from "../api/notificationService";
@@ -41,12 +45,6 @@ function DashboardLayout() {
   useEffect(() => {
     loadUnreadCount();
 
-    /*
-     * Refresh notification count every
-     * 30 seconds so new notifications
-     * appear without refreshing the page.
-     */
-
     const interval = setInterval(() => {
       loadUnreadCount();
     }, 30000);
@@ -76,7 +74,6 @@ function DashboardLayout() {
 
   const navigateTo = (path) => {
     setActiveMenu(null);
-
     navigate(path);
   };
 
@@ -98,7 +95,6 @@ function DashboardLayout() {
 
   const handleNotifications = () => {
     setActiveMenu(null);
-
     navigate("/notifications");
   };
 
@@ -127,7 +123,6 @@ function DashboardLayout() {
 
         </div>
 
-
         {/* =========================
             NOTIFICATION BUTTON
         ========================= */}
@@ -142,11 +137,9 @@ function DashboardLayout() {
 
           {unreadCount > 0 && (
             <span className="notification-badge">
-
               {unreadCount > 99
                 ? "99+"
                 : unreadCount}
-
             </span>
           )}
 
@@ -154,24 +147,19 @@ function DashboardLayout() {
 
       </header>
 
-
       {/* =========================
           PAGE CONTENT
       ========================= */}
 
       <main className="dashboard-content">
-
         <Outlet />
-
       </main>
-
 
       {/* =========================
           RIDES POPUP
       ========================= */}
 
       {activeMenu === "rides" && (
-
         <div className="bottom-popup">
 
           <button
@@ -202,16 +190,13 @@ function DashboardLayout() {
           </button>
 
         </div>
-
       )}
-
 
       {/* =========================
           RENTALS POPUP
       ========================= */}
 
       {activeMenu === "rentals" && (
-
         <div className="bottom-popup">
 
           <button
@@ -251,16 +236,13 @@ function DashboardLayout() {
           </button>
 
         </div>
-
       )}
-
 
       {/* =========================
           PROFILE POPUP
       ========================= */}
 
       {activeMenu === "profile" && (
-
         <div className="bottom-popup profile-popup">
 
           <button
@@ -299,9 +281,7 @@ function DashboardLayout() {
           </button>
 
         </div>
-
       )}
-
 
       {/* =========================
           BOTTOM NAVIGATION
@@ -330,7 +310,6 @@ function DashboardLayout() {
           </span>
         </button>
 
-
         {/* RIDES */}
 
         <button
@@ -351,7 +330,6 @@ function DashboardLayout() {
             Rides
           </span>
         </button>
-
 
         {/* RENTALS */}
 
@@ -374,7 +352,6 @@ function DashboardLayout() {
           </span>
         </button>
 
-
         {/* BOOKINGS */}
 
         <button
@@ -395,7 +372,6 @@ function DashboardLayout() {
             Bookings
           </span>
         </button>
-
 
         {/* PROFILE */}
 
@@ -425,4 +401,3 @@ function DashboardLayout() {
 }
 
 export default DashboardLayout;
-
