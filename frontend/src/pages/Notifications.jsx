@@ -32,3 +32,5 @@ export const markAllNotificationsAsRead = async () => {
 
   return response.data;
 };
+
+export default Notifications;
