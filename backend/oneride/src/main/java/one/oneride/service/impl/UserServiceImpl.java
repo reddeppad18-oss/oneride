@@ -1,17 +1,20 @@
 package one.oneride.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
+import one.oneride.dto.SettingsResponse;
 import one.oneride.dto.UpdateProfileRequest;
+import one.oneride.dto.UpdateSettingsRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.entity.Language;
 import one.oneride.entity.User;
 import one.oneride.repository.RatingRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.UserService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +36,10 @@ public class UserServiceImpl implements UserService {
                     User user = User.builder()
                             .phoneNumber(phoneNumber)
                             .verified(true)
+                            .notificationsEnabled(true)
+                            .bookingNotificationsEnabled(true)
+                            .rideNotificationsEnabled(true)
+                            .language("English")
                             .build();
 
                     return userRepository.save(user);
@@ -85,15 +92,6 @@ public class UserServiceImpl implements UserService {
                 request.getProfilePhotoUrl()
         );
 
-        /*
-         * Languages are not updated here because
-         * User.languages is List<Language>, while
-         * UpdateProfileRequest.languages is List<String>.
-         *
-         * We can add language management separately
-         * using Language entities.
-         */
-
         userRepository.save(user);
     }
 
@@ -113,6 +111,120 @@ public class UserServiceImpl implements UserService {
         return buildUserResponse(user);
     }
 
+    /*
+     * GET SETTINGS
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public SettingsResponse getSettings(
+            String phoneNumber) {
+
+        User user = userRepository
+                .findByPhoneNumber(phoneNumber)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "User not found"
+                        )
+                );
+
+        /*
+         * Defaults are applied for existing users
+         * whose settings columns may contain NULL.
+         */
+
+        Boolean notificationsEnabled =
+                user.getNotificationsEnabled() != null
+                        ? user.getNotificationsEnabled()
+                        : true;
+
+        Boolean bookingNotificationsEnabled =
+                user.getBookingNotificationsEnabled() != null
+                        ? user.getBookingNotificationsEnabled()
+                        : true;
+
+        Boolean rideNotificationsEnabled =
+                user.getRideNotificationsEnabled() != null
+                        ? user.getRideNotificationsEnabled()
+                        : true;
+
+        String language =
+                user.getLanguage() != null
+                        && !user.getLanguage().isBlank()
+                        ? user.getLanguage()
+                        : "English";
+
+        return new SettingsResponse(
+                notificationsEnabled,
+                bookingNotificationsEnabled,
+                rideNotificationsEnabled,
+                language
+        );
+    }
+
+    /*
+     * UPDATE SETTINGS
+     */
+    @Override
+    @Transactional
+    public void updateSettings(
+            String phoneNumber,
+            UpdateSettingsRequest request) {
+
+        User user = userRepository
+                .findByPhoneNumber(phoneNumber)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "User not found"
+                        )
+                );
+
+        /*
+         * Master notification setting
+         */
+        if (request.getNotificationsEnabled() != null) {
+
+            user.setNotificationsEnabled(
+                    request.getNotificationsEnabled()
+            );
+        }
+
+        /*
+         * Booking notifications
+         */
+        if (request.getBookingNotificationsEnabled() != null) {
+
+            user.setBookingNotificationsEnabled(
+                    request.getBookingNotificationsEnabled()
+            );
+        }
+
+        /*
+         * Ride notifications
+         */
+        if (request.getRideNotificationsEnabled() != null) {
+
+            user.setRideNotificationsEnabled(
+                    request.getRideNotificationsEnabled()
+            );
+        }
+
+        /*
+         * Language
+         */
+        if (request.getLanguage() != null
+                && !request.getLanguage().isBlank()) {
+
+            user.setLanguage(
+                    request.getLanguage()
+            );
+        }
+
+        userRepository.save(user);
+    }
+
+    /*
+     * BUILD USER RESPONSE
+     */
     private UserResponse buildUserResponse(
             User user) {
 
@@ -148,16 +260,8 @@ public class UserServiceImpl implements UserService {
                 .orElse(0.0);
 
         /*
-         * Convert:
-         *
-         * List<Language>
-         *
-         * into:
-         *
-         * List<String>
-         *
-         * because UserResponse expects
-         * List<String> languages.
+         * Convert List<Language>
+         * into List<String>.
          */
         List<String> languageNames =
                 user.getLanguages()

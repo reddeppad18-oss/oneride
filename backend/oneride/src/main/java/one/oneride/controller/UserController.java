@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import one.oneride.dto.MessageResponse;
+import one.oneride.dto.SettingsResponse;
 import one.oneride.dto.UpdateProfileRequest;
+import one.oneride.dto.UpdateSettingsRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.service.UserService;
 
@@ -24,6 +26,9 @@ public class UserController {
 
     private final UserService userService;
 
+    /*
+     * Get current user's profile
+     */
     @GetMapping("/me")
     public UserResponse getCurrentUser(
             Authentication authentication
@@ -37,6 +42,9 @@ public class UserController {
         );
     }
 
+    /*
+     * Get public profile
+     */
     @GetMapping("/public/{userId}")
     public UserResponse getPublicProfile(
             @PathVariable Long userId
@@ -47,6 +55,9 @@ public class UserController {
         );
     }
 
+    /*
+     * Update current user's profile
+     */
     @PutMapping("/profile")
     public MessageResponse updateProfile(
             Authentication authentication,
@@ -64,6 +75,46 @@ public class UserController {
         return MessageResponse.builder()
                 .message(
                         "Profile updated successfully"
+                )
+                .build();
+    }
+
+    /*
+     * Get current user's Settings
+     */
+    @GetMapping("/settings")
+    public SettingsResponse getSettings(
+            Authentication authentication
+    ) {
+
+        String phoneNumber =
+                authentication.getName();
+
+        return userService.getSettings(
+                phoneNumber
+        );
+    }
+
+    /*
+     * Update current user's Settings
+     */
+    @PutMapping("/settings")
+    public MessageResponse updateSettings(
+            Authentication authentication,
+            @Valid @RequestBody UpdateSettingsRequest request
+    ) {
+
+        String phoneNumber =
+                authentication.getName();
+
+        userService.updateSettings(
+                phoneNumber,
+                request
+        );
+
+        return MessageResponse.builder()
+                .message(
+                        "Settings updated successfully"
                 )
                 .build();
     }

@@ -65,15 +65,25 @@ public class User implements UserDetails {
     private String aboutMe;
 
     /*
-     * Languages spoken by the user
-     *
-     * One user can speak multiple languages.
-     * One language can belong to multiple users.
-     *
-     * Example:
-     *
-     * Ramesh -> Telugu, English
+     * User Settings
      */
+
+    @Builder.Default
+    private Boolean notificationsEnabled = true;
+
+    @Builder.Default
+    private Boolean bookingNotificationsEnabled = true;
+
+    @Builder.Default
+    private Boolean rideNotificationsEnabled = true;
+
+    @Builder.Default
+    private String language = "English";
+
+    /*
+     * Languages spoken by the user
+     */
+
     @ManyToMany
     @JoinTable(
             name = "user_languages",
@@ -85,6 +95,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+
         return List.of(
                 new SimpleGrantedAuthority(
                         role != null
@@ -99,10 +110,6 @@ public class User implements UserDetails {
         return null;
     }
 
-    /**
-     * Spring Security uses the phone number
-     * as the username.
-     */
     @Override
     public String getUsername() {
         return phoneNumber;
@@ -128,13 +135,6 @@ public class User implements UserDetails {
         return Boolean.TRUE.equals(verified);
     }
 
-    /*
-     * Explicit getter for profile photo.
-     *
-     * Lombok @Getter should normally generate this method,
-     * but this explicit getter ensures that
-     * user.getProfilePhotoUrl() is available during compilation.
-     */
     public String getProfilePhotoUrl() {
         return profilePhotoUrl;
     }
