@@ -29,6 +29,8 @@ import MyProfile from "./pages/MyProfile";
 import MyActivity from "./pages/MyActivity";
 import UserProfile from "./pages/UserProfile";
 
+import Settings from "./pages/Settings";
+
 
 /* =========================
    PROTECTED ROUTE
@@ -43,32 +45,6 @@ function ProtectedRoute({ children }) {
   }
 
   return children;
-}
-
-
-/* =========================
-   SETTINGS
-========================= */
-
-function Settings() {
-
-  return (
-
-    <div className="page-container">
-
-      <div className="form-card">
-
-        <h1>Settings</h1>
-
-        <p className="page-description">
-          Application settings will be available here.
-        </p>
-
-      </div>
-
-    </div>
-
-  );
 }
 
 
@@ -199,8 +175,6 @@ function App() {
             element={<RentalBookingHistory />}
           />
 
-          {/* RENTAL BOOKING REQUESTS */}
-
           <Route
             path="/rental-booking-requests/:rentalId"
             element={<RentalBookingRequests />}
@@ -221,14 +195,20 @@ function App() {
             element={<MyActivity />}
           />
 
+
           {/* =========================
-              PUBLIC DRIVER / OWNER PROFILE
+              PUBLIC USER PROFILE
           ========================= */}
 
           <Route
             path="/user-profile/:userId"
             element={<UserProfile />}
           />
+
+
+          {/* =========================
+              SETTINGS
+          ========================= */}
 
           <Route
             path="/settings"
@@ -252,9 +232,7 @@ function App() {
       </Routes>
 
     </BrowserRouter>
-
   );
 }
 
 export default App;
-

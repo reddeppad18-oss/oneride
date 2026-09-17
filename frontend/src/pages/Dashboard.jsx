@@ -171,6 +171,33 @@ function Dashboard() {
           </a>
 
         </div>
+        {/* =========================
+    SETTINGS
+========================= */}
+
+<div className="dashboard-card">
+
+  <div className="card-icon">
+    ⚙️
+  </div>
+
+  <h3>
+    Settings
+  </h3>
+
+  <p>
+    Manage your Alrides preferences,
+    notifications, and account settings.
+  </p>
+
+  <a
+    href="/settings"
+    className="dashboard-card-button"
+  >
+    Open Settings
+  </a>
+
+</div>
 
 
       </section>
