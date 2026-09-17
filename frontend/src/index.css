@@ -1,3 +1,7 @@
+/* =========================================================
+   GLOBAL
+========================================================= */
+
 * {
   box-sizing: border-box;
 }
@@ -11,9 +15,19 @@ body,
   min-height: 100%;
 }
 
+html {
+  color-scheme: light dark;
+}
+
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
+
+  background-color: var(--app-bg);
+  color: var(--app-text);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
 button,
@@ -23,9 +37,352 @@ textarea {
   font-family: inherit;
 }
 
+
+/* =========================================================
+   ALRIDES THEME VARIABLES
+========================================================= */
+
 /* =========================
-   LOGIN
+   DEFAULT / LIGHT
 ========================= */
+
+:root {
+  --app-bg: #f4f6f8;
+  --app-card: #ffffff;
+  --app-text: #1f2933;
+  --app-secondary: #667085;
+
+  --app-border: #e5e7eb;
+  --app-input-border: #d0d5dd;
+  --app-input-bg: #ffffff;
+
+  --app-primary: #1976d2;
+  --app-primary-hover: #125ea8;
+
+  --app-header: #173b5e;
+  --app-header-text: #ffffff;
+  --app-header-subtitle: #c9d7e4;
+
+  --app-hover: #f4f8fc;
+
+  --app-danger: #c53b3b;
+  --app-danger-hover: #a82f2f;
+
+  --app-success: #198754;
+  --app-error: #c62828;
+
+  --app-shadow: rgba(0, 0, 0, 0.08);
+  --app-shadow-strong: rgba(0, 0, 0, 0.18);
+
+  /* Settings */
+  --settings-bg: #f7f8fa;
+  --settings-card: #ffffff;
+  --settings-text: #1f2937;
+  --settings-secondary: #6b7280;
+  --settings-border: #e5e7eb;
+  --settings-icon-bg: #eef2ff;
+  --settings-primary: #4f46e5;
+  --settings-shadow: rgba(0, 0, 0, 0.06);
+
+  --settings-input-bg: #ffffff;
+  --settings-input-border: #d1d5db;
+
+  --settings-theme-option-bg: #ffffff;
+  --settings-theme-selected-bg: #eef2ff;
+
+  --settings-success-bg: #f0fdf4;
+  --settings-success-border: #bbf7d0;
+  --settings-success-text: #15803d;
+
+  --settings-error-bg: #fef2f2;
+  --settings-error-border: #fecaca;
+  --settings-error-text: #b91c1c;
+
+  --settings-info-bg: #eff6ff;
+  --settings-info-border: #bfdbfe;
+  --settings-info-text: #1d4ed8;
+
+  --settings-danger: #dc2626;
+  --settings-danger-bg: #fef2f2;
+  --settings-danger-border: #fecaca;
+
+  --settings-secondary-icon: #9ca3af;
+}
+
+
+/* =========================
+   LIGHT MODE
+========================= */
+
+html[data-theme="light"] {
+  --app-bg: #f4f6f8;
+  --app-card: #ffffff;
+  --app-text: #1f2933;
+  --app-secondary: #667085;
+
+  --app-border: #e5e7eb;
+  --app-input-border: #d0d5dd;
+  --app-input-bg: #ffffff;
+
+  --app-primary: #1976d2;
+  --app-primary-hover: #125ea8;
+
+  --app-header: #173b5e;
+  --app-header-text: #ffffff;
+  --app-header-subtitle: #c9d7e4;
+
+  --app-hover: #f4f8fc;
+
+  --app-danger: #c53b3b;
+  --app-danger-hover: #a82f2f;
+
+  --app-success: #198754;
+  --app-error: #c62828;
+
+  --app-shadow: rgba(0, 0, 0, 0.08);
+  --app-shadow-strong: rgba(0, 0, 0, 0.18);
+
+  --settings-bg: #f7f8fa;
+  --settings-card: #ffffff;
+  --settings-text: #1f2937;
+  --settings-secondary: #6b7280;
+  --settings-border: #e5e7eb;
+  --settings-icon-bg: #eef2ff;
+  --settings-primary: #4f46e5;
+  --settings-shadow: rgba(0, 0, 0, 0.06);
+
+  --settings-input-bg: #ffffff;
+  --settings-input-border: #d1d5db;
+
+  --settings-theme-option-bg: #ffffff;
+  --settings-theme-selected-bg: #eef2ff;
+
+  --settings-success-bg: #f0fdf4;
+  --settings-success-border: #bbf7d0;
+  --settings-success-text: #15803d;
+
+  --settings-error-bg: #fef2f2;
+  --settings-error-border: #fecaca;
+  --settings-error-text: #b91c1c;
+
+  --settings-info-bg: #eff6ff;
+  --settings-info-border: #bfdbfe;
+  --settings-info-text: #1d4ed8;
+
+  --settings-danger: #dc2626;
+  --settings-danger-bg: #fef2f2;
+  --settings-danger-border: #fecaca;
+
+  --settings-secondary-icon: #9ca3af;
+}
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+html[data-theme="dark"] {
+  --app-bg: #111827;
+  --app-card: #1f2937;
+  --app-text: #f9fafb;
+  --app-secondary: #9ca3af;
+
+  --app-border: #374151;
+  --app-input-border: #4b5563;
+  --app-input-bg: #111827;
+
+  --app-primary: #60a5fa;
+  --app-primary-hover: #3b82f6;
+
+  --app-header: #0b2239;
+  --app-header-text: #ffffff;
+  --app-header-subtitle: #b8c7d6;
+
+  --app-hover: #374151;
+
+  --app-danger: #f87171;
+  --app-danger-hover: #ef4444;
+
+  --app-success: #4ade80;
+  --app-error: #f87171;
+
+  --app-shadow: rgba(0, 0, 0, 0.25);
+  --app-shadow-strong: rgba(0, 0, 0, 0.45);
+
+  --settings-bg: #111827;
+  --settings-card: #1f2937;
+  --settings-text: #f9fafb;
+  --settings-secondary: #9ca3af;
+  --settings-border: #374151;
+  --settings-icon-bg: #312e81;
+  --settings-primary: #818cf8;
+  --settings-shadow: rgba(0, 0, 0, 0.25);
+
+  --settings-input-bg: #111827;
+  --settings-input-border: #4b5563;
+
+  --settings-theme-option-bg: #1f2937;
+  --settings-theme-selected-bg: #312e81;
+
+  --settings-success-bg: #14532d;
+  --settings-success-border: #166534;
+  --settings-success-text: #bbf7d0;
+
+  --settings-error-bg: #450a0a;
+  --settings-error-border: #991b1b;
+  --settings-error-text: #fecaca;
+
+  --settings-info-bg: #172554;
+  --settings-info-border: #1e40af;
+  --settings-info-text: #bfdbfe;
+
+  --settings-danger: #f87171;
+  --settings-danger-bg: #450a0a;
+  --settings-danger-border: #991b1b;
+
+  --settings-secondary-icon: #9ca3af;
+}
+
+
+/* =========================
+   SYSTEM MODE
+========================= */
+
+html[data-theme="system"] {
+  --app-bg: #f4f6f8;
+  --app-card: #ffffff;
+  --app-text: #1f2933;
+  --app-secondary: #667085;
+
+  --app-border: #e5e7eb;
+  --app-input-border: #d0d5dd;
+  --app-input-bg: #ffffff;
+
+  --app-primary: #1976d2;
+  --app-primary-hover: #125ea8;
+
+  --app-header: #173b5e;
+  --app-header-text: #ffffff;
+  --app-header-subtitle: #c9d7e4;
+
+  --app-hover: #f4f8fc;
+
+  --app-danger: #c53b3b;
+  --app-danger-hover: #a82f2f;
+
+  --app-success: #198754;
+  --app-error: #c62828;
+
+  --app-shadow: rgba(0, 0, 0, 0.08);
+  --app-shadow-strong: rgba(0, 0, 0, 0.18);
+
+  --settings-bg: #f7f8fa;
+  --settings-card: #ffffff;
+  --settings-text: #1f2937;
+  --settings-secondary: #6b7280;
+  --settings-border: #e5e7eb;
+  --settings-icon-bg: #eef2ff;
+  --settings-primary: #4f46e5;
+  --settings-shadow: rgba(0, 0, 0, 0.06);
+
+  --settings-input-bg: #ffffff;
+  --settings-input-border: #d1d5db;
+
+  --settings-theme-option-bg: #ffffff;
+  --settings-theme-selected-bg: #eef2ff;
+
+  --settings-success-bg: #f0fdf4;
+  --settings-success-border: #bbf7d0;
+  --settings-success-text: #15803d;
+
+  --settings-error-bg: #fef2f2;
+  --settings-error-border: #fecaca;
+  --settings-error-text: #b91c1c;
+
+  --settings-info-bg: #eff6ff;
+  --settings-info-border: #bfdbfe;
+  --settings-info-text: #1d4ed8;
+
+  --settings-danger: #dc2626;
+  --settings-danger-bg: #fef2f2;
+  --settings-danger-border: #fecaca;
+
+  --settings-secondary-icon: #9ca3af;
+}
+
+
+/* =========================================================
+   SYSTEM DARK MODE
+========================================================= */
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --app-bg: #111827;
+    --app-card: #1f2937;
+    --app-text: #f9fafb;
+    --app-secondary: #9ca3af;
+
+    --app-border: #374151;
+    --app-input-border: #4b5563;
+    --app-input-bg: #111827;
+
+    --app-primary: #60a5fa;
+    --app-primary-hover: #3b82f6;
+
+    --app-header: #0b2239;
+    --app-header-text: #ffffff;
+    --app-header-subtitle: #b8c7d6;
+
+    --app-hover: #374151;
+
+    --app-danger: #f87171;
+    --app-danger-hover: #ef4444;
+
+    --app-success: #4ade80;
+    --app-error: #f87171;
+
+    --app-shadow: rgba(0, 0, 0, 0.25);
+    --app-shadow-strong: rgba(0, 0, 0, 0.45);
+
+    --settings-bg: #111827;
+    --settings-card: #1f2937;
+    --settings-text: #f9fafb;
+    --settings-secondary: #9ca3af;
+    --settings-border: #374151;
+    --settings-icon-bg: #312e81;
+    --settings-primary: #818cf8;
+    --settings-shadow: rgba(0, 0, 0, 0.25);
+
+    --settings-input-bg: #111827;
+    --settings-input-border: #4b5563;
+
+    --settings-theme-option-bg: #1f2937;
+    --settings-theme-selected-bg: #312e81;
+
+    --settings-success-bg: #14532d;
+    --settings-success-border: #166534;
+    --settings-success-text: #bbf7d0;
+
+    --settings-error-bg: #450a0a;
+    --settings-error-border: #991b1b;
+    --settings-error-text: #fecaca;
+
+    --settings-info-bg: #172554;
+    --settings-info-border: #1e40af;
+    --settings-info-text: #bfdbfe;
+
+    --settings-danger: #f87171;
+    --settings-danger-bg: #450a0a;
+    --settings-danger-border: #991b1b;
+
+    --settings-secondary-icon: #9ca3af;
+  }
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
 
 .login-container {
   min-height: 100vh;
@@ -33,18 +390,28 @@ textarea {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f5f5f5;
+
+  background: var(--app-bg);
+
   padding: 20px;
 }
 
 .login-card {
   width: 350px;
   max-width: 100%;
+
   padding: 30px;
-  background: white;
+
+  background: var(--app-card);
+
   border-radius: 10px;
+
   text-align: center;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+
+  box-shadow:
+    0 0 15px var(--app-shadow);
+
+  color: var(--app-text);
 }
 
 .login-card h1 {
@@ -52,109 +419,167 @@ textarea {
 }
 
 .login-card p {
-  color: gray;
+  color: var(--app-secondary);
 }
 
 .login-card input {
   width: 100%;
+
   padding: 12px;
+
   margin-top: 20px;
+
   box-sizing: border-box;
+
   font-size: 16px;
+
+  background: var(--app-input-bg);
+  color: var(--app-text);
+
+  border: 1px solid var(--app-input-border);
+
+  border-radius: 5px;
 }
 
 .login-card button {
   width: 100%;
+
   padding: 12px;
+
   margin-top: 20px;
-  background: #1976d2;
+
+  background: var(--app-primary);
+
   color: white;
+
   border: none;
+
   border-radius: 5px;
+
   font-size: 16px;
+
   cursor: pointer;
 }
 
 .login-card button:hover {
-  background: #125ea8;
+  background: var(--app-primary-hover);
 }
 
-/* =========================
+
+/* =========================================================
    DASHBOARD LAYOUT
-========================= */
+========================================================= */
 
 .dashboard-layout {
   width: 100%;
   min-height: 100vh;
-  background-color: #f4f6f8;
+
+  background-color: var(--app-bg);
+
   overflow-x: hidden;
+
   padding-bottom: 85px;
+
+  color: var(--app-text);
 }
 
-/* =========================
+
+/* =========================================================
    APP HEADER
-========================= */
+========================================================= */
 
 .mobile-app-header {
   position: sticky;
+
   top: 0;
+
   z-index: 100;
+
   width: 100%;
+
   height: 72px;
+
   display: flex;
+
   align-items: center;
+
   padding: 0 30px;
-  background-color: #173b5e;
-  color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+
+  background-color: var(--app-header);
+
+  color: var(--app-header-text);
+
+  box-shadow:
+    0 2px 10px var(--app-shadow);
 }
 
 .app-brand {
   display: flex;
+
   align-items: center;
+
   gap: 12px;
 }
 
 .app-logo {
   width: 42px;
   height: 42px;
+
   display: flex;
+
   align-items: center;
   justify-content: center;
+
   border-radius: 50%;
+
   background-color: white;
+
   color: #173b5e;
+
   font-size: 22px;
+
   font-weight: 700;
 }
 
 .app-brand h2 {
   margin: 0;
+
   font-size: 20px;
 }
 
 .app-brand span {
   display: block;
+
   margin-top: 2px;
+
   font-size: 11px;
-  color: #c9d7e4;
+
+  color: var(--app-header-subtitle);
 }
 
-/* =========================
+
+/* =========================================================
    DASHBOARD CONTENT
-========================= */
+========================================================= */
 
 .dashboard-content {
   width: 100%;
+
   min-height: calc(100vh - 72px);
+
   padding: 35px;
+
   box-sizing: border-box;
+
   overflow-x: hidden;
+
+  color: var(--app-text);
 }
 
-/* =========================
+
+/* =========================================================
    DASHBOARD HEADER
-========================= */
+========================================================= */
 
 .dashboard-header {
   margin-bottom: 30px;
@@ -162,154 +587,238 @@ textarea {
 
 .dashboard-header h1 {
   margin: 0;
-  color: #1f2933;
+
+  color: var(--app-text);
 }
 
 .dashboard-header p {
-  color: #667085;
+  color: var(--app-secondary);
 }
 
-/* =========================
+
+/* =========================================================
    DASHBOARD CARDS
-========================= */
+========================================================= */
 
 .dashboard-cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
+
+  grid-template-columns:
+    repeat(3, minmax(220px, 1fr));
+
   gap: 20px;
+
   width: 100%;
 }
 
 .dashboard-card {
   position: relative;
+
   padding: 25px;
+
   border-radius: 12px;
-  background-color: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+
+  background-color: var(--app-card);
+
+  box-shadow:
+    0 4px 15px var(--app-shadow);
+
   min-width: 0;
+
+  color: var(--app-text);
 }
 
 .card-icon {
   width: 48px;
   height: 48px;
+
   display: flex;
+
   align-items: center;
   justify-content: center;
+
   margin-bottom: 15px;
+
   border-radius: 12px;
-  background-color: #eef5fb;
+
+  background-color: var(--app-hover);
+
   font-size: 24px;
 }
 
 .dashboard-card h3 {
   margin-top: 0;
-  color: #173b5e;
+
+  color: var(--app-header);
 }
 
 .dashboard-card p {
   min-height: 65px;
-  color: #667085;
+
+  color: var(--app-secondary);
+
   line-height: 1.5;
 }
 
 .dashboard-card button {
   padding: 10px 18px;
+
   border: none;
+
   border-radius: 6px;
-  background-color: #1976d2;
+
+  background-color: var(--app-primary);
+
   color: white;
+
   cursor: pointer;
 }
 
 .dashboard-card button:hover {
-  background-color: #125ea8;
+  background-color: var(--app-primary-hover);
 }
 
-/* =========================
+
+/* =========================================================
    BOTTOM NAVIGATION
-========================= */
+========================================================= */
 
 .bottom-navigation {
   position: fixed;
+
   left: 0;
   bottom: 0;
+
   z-index: 1000;
+
   width: 100%;
+
   height: 72px;
+
   display: flex;
+
   align-items: stretch;
+
   justify-content: space-around;
-  background-color: white;
-  border-top: 1px solid #e5e7eb;
-  box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.08);
+
+  background-color: var(--app-card);
+
+  border-top:
+    1px solid var(--app-border);
+
+  box-shadow:
+    0 -3px 15px var(--app-shadow);
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .bottom-nav-item {
   flex: 1;
+
   max-width: 150px;
+
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
+
   justify-content: center;
+
   gap: 4px;
+
   border: none;
+
   background: transparent;
-  color: #667085;
+
+  color: var(--app-secondary);
+
   font-size: 11px;
+
   cursor: pointer;
 }
 
 .bottom-nav-item:hover {
-  color: #1976d2;
+  color: var(--app-primary);
 }
 
 .bottom-nav-item.active {
-  color: #1976d2;
+  color: var(--app-primary);
+
   font-weight: 700;
 }
 
 .nav-icon {
   font-size: 23px;
+
   line-height: 1;
 }
 
-/* =========================
+
+/* =========================================================
    BOTTOM POPUP MENUS
-========================= */
+========================================================= */
 
 .bottom-popup {
   position: fixed;
+
   left: 50%;
+
   bottom: 82px;
+
   z-index: 999;
+
   width: min(420px, calc(100% - 30px));
+
   transform: translateX(-50%);
+
   display: grid;
+
   grid-template-columns: 1fr 1fr;
+
   gap: 10px;
+
   padding: 15px;
+
   border-radius: 15px;
-  background-color: white;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+
+  background-color: var(--app-card);
+
+  box-shadow:
+    0 8px 30px var(--app-shadow-strong);
 }
 
 .bottom-popup button {
   min-height: 70px;
+
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
+
   justify-content: center;
+
   gap: 6px;
-  border: 1px solid #e5e7eb;
+
+  border:
+    1px solid var(--app-border);
+
   border-radius: 10px;
-  background-color: white;
-  color: #173b5e;
+
+  background-color: var(--app-card);
+
+  color: var(--app-header);
+
   font-size: 13px;
+
   cursor: pointer;
 }
 
 .bottom-popup button:hover {
-  background-color: #f4f8fc;
+  background-color: var(--app-hover);
 }
 
 .bottom-popup button span {
@@ -321,209 +830,304 @@ textarea {
 }
 
 .bottom-popup .popup-logout {
-  color: #c53b3b;
+  color: var(--app-danger);
 }
 
-/* =========================
+
+/* =========================================================
    PAGE CONTAINER
-========================= */
+========================================================= */
 
 .page-container {
   min-height: 100%;
+
   padding: 40px;
-  background-color: #f4f6f8;
+
+  background-color: var(--app-bg);
+
   box-sizing: border-box;
+
+  color: var(--app-text);
 }
 
-/* =========================
+
+/* =========================================================
    FORM CARD
-========================= */
+========================================================= */
 
 .form-card {
   width: 100%;
+
   max-width: 900px;
+
   margin: 0 auto;
+
   padding: 30px;
+
   border-radius: 12px;
-  background-color: white;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+
+  background-color: var(--app-card);
+
+  box-shadow:
+    0 4px 18px var(--app-shadow);
+
+  color: var(--app-text);
 }
 
 .form-card h1 {
   margin-top: 0;
-  color: #173b5e;
+
+  color: var(--app-header);
 }
 
 .page-description {
   margin-bottom: 25px;
-  color: #667085;
+
+  color: var(--app-secondary);
 }
 
-/* =========================
+
+/* =========================================================
    FORM GRID
-========================= */
+========================================================= */
 
 .form-grid {
   display: grid;
+
   grid-template-columns: 1fr 1fr;
+
   gap: 20px;
 }
 
 .form-group {
   display: flex;
+
   flex-direction: column;
+
   margin-bottom: 20px;
 }
 
 .form-group label {
   margin-bottom: 7px;
+
   font-weight: 600;
-  color: #344054;
+
+  color: var(--app-text);
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
+
   padding: 12px;
-  border: 1px solid #d0d5dd;
+
+  border:
+    1px solid var(--app-input-border);
+
   border-radius: 7px;
+
   font-size: 15px;
+
   box-sizing: border-box;
+
+  background-color: var(--app-input-bg);
+
+  color: var(--app-text);
 }
 
 .form-group textarea {
   resize: vertical;
 }
 
-/* =========================
+
+/* =========================================================
    BUTTONS
-========================= */
+========================================================= */
 
 .primary-button {
   padding: 12px 24px;
+
   border: none;
+
   border-radius: 7px;
-  background-color: #1976d2;
+
+  background-color: var(--app-primary);
+
   color: white;
+
   font-size: 16px;
+
   cursor: pointer;
 }
 
 .primary-button:hover {
-  background-color: #125ea8;
+  background-color: var(--app-primary-hover);
 }
 
 .primary-button:disabled {
   opacity: 0.7;
+
   cursor: not-allowed;
 }
 
-/* =========================
+
+/* =========================================================
    MESSAGES
-========================= */
+========================================================= */
 
 .success-message {
   margin-top: 15px;
-  color: #198754;
+
+  color: var(--app-success);
+
   font-weight: 600;
 }
 
 .error-message {
   margin-top: 15px;
-  color: #c62828;
+
+  color: var(--app-error);
+
   font-weight: 600;
 }
 
-/* =========================
+
+/* =========================================================
    MY RIDES
-========================= */
+========================================================= */
 
 .my-rides-list {
   display: flex;
+
   flex-direction: column;
+
   gap: 32px;
+
   margin-top: 20px;
 }
 
 .ride-action .primary-button {
   padding: 8px 14px;
+
   font-size: 13px;
+
   border-radius: 6px;
 }
 
-/* =========================
+
+/* =========================================================
    BOOKINGS
-========================= */
+========================================================= */
 
 .booking-list {
   display: flex;
+
   flex-direction: column;
+
   gap: 32px;
+
   margin-top: 20px;
 }
 
 .booking-card {
   width: 100%;
-  background: #ffffff;
-  border: 1px solid #dddddd;
+
+  background: var(--app-card);
+
+  border:
+    1px solid var(--app-border);
+
   border-radius: 10px;
+
   overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+
+  box-shadow:
+    0 3px 10px var(--app-shadow);
+
+  color: var(--app-text);
 }
 
 .booking-row {
   display: flex;
+
   align-items: center;
+
   gap: 6px;
+
   padding: 15px 20px;
-  border-bottom: 1px solid #e5e5e5;
+
+  border-bottom:
+    1px solid var(--app-border);
+
   min-width: 0;
 }
 
 .booking-row strong {
   font-weight: 700;
-  color: #222222;
+
+  color: var(--app-text);
+
   white-space: nowrap;
 }
 
 .booking-row span {
   font-weight: 400;
-  color: #555555;
+
+  color: var(--app-secondary);
+
   overflow-wrap: anywhere;
 }
 
 .booking-actions {
   display: flex;
+
   justify-content: flex-end;
+
   gap: 10px;
+
   padding: 14px 20px;
 }
 
 .booking-button {
   padding: 8px 14px;
+
   font-size: 13px;
+
   border-radius: 6px;
 }
 
-/* =========================
+
+/* =========================================================
    MY BOOKINGS
-========================= */
+========================================================= */
 
 .my-bookings-list {
   display: flex;
+
   flex-direction: column;
+
   gap: 32px;
+
   margin-top: 20px;
 }
 
 .my-booking-card {
   width: 100%;
-  background: #ffffff;
-  border: 1px solid #dddddd;
+
+  background: var(--app-card);
+
+  border:
+    1px solid var(--app-border);
+
   border-radius: 10px;
+
   overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+
+  box-shadow:
+    0 3px 10px var(--app-shadow);
+
+  color: var(--app-text);
 }
 
 .booking-status {
@@ -532,72 +1136,104 @@ textarea {
 
 .booking-action {
   display: flex;
+
   justify-content: flex-end;
+
   padding: 12px 20px;
 }
 
 .cancel-booking-button {
   display: inline-block;
+
   padding: 8px 14px;
+
   border: none;
+
   border-radius: 6px;
-  background-color: #c53b3b;
+
+  background-color: var(--app-danger);
+
   color: #ffffff;
+
   font-size: 13px;
+
   cursor: pointer;
 }
 
 .cancel-booking-button:hover {
-  background-color: #a82f2f;
+  background-color: var(--app-danger-hover);
 }
 
-/* =========================
+
+/* =========================================================
    MY RENTAL BOOKINGS
-========================= */
+========================================================= */
 
 .my-rental-bookings-list {
   display: flex;
+
   flex-direction: column;
+
   gap: 32px;
+
   margin-top: 25px;
 }
 
 .my-rental-booking-card {
   width: 100%;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
+
+  background-color: var(--app-card);
+
+  border:
+    1px solid var(--app-border);
+
   border-radius: 10px;
+
   padding: 25px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+
+  box-shadow:
+    0 3px 10px var(--app-shadow);
+
+  color: var(--app-text);
 }
 
 .my-rental-booking-card h2 {
   margin-top: 0;
+
   margin-bottom: 20px;
-  color: #173b5e;
+
+  color: var(--app-header);
 }
 
 .my-rental-booking-card p {
   margin: 12px 0;
-  color: #555555;
+
+  color: var(--app-secondary);
+
   line-height: 1.5;
 }
 
 .my-rental-booking-card p strong {
-  color: #222222;
+  color: var(--app-text);
+
   font-weight: 700;
 }
 
 .rental-booking-actions {
   margin-top: 22px;
+
   padding-top: 15px;
-  border-top: 1px solid #e5e5e5;
+
+  border-top:
+    1px solid var(--app-border);
 }
 
 .booking-info {
   font-size: 14px;
+
   font-weight: 600;
-  color: #667085;
+
+  color: var(--app-secondary);
 }
 
 .rental-booking-status {
@@ -609,58 +1245,500 @@ textarea {
 }
 
 .rental-booking-status.confirmed {
-  color: #198754;
+  color: var(--app-success);
 }
 
 .rental-booking-status.cancelled {
-  color: #c53b3b;
+  color: var(--app-danger);
 }
 
 .rental-booking-status.rejected {
-  color: #c53b3b;
+  color: var(--app-danger);
 }
 
 .rental-booking-status.completed {
-  color: #1976d2;
+  color: var(--app-primary);
 }
 
-/* =========================
+
+/* =========================================================
+   NOTIFICATION HEADER BUTTON
+========================================================= */
+
+.notification-header-button {
+  position: relative;
+
+  width: 42px;
+  height: 42px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  color: inherit;
+}
+
+.notification-header-button:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================================
+   NOTIFICATION BADGE
+========================================================= */
+
+.notification-badge {
+  position: absolute;
+
+  top: 2px;
+  right: 1px;
+
+  min-width: 18px;
+  height: 18px;
+
+  padding: 0 5px;
+
+  border-radius: 999px;
+
+  background: #e53935;
+
+  color: white;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid var(--app-card);
+}
+
+
+/* =========================================================
+   NOTIFICATIONS PAGE
+========================================================= */
+
+.notifications-page {
+  width: 100%;
+
+  max-width: 900px;
+
+  margin: 0 auto;
+
+  padding: 20px;
+
+  box-sizing: border-box;
+
+  color: var(--app-text);
+}
+
+
+/* =========================================================
+   NOTIFICATIONS HEADER
+========================================================= */
+
+.notifications-header {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  margin-bottom: 20px;
+}
+
+.back-button {
+  width: 40px;
+  height: 40px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: var(--app-hover);
+
+  color: var(--app-text);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.notifications-title {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  flex: 1;
+}
+
+.notifications-title h2 {
+  margin: 0;
+
+  font-size: 22px;
+
+  color: var(--app-text);
+}
+
+.notifications-title span {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 13px;
+
+  color: var(--app-secondary);
+}
+
+.mark-all-button {
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--app-primary);
+
+  cursor: pointer;
+
+  font-size: 13px;
+}
+
+.mark-all-button:disabled {
+  opacity: 0.5;
+}
+
+
+/* =========================================================
+   NOTIFICATION ERROR
+========================================================= */
+
+.notification-error {
+  padding: 12px 15px;
+
+  margin-bottom: 15px;
+
+  border-radius: 10px;
+
+  background: var(--settings-error-bg);
+
+  color: var(--settings-error-text);
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   NOTIFICATION LOADING
+========================================================= */
+
+.notifications-loading {
+  min-height: 250px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  color: var(--app-secondary);
+
+  opacity: 0.65;
+}
+
+
+/* =========================================================
+   NOTIFICATION EMPTY
+========================================================= */
+
+.notifications-empty {
+  min-height: 350px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  color: var(--app-text);
+}
+
+.empty-notification-icon {
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+
+  background: var(--app-hover);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 15px;
+}
+
+.notifications-empty h3 {
+  margin: 0 0 6px;
+
+  color: var(--app-text);
+}
+
+.notifications-empty p {
+  margin: 0;
+
+  color: var(--app-secondary);
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   NOTIFICATION LIST
+========================================================= */
+
+.notification-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   NOTIFICATION CARD
+========================================================= */
+
+.notification-card {
+  position: relative;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 13px;
+
+  padding: 15px;
+
+  border-radius: 14px;
+
+  background: var(--app-card);
+
+  border:
+    1px solid var(--app-border);
+
+  color: var(--app-text);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-1px);
+
+  background: var(--app-hover);
+}
+
+.notification-card.unread {
+  background: var(--app-hover);
+
+  border-left:
+    4px solid var(--app-primary);
+}
+
+
+/* =========================================================
+   NOTIFICATION ICON
+========================================================= */
+
+.notification-icon {
+  width: 44px;
+  height: 44px;
+
+  min-width: 44px;
+
+  border-radius: 12px;
+
+  background: var(--app-hover);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+}
+
+
+/* =========================================================
+   NOTIFICATION CONTENT
+========================================================= */
+
+.notification-content {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.notification-top {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.notification-top h3 {
+  margin: 0;
+
+  font-size: 15px;
+
+  color: var(--app-text);
+}
+
+.notification-content p {
+  margin: 6px 0;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  color: var(--app-secondary);
+}
+
+.notification-date {
+  font-size: 12px;
+
+  color: var(--app-secondary);
+}
+
+
+/* =========================================================
+   UNREAD DOT
+========================================================= */
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: var(--app-primary);
+
+  display: inline-block;
+}
+
+
+/* =========================================================
+   MARK READ
+========================================================= */
+
+.mark-read-button {
+  width: 32px;
+  height: 32px;
+
+  min-width: 32px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: var(--settings-icon-bg);
+
+  color: var(--settings-primary);
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.mark-read-button:hover {
+  background: var(--settings-theme-selected-bg);
+}
+
+
+/* =========================================================
    TABLET
-========================= */
+========================================================= */
 
 @media (max-width: 1000px) {
+
   .dashboard-content {
     padding: 25px;
   }
 
   .dashboard-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
   .form-grid {
     grid-template-columns: 1fr;
   }
+
 }
 
-/* =========================
+
+/* =========================================================
    MOBILE
-========================= */
+========================================================= */
 
 @media (max-width: 700px) {
+
   .dashboard-layout {
     width: 100%;
+
     min-height: 100vh;
+
     padding-bottom: 75px;
   }
 
   .mobile-app-header {
     height: 64px;
+
     padding: 0 16px;
   }
 
   .app-logo {
     width: 38px;
     height: 38px;
+
     font-size: 20px;
   }
 
@@ -678,7 +1756,10 @@ textarea {
 
   .dashboard-content {
     width: 100%;
-    min-height: calc(100vh - 64px);
+
+    min-height:
+      calc(100vh - 64px);
+
     padding: 18px 15px;
   }
 
@@ -688,6 +1769,7 @@ textarea {
 
   .dashboard-header h1 {
     font-size: 25px;
+
     line-height: 1.2;
   }
 
@@ -697,11 +1779,13 @@ textarea {
 
   .dashboard-cards {
     grid-template-columns: 1fr;
+
     gap: 15px;
   }
 
   .dashboard-card {
     width: 100%;
+
     padding: 20px;
   }
 
@@ -712,6 +1796,7 @@ textarea {
   .card-icon {
     width: 45px;
     height: 45px;
+
     font-size: 22px;
   }
 
@@ -721,6 +1806,7 @@ textarea {
 
   .bottom-nav-item {
     min-width: 0;
+
     font-size: 10px;
   }
 
@@ -730,28 +1816,36 @@ textarea {
 
   .bottom-popup {
     bottom: 78px;
-    width: calc(100% - 24px);
+
+    width:
+      calc(100% - 24px);
   }
 
   .bottom-popup button {
     min-height: 65px;
+
     font-size: 12px;
   }
 
   .page-container {
     width: 100%;
+
     min-width: 0;
+
     padding: 15px;
   }
 
   .form-card {
     width: 100%;
+
     max-width: 100%;
+
     padding: 20px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
+
     gap: 0;
   }
 
@@ -759,12 +1853,15 @@ textarea {
   .my-booking-card,
   .my-rental-booking-card {
     width: 100%;
+
     max-width: 100%;
   }
 
   .booking-row {
     flex-wrap: wrap;
+
     align-items: flex-start;
+
     padding: 12px 15px;
   }
 
@@ -774,7 +1871,9 @@ textarea {
 
   .booking-actions {
     justify-content: stretch;
+
     flex-direction: column;
+
     padding: 15px;
   }
 
@@ -784,6 +1883,7 @@ textarea {
 
   .booking-action {
     justify-content: stretch;
+
     padding: 12px 15px;
   }
 
@@ -794,13 +1894,16 @@ textarea {
   .my-rental-booking-card {
     padding: 20px;
   }
+
 }
 
-/* =========================
+
+/* =========================================================
    VERY SMALL MOBILE
-========================= */
+========================================================= */
 
 @media (max-width: 400px) {
+
   .dashboard-content {
     padding: 15px 12px;
   }
@@ -830,411 +1933,24 @@ textarea {
   }
 
   .bottom-popup {
-    width: calc(100% - 20px);
+    width:
+      calc(100% - 20px);
+
     padding: 12px;
+
     gap: 8px;
   }
 
   .bottom-popup button {
     min-height: 60px;
   }
-}
-/* =========================================
-   NOTIFICATION HEADER BUTTON
-========================================= */
 
-.notification-header-button {
-  position: relative;
-
-  width: 42px;
-  height: 42px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: transparent;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-
-  color: inherit;
-}
-
-.notification-header-button:hover {
-  background: rgba(0, 0, 0, 0.06);
 }
 
 
-/* =========================================
-   NOTIFICATION BADGE
-========================================= */
-
-.notification-badge {
-  position: absolute;
-
-  top: 2px;
-  right: 1px;
-
-  min-width: 18px;
-  height: 18px;
-
-  padding: 0 5px;
-
-  border-radius: 999px;
-
-  background: #e53935;
-  color: white;
-
-  font-size: 10px;
-  font-weight: 700;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 2px solid white;
-}
-
-
-/* =========================================
-   NOTIFICATIONS PAGE
-========================================= */
-
-.notifications-page {
-  width: 100%;
-  max-width: 900px;
-
-  margin: 0 auto;
-
-  padding: 20px;
-
-  box-sizing: border-box;
-}
-
-
-/* =========================================
-   HEADER
-========================================= */
-
-.notifications-header {
-  display: flex;
-  align-items: center;
-
-  gap: 14px;
-
-  margin-bottom: 20px;
-}
-
-.back-button {
-  width: 40px;
-  height: 40px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: #f2f2f2;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-}
-
-.notifications-title {
-  display: flex;
-  align-items: center;
-
-  gap: 10px;
-
-  flex: 1;
-}
-
-.notifications-title h2 {
-  margin: 0;
-
-  font-size: 22px;
-}
-
-.notifications-title span {
-  display: block;
-
-  margin-top: 3px;
-
-  font-size: 13px;
-
-  opacity: 0.65;
-}
-
-.mark-all-button {
-  display: flex;
-  align-items: center;
-
-  gap: 6px;
-
-  border: none;
-
-  background: transparent;
-
-  cursor: pointer;
-
-  font-size: 13px;
-}
-
-.mark-all-button:disabled {
-  opacity: 0.5;
-}
-
-
-/* =========================================
-   ERROR
-========================================= */
-
-.notification-error {
-  padding: 12px 15px;
-
-  margin-bottom: 15px;
-
-  border-radius: 10px;
-
-  background: #ffebee;
-
-  color: #c62828;
-
-  font-size: 14px;
-}
-
-
-/* =========================================
-   LOADING
-========================================= */
-
-.notifications-loading {
-  min-height: 250px;
-
-  display: flex;
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: 10px;
-
-  opacity: 0.65;
-}
-
-
-/* =========================================
-   EMPTY
-========================================= */
-
-.notifications-empty {
-  min-height: 350px;
-
-  display: flex;
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-}
-
-.empty-notification-icon {
-  width: 80px;
-  height: 80px;
-
-  border-radius: 50%;
-
-  background: #f3f4f6;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 15px;
-}
-
-.notifications-empty h3 {
-  margin: 0 0 6px;
-}
-
-.notifications-empty p {
-  margin: 0;
-
-  opacity: 0.65;
-
-  font-size: 14px;
-}
-
-
-/* =========================================
-   NOTIFICATION LIST
-========================================= */
-
-.notification-list {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 10px;
-}
-
-
-/* =========================================
-   NOTIFICATION CARD
-========================================= */
-
-.notification-card {
-  position: relative;
-
-  display: flex;
-
-  align-items: flex-start;
-
-  gap: 13px;
-
-  padding: 15px;
-
-  border-radius: 14px;
-
-  background: white;
-
-  border: 1px solid #eeeeee;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.15s ease,
-    background 0.15s ease;
-}
-
-.notification-card:hover {
-  transform: translateY(-1px);
-
-  background: #fafafa;
-}
-
-.notification-card.unread {
-  background: #f7faff;
-
-  border-left: 4px solid #2563eb;
-}
-
-
-/* =========================================
-   ICON
-========================================= */
-
-.notification-icon {
-  width: 44px;
-  height: 44px;
-
-  min-width: 44px;
-
-  border-radius: 12px;
-
-  background: #f1f5f9;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 20px;
-}
-
-
-/* =========================================
-   CONTENT
-========================================= */
-
-.notification-content {
-  flex: 1;
-
-  min-width: 0;
-}
-
-.notification-top {
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-}
-
-.notification-top h3 {
-  margin: 0;
-
-  font-size: 15px;
-}
-
-.notification-content p {
-  margin: 6px 0;
-
-  font-size: 14px;
-
-  line-height: 1.5;
-
-  opacity: 0.8;
-}
-
-.notification-date {
-  font-size: 12px;
-
-  opacity: 0.55;
-}
-
-
-/* =========================================
-   UNREAD DOT
-========================================= */
-
-.unread-dot {
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-
-  background: #2563eb;
-
-  display: inline-block;
-}
-
-
-/* =========================================
-   MARK READ
-========================================= */
-
-.mark-read-button {
-  width: 32px;
-  height: 32px;
-
-  min-width: 32px;
-
-  border: none;
-
-  border-radius: 50%;
-
-  background: #eef2ff;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mark-read-button:hover {
-  background: #e0e7ff;
-}
-
-
-/* =========================================
-   MOBILE
-========================================= */
+/* =========================================================
+   NOTIFICATIONS MOBILE
+========================================================= */
 
 @media (max-width: 600px) {
 

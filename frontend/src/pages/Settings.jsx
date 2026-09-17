@@ -9,6 +9,9 @@ import {
   FiLogOut,
   FiChevronRight,
   FiCheck,
+  FiMonitor,
+  FiSun,
+  FiMoon,
 } from "react-icons/fi";
 
 import api from "../api/axios";
@@ -28,6 +31,14 @@ const Settings = () => {
     useState(true);
 
   const [language, setLanguage] = useState("English");
+
+  // =========================
+  // APPEARANCE STATE
+  // =========================
+
+  const [theme, setTheme] = useState(
+    localStorage.getItem("alrides-theme") || "system"
+  );
 
   // =========================
   // UI STATE
@@ -54,6 +65,77 @@ const Settings = () => {
   };
 
   // =========================
+  // APPLY THEME
+  // =========================
+
+  const applyTheme = (selectedTheme) => {
+
+    setTheme(selectedTheme);
+
+    localStorage.setItem(
+      "alrides-theme",
+      selectedTheme
+    );
+
+    document.documentElement.setAttribute(
+      "data-theme",
+      selectedTheme
+    );
+
+    // Update browser color scheme preference.
+    // This helps browser controls follow
+    // the selected Alrides theme.
+    if (selectedTheme === "dark") {
+      document.documentElement.style.colorScheme = "dark";
+    } else if (selectedTheme === "light") {
+      document.documentElement.style.colorScheme = "light";
+    } else {
+      document.documentElement.style.colorScheme = "light dark";
+    }
+
+    const themeName =
+      selectedTheme === "system"
+        ? "System"
+        : selectedTheme === "light"
+        ? "Light"
+        : "Dark";
+
+    showSuccess(
+      `${themeName} mode enabled.`
+    );
+  };
+
+  // =========================
+  // LOAD SAVED THEME
+  // =========================
+
+  useEffect(() => {
+
+    const savedTheme =
+      localStorage.getItem("alrides-theme") ||
+      "system";
+
+    setTheme(savedTheme);
+
+    document.documentElement.setAttribute(
+      "data-theme",
+      savedTheme
+    );
+
+    if (savedTheme === "dark") {
+      document.documentElement.style.colorScheme =
+        "dark";
+    } else if (savedTheme === "light") {
+      document.documentElement.style.colorScheme =
+        "light";
+    } else {
+      document.documentElement.style.colorScheme =
+        "light dark";
+    }
+
+  }, []);
+
+  // =========================
   // LOAD SETTINGS
   // =========================
 
@@ -68,7 +150,8 @@ const Settings = () => {
       setLoading(true);
       setError("");
 
-      const response = await api.get("/user/settings");
+      const response =
+        await api.get("/user/settings");
 
       const data = response.data;
 
@@ -113,10 +196,13 @@ const Settings = () => {
 
   const saveSettings = async ({
     notificationsEnabled = notifications,
-    bookingNotificationsEnabled = bookingNotifications,
-    rideNotificationsEnabled = rideNotifications,
+    bookingNotificationsEnabled =
+      bookingNotifications,
+    rideNotificationsEnabled =
+      rideNotifications,
     selectedLanguage = language,
-    successMessage = "Settings updated successfully.",
+    successMessage =
+      "Settings updated successfully.",
   }) => {
 
     try {
@@ -471,6 +557,82 @@ const Settings = () => {
 
 
       {/* =========================
+          APPEARANCE
+      ========================= */}
+
+      <section style={styles.section}>
+
+        <div style={styles.sectionHeader}>
+
+          <div style={styles.sectionIcon}>
+            <FiSettings size={21} />
+          </div>
+
+          <div>
+
+            <h2 style={styles.sectionTitle}>
+              Appearance
+            </h2>
+
+            <p style={styles.sectionDescription}>
+              Choose how Alrides looks on
+              your device.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div style={styles.themeContainer}>
+
+          {/* SYSTEM */}
+
+          <ThemeOption
+            value="system"
+            selected={theme === "system"}
+            icon={<FiMonitor size={20} />}
+            title="System"
+            description="Follow your device theme"
+            onClick={() =>
+              applyTheme("system")
+            }
+          />
+
+
+          {/* LIGHT */}
+
+          <ThemeOption
+            value="light"
+            selected={theme === "light"}
+            icon={<FiSun size={20} />}
+            title="Light"
+            description="Always use light mode"
+            onClick={() =>
+              applyTheme("light")
+            }
+          />
+
+
+          {/* DARK */}
+
+          <ThemeOption
+            value="dark"
+            selected={theme === "dark"}
+            icon={<FiMoon size={20} />}
+            title="Dark"
+            description="Always use dark mode"
+            onClick={() =>
+              applyTheme("dark")
+            }
+          />
+
+        </div>
+
+      </section>
+
+
+      {/* =========================
           PRIVACY & SECURITY
       ========================= */}
 
@@ -515,7 +677,7 @@ const Settings = () => {
 
           <FiChevronRight
             size={20}
-            color="#9ca3af"
+            color="var(--settings-secondary)"
           />
 
         </div>
@@ -677,7 +839,7 @@ const Settings = () => {
 
           <FiChevronRight
             size={20}
-            color="#9ca3af"
+            color="var(--settings-secondary)"
           />
 
         </div>
@@ -707,7 +869,7 @@ const Settings = () => {
 
           <FiChevronRight
             size={20}
-            color="#9ca3af"
+            color="var(--settings-secondary)"
           />
 
         </div>
@@ -767,7 +929,7 @@ const Settings = () => {
 
           <FiChevronRight
             size={20}
-            color="#9ca3af"
+            color="var(--settings-secondary)"
           />
 
         </div>
@@ -797,7 +959,7 @@ const Settings = () => {
 
           <FiChevronRight
             size={20}
-            color="#9ca3af"
+            color="var(--settings-secondary)"
           />
 
         </div>
@@ -883,7 +1045,7 @@ const Settings = () => {
 
           <FiChevronRight
             size={20}
-            color="#9ca3af"
+            color="var(--settings-secondary)"
           />
 
         </div>
@@ -913,7 +1075,7 @@ const Settings = () => {
 
           <FiChevronRight
             size={20}
-            color="#9ca3af"
+            color="var(--settings-secondary)"
           />
 
         </div>
@@ -1079,6 +1241,71 @@ const SettingRow = ({
 
 
 // ======================================================
+// THEME OPTION COMPONENT
+// ======================================================
+
+const ThemeOption = ({
+  selected,
+  icon,
+  title,
+  description,
+  onClick,
+}) => {
+
+  return (
+
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        ...styles.themeOption,
+        ...(selected
+          ? styles.themeOptionSelected
+          : {}),
+      }}
+      aria-pressed={selected}
+    >
+
+      <div
+        style={{
+          ...styles.themeIcon,
+          ...(selected
+            ? styles.themeIconSelected
+            : {}),
+        }}
+      >
+        {icon}
+      </div>
+
+
+      <div style={styles.themeText}>
+
+        <strong style={styles.rowTitle}>
+          {title}
+        </strong>
+
+        <span style={styles.rowDescription}>
+          {description}
+        </span>
+
+      </div>
+
+
+      <div style={styles.themeCheck}>
+
+        {selected && (
+          <FiCheck size={18} />
+        )}
+
+      </div>
+
+    </button>
+
+  );
+};
+
+
+// ======================================================
 // STYLES
 // ======================================================
 
@@ -1090,6 +1317,7 @@ const styles = {
     margin: "0 auto",
     padding: "30px",
     boxSizing: "border-box",
+    color: "var(--settings-text)",
   },
 
   header: {
@@ -1100,27 +1328,27 @@ const styles = {
     margin: 0,
     fontSize: "30px",
     fontWeight: "700",
-    color: "#1f2937",
+    color: "var(--settings-text)",
   },
 
   subtitle: {
     marginTop: "8px",
-    color: "#6b7280",
+    color: "var(--settings-secondary)",
     fontSize: "15px",
     lineHeight: "1.6",
   },
 
   loadingBox: {
-    background: "#ffffff",
+    background: "var(--settings-card)",
     borderRadius: "16px",
     padding: "40px",
     textAlign: "center",
     boxShadow:
-      "0 4px 18px rgba(0, 0, 0, 0.06)",
+      "0 4px 18px var(--settings-shadow)",
   },
 
   loadingText: {
-    color: "#6b7280",
+    color: "var(--settings-secondary)",
     fontSize: "15px",
   },
 
@@ -1128,9 +1356,9 @@ const styles = {
     marginBottom: "15px",
     padding: "10px 14px",
     borderRadius: "8px",
-    background: "#eff6ff",
-    border: "1px solid #bfdbfe",
-    color: "#1d4ed8",
+    background: "var(--settings-info-bg)",
+    border: "1px solid var(--settings-info-border)",
+    color: "var(--settings-info-text)",
     fontSize: "14px",
   },
 
@@ -1141,9 +1369,9 @@ const styles = {
     marginBottom: "20px",
     padding: "12px 16px",
     borderRadius: "8px",
-    background: "#f0fdf4",
-    border: "1px solid #bbf7d0",
-    color: "#15803d",
+    background: "var(--settings-success-bg)",
+    border: "1px solid var(--settings-success-border)",
+    color: "var(--settings-success-text)",
     fontSize: "14px",
     fontWeight: "500",
   },
@@ -1152,21 +1380,24 @@ const styles = {
     marginBottom: "20px",
     padding: "12px 16px",
     borderRadius: "8px",
-    background: "#fef2f2",
-    border: "1px solid #fecaca",
-    color: "#b91c1c",
+    background: "var(--settings-error-bg)",
+    border: "1px solid var(--settings-error-border)",
+    color: "var(--settings-error-text)",
     fontSize: "14px",
     fontWeight: "500",
   },
 
   section: {
-    background: "#ffffff",
+    background: "var(--settings-card)",
     borderRadius: "16px",
     marginBottom: "20px",
     padding: "24px",
     boxShadow:
-      "0 4px 18px rgba(0, 0, 0, 0.06)",
-    border: "1px solid #f1f5f9",
+      "0 4px 18px var(--settings-shadow)",
+    border:
+      "1px solid var(--settings-border)",
+    transition:
+      "background-color 0.25s ease, border-color 0.25s ease",
   },
 
   sectionHeader: {
@@ -1181,8 +1412,8 @@ const styles = {
     height: "42px",
     minWidth: "42px",
     borderRadius: "10px",
-    background: "#eef2ff",
-    color: "#4f46e5",
+    background: "var(--settings-icon-bg)",
+    color: "var(--settings-primary)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1192,12 +1423,12 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "700",
-    color: "#1f2937",
+    color: "var(--settings-text)",
   },
 
   sectionDescription: {
     margin: "5px 0 0",
-    color: "#6b7280",
+    color: "var(--settings-secondary)",
     fontSize: "14px",
     lineHeight: "1.5",
   },
@@ -1208,7 +1439,8 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     padding: "18px 0",
-    borderTop: "1px solid #f1f5f9",
+    borderTop:
+      "1px solid var(--settings-border)",
   },
 
   disabledRow: {
@@ -1221,7 +1453,8 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     padding: "18px 0",
-    borderTop: "1px solid #f1f5f9",
+    borderTop:
+      "1px solid var(--settings-border)",
   },
 
   clickableRow: {
@@ -1230,7 +1463,8 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     padding: "18px 0",
-    borderTop: "1px solid #f1f5f9",
+    borderTop:
+      "1px solid var(--settings-border)",
     cursor: "pointer",
   },
 
@@ -1242,16 +1476,20 @@ const styles = {
   },
 
   rowTitle: {
-    color: "#1f2937",
+    color: "var(--settings-text)",
     fontSize: "15px",
     fontWeight: "600",
   },
 
   rowDescription: {
-    color: "#6b7280",
+    color: "var(--settings-secondary)",
     fontSize: "13px",
     lineHeight: "1.5",
   },
+
+  // =========================
+  // TOGGLE
+  // =========================
 
   toggle: {
     position: "relative",
@@ -1270,7 +1508,7 @@ const styles = {
   },
 
   toggleDisabled: {
-    background: "#d1d5db",
+    background: "#9ca3af",
   },
 
   toggleDisabledRow: {
@@ -1297,21 +1535,98 @@ const styles = {
     left: "3px",
   },
 
+  // =========================
+  // APPEARANCE
+  // =========================
+
+  themeContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginTop: "15px",
+  },
+
+  themeOption: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: "14px",
+    padding: "14px",
+    borderRadius: "12px",
+    border:
+      "1px solid var(--settings-border)",
+    background:
+      "var(--settings-theme-option-bg)",
+    color: "var(--settings-text)",
+    textAlign: "left",
+    cursor: "pointer",
+    transition:
+      "background-color 0.2s ease, border-color 0.2s ease",
+  },
+
+  themeOptionSelected: {
+    border:
+      "1px solid var(--settings-primary)",
+    background:
+      "var(--settings-theme-selected-bg)",
+  },
+
+  themeIcon: {
+    width: "42px",
+    height: "42px",
+    minWidth: "42px",
+    borderRadius: "10px",
+    background:
+      "var(--settings-icon-bg)",
+    color: "var(--settings-secondary)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  themeIconSelected: {
+    color: "var(--settings-primary)",
+  },
+
+  themeText: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    flex: 1,
+  },
+
+  themeCheck: {
+    width: "26px",
+    height: "26px",
+    borderRadius: "50%",
+    color: "var(--settings-primary)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // =========================
+  // LANGUAGE
+  // =========================
+
   languageRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "20px",
     paddingTop: "18px",
-    borderTop: "1px solid #f1f5f9",
+    borderTop:
+      "1px solid var(--settings-border)",
   },
 
   languageSelect: {
     padding: "9px 35px 9px 12px",
     borderRadius: "8px",
-    border: "1px solid #d1d5db",
-    background: "#ffffff",
-    color: "#1f2937",
+    border:
+      "1px solid var(--settings-input-border)",
+    background:
+      "var(--settings-input-bg)",
+    color: "var(--settings-text)",
     fontSize: "14px",
     cursor: "pointer",
     outline: "none",
@@ -1320,35 +1635,48 @@ const styles = {
   verifiedBadge: {
     padding: "5px 10px",
     borderRadius: "20px",
-    background: "#dcfce7",
-    color: "#15803d",
+    background:
+      "var(--settings-success-bg)",
+    color:
+      "var(--settings-success-text)",
     fontSize: "12px",
     fontWeight: "600",
     whiteSpace: "nowrap",
   },
+
+  // =========================
+  // INFO
+  // =========================
 
   infoRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     padding: "16px 0",
-    borderTop: "1px solid #f1f5f9",
+    borderTop:
+      "1px solid var(--settings-border)",
   },
 
   infoValue: {
-    color: "#6b7280",
+    color: "var(--settings-secondary)",
     fontSize: "14px",
     fontWeight: "500",
   },
 
+  // =========================
+  // DANGER
+  // =========================
+
   dangerSection: {
-    background: "#ffffff",
+    background:
+      "var(--settings-card)",
     borderRadius: "16px",
     marginBottom: "20px",
     padding: "24px",
-    border: "1px solid #fecaca",
+    border:
+      "1px solid var(--settings-danger-border)",
     boxShadow:
-      "0 4px 18px rgba(0, 0, 0, 0.04)",
+      "0 4px 18px var(--settings-shadow)",
   },
 
   dangerIcon: {
@@ -1356,7 +1684,8 @@ const styles = {
     height: "42px",
     minWidth: "42px",
     borderRadius: "10px",
-    background: "#fef2f2",
+    background:
+      "var(--settings-danger-bg)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1366,7 +1695,7 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "700",
-    color: "#991b1b",
+    color: "var(--settings-danger)",
   },
 
   deleteRow: {
@@ -1375,11 +1704,12 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     paddingTop: "18px",
-    borderTop: "1px solid #fee2e2",
+    borderTop:
+      "1px solid var(--settings-danger-border)",
   },
 
   deleteTitle: {
-    color: "#b91c1c",
+    color: "var(--settings-danger)",
     fontSize: "15px",
     fontWeight: "600",
   },
@@ -1388,13 +1718,18 @@ const styles = {
     border: "none",
     borderRadius: "8px",
     padding: "10px 15px",
-    background: "#dc2626",
+    background:
+      "var(--settings-danger)",
     color: "#ffffff",
     fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
     whiteSpace: "nowrap",
   },
+
+  // =========================
+  // LOGOUT
+  // =========================
 
   logoutSection: {
     display: "flex",
@@ -1411,9 +1746,12 @@ const styles = {
     maxWidth: "300px",
     padding: "13px 20px",
     borderRadius: "10px",
-    border: "1px solid #fecaca",
-    background: "#ffffff",
-    color: "#dc2626",
+    border:
+      "1px solid var(--settings-danger-border)",
+    background:
+      "var(--settings-card)",
+    color:
+      "var(--settings-danger)",
     fontSize: "15px",
     fontWeight: "600",
     cursor: "pointer",
