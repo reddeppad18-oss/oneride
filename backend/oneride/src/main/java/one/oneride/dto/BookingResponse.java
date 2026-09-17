@@ -1,9 +1,15 @@
 package one.oneride.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class BookingResponse {
 
@@ -31,7 +37,10 @@ public class BookingResponse {
 
     private String bookingStatus;
 
-    // Vehicle details
+    /*
+     * Vehicle details
+     */
+
     private String vehicleType;
 
     private String brand;

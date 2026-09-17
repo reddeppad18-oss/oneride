@@ -20,13 +20,17 @@ public class UpdateSettingsRequest {
             Boolean notificationsEnabled,
             Boolean bookingNotificationsEnabled,
             Boolean rideNotificationsEnabled,
-            String language
-    ) {
-        this.notificationsEnabled = notificationsEnabled;
+            String language) {
+
+        this.notificationsEnabled =
+                notificationsEnabled;
+
         this.bookingNotificationsEnabled =
                 bookingNotificationsEnabled;
+
         this.rideNotificationsEnabled =
                 rideNotificationsEnabled;
+
         this.language = language;
     }
 
@@ -35,8 +39,8 @@ public class UpdateSettingsRequest {
     }
 
     public void setNotificationsEnabled(
-            Boolean notificationsEnabled
-    ) {
+            Boolean notificationsEnabled) {
+
         this.notificationsEnabled =
                 notificationsEnabled;
     }
@@ -46,8 +50,8 @@ public class UpdateSettingsRequest {
     }
 
     public void setBookingNotificationsEnabled(
-            Boolean bookingNotificationsEnabled
-    ) {
+            Boolean bookingNotificationsEnabled) {
+
         this.bookingNotificationsEnabled =
                 bookingNotificationsEnabled;
     }
@@ -57,8 +61,8 @@ public class UpdateSettingsRequest {
     }
 
     public void setRideNotificationsEnabled(
-            Boolean rideNotificationsEnabled
-    ) {
+            Boolean rideNotificationsEnabled) {
+
         this.rideNotificationsEnabled =
                 rideNotificationsEnabled;
     }

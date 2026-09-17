@@ -80,6 +80,8 @@ public class User implements UserDetails {
     @Builder.Default
     private String language = "English";
 
+    
+
     /*
      * Languages spoken by the user
      */

@@ -17,8 +17,8 @@ public class SettingsResponse {
             Boolean notificationsEnabled,
             Boolean bookingNotificationsEnabled,
             Boolean rideNotificationsEnabled,
-            String language
-    ) {
+            String language) {
+
         this.notificationsEnabled = notificationsEnabled;
         this.bookingNotificationsEnabled =
                 bookingNotificationsEnabled;
@@ -32,8 +32,8 @@ public class SettingsResponse {
     }
 
     public void setNotificationsEnabled(
-            Boolean notificationsEnabled
-    ) {
+            Boolean notificationsEnabled) {
+
         this.notificationsEnabled =
                 notificationsEnabled;
     }
@@ -43,8 +43,8 @@ public class SettingsResponse {
     }
 
     public void setBookingNotificationsEnabled(
-            Boolean bookingNotificationsEnabled
-    ) {
+            Boolean bookingNotificationsEnabled) {
+
         this.bookingNotificationsEnabled =
                 bookingNotificationsEnabled;
     }
@@ -54,8 +54,8 @@ public class SettingsResponse {
     }
 
     public void setRideNotificationsEnabled(
-            Boolean rideNotificationsEnabled
-    ) {
+            Boolean rideNotificationsEnabled) {
+
         this.rideNotificationsEnabled =
                 rideNotificationsEnabled;
     }

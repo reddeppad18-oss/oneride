@@ -24,10 +24,13 @@ public class UserServiceImpl implements UserService {
 
     private final RatingRepository ratingRepository;
 
+    /*
+     * CREATE USER
+     */
+
     @Override
     @Transactional
-    public User createUserIfNotExists(
-            String phoneNumber) {
+    public User createUserIfNotExists(String phoneNumber) {
 
         return userRepository
                 .findByPhoneNumber(phoneNumber)
@@ -36,15 +39,22 @@ public class UserServiceImpl implements UserService {
                     User user = User.builder()
                             .phoneNumber(phoneNumber)
                             .verified(true)
+
+                            // Default Settings
                             .notificationsEnabled(true)
                             .bookingNotificationsEnabled(true)
                             .rideNotificationsEnabled(true)
                             .language("English")
+
                             .build();
 
                     return userRepository.save(user);
                 });
     }
+
+    /*
+     * GET CURRENT USER
+     */
 
     @Override
     @Transactional(readOnly = true)
@@ -53,14 +63,18 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository
                 .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                        new RuntimeException(
+                .orElseThrow(
+                        () -> new RuntimeException(
                                 "User not found"
                         )
                 );
 
         return buildUserResponse(user);
     }
+
+    /*
+     * UPDATE PROFILE
+     */
 
     @Override
     @Transactional
@@ -70,8 +84,8 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository
                 .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                        new RuntimeException(
+                .orElseThrow(
+                        () -> new RuntimeException(
                                 "User not found"
                         )
                 );
@@ -95,6 +109,10 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /*
+     * GET PUBLIC PROFILE
+     */
+
     @Override
     @Transactional(readOnly = true)
     public UserResponse getPublicProfile(
@@ -102,8 +120,8 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository
                 .findById(userId)
-                .orElseThrow(() ->
-                        new RuntimeException(
+                .orElseThrow(
+                        () -> new RuntimeException(
                                 "User not found"
                         )
                 );
@@ -114,6 +132,7 @@ public class UserServiceImpl implements UserService {
     /*
      * GET SETTINGS
      */
+
     @Override
     @Transactional(readOnly = true)
     public SettingsResponse getSettings(
@@ -121,15 +140,17 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository
                 .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                        new RuntimeException(
+                .orElseThrow(
+                        () -> new RuntimeException(
                                 "User not found"
                         )
                 );
 
         /*
-         * Defaults are applied for existing users
-         * whose settings columns may contain NULL.
+         * Existing users may have NULL values
+         * because these fields were added later.
+         *
+         * Therefore we provide safe defaults.
          */
 
         Boolean notificationsEnabled =
@@ -150,8 +171,8 @@ public class UserServiceImpl implements UserService {
         String language =
                 user.getLanguage() != null
                         && !user.getLanguage().isBlank()
-                        ? user.getLanguage()
-                        : "English";
+                                ? user.getLanguage()
+                                : "English";
 
         return new SettingsResponse(
                 notificationsEnabled,
@@ -164,6 +185,7 @@ public class UserServiceImpl implements UserService {
     /*
      * UPDATE SETTINGS
      */
+
     @Override
     @Transactional
     public void updateSettings(
@@ -172,15 +194,16 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository
                 .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() ->
-                        new RuntimeException(
+                .orElseThrow(
+                        () -> new RuntimeException(
                                 "User not found"
                         )
                 );
 
         /*
-         * Master notification setting
+         * Push Notifications
          */
+
         if (request.getNotificationsEnabled() != null) {
 
             user.setNotificationsEnabled(
@@ -189,9 +212,11 @@ public class UserServiceImpl implements UserService {
         }
 
         /*
-         * Booking notifications
+         * Booking Notifications
          */
-        if (request.getBookingNotificationsEnabled() != null) {
+
+        if (request.getBookingNotificationsEnabled()
+                != null) {
 
             user.setBookingNotificationsEnabled(
                     request.getBookingNotificationsEnabled()
@@ -199,9 +224,11 @@ public class UserServiceImpl implements UserService {
         }
 
         /*
-         * Ride notifications
+         * Ride Notifications
          */
-        if (request.getRideNotificationsEnabled() != null) {
+
+        if (request.getRideNotificationsEnabled()
+                != null) {
 
             user.setRideNotificationsEnabled(
                     request.getRideNotificationsEnabled()
@@ -211,6 +238,7 @@ public class UserServiceImpl implements UserService {
         /*
          * Language
          */
+
         if (request.getLanguage() != null
                 && !request.getLanguage().isBlank()) {
 
@@ -219,50 +247,46 @@ public class UserServiceImpl implements UserService {
             );
         }
 
+        /*
+         * Save changes to PostgreSQL
+         */
+
         userRepository.save(user);
     }
 
     /*
      * BUILD USER RESPONSE
      */
+
     private UserResponse buildUserResponse(
             User user) {
 
-        /*
-         * Get ratings received by this user.
-         */
         List<?> ratings =
                 ratingRepository.findByReviewee(user);
 
-        /*
-         * Calculate average rating.
-         */
-        double averageRating = ratings
-                .stream()
-                .mapToDouble(rating -> {
+        double averageRating =
+                ratings
+                        .stream()
+                        .mapToDouble(rating -> {
 
-                    try {
+                            try {
 
-                        return ((Number)
-                                rating.getClass()
-                                        .getMethod(
-                                                "getRating"
-                                        )
-                                        .invoke(rating))
-                                .doubleValue();
+                                return ((Number)
+                                        rating.getClass()
+                                                .getMethod(
+                                                        "getRating"
+                                                )
+                                                .invoke(rating))
+                                        .doubleValue();
 
-                    } catch (Exception e) {
+                            } catch (Exception e) {
 
-                        return 0.0;
-                    }
-                })
-                .average()
-                .orElse(0.0);
+                                return 0.0;
+                            }
+                        })
+                        .average()
+                        .orElse(0.0);
 
-        /*
-         * Convert List<Language>
-         * into List<String>.
-         */
         List<String> languageNames =
                 user.getLanguages()
                         .stream()
@@ -270,53 +294,25 @@ public class UserServiceImpl implements UserService {
                         .toList();
 
         return UserResponse.builder()
-
-                .id(
-                        user.getId()
-                )
-
-                .fullName(
-                        user.getFullName()
-                )
-
-                .phoneNumber(
-                        user.getPhoneNumber()
-                )
-
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
                 .role(
                         user.getRole() != null
                                 ? user.getRole().name()
                                 : null
                 )
-
-                .verified(
-                        user.getVerified()
-                )
-
-                .city(
-                        user.getCity()
-                )
-
-                .aboutMe(
-                        user.getAboutMe()
-                )
-
-                .averageRating(
-                        averageRating
-                )
-
+                .verified(user.getVerified())
+                .city(user.getCity())
+                .aboutMe(user.getAboutMe())
+                .averageRating(averageRating)
                 .totalRatings(
                         (long) ratings.size()
                 )
-
-                .languages(
-                        languageNames
-                )
-
+                .languages(languageNames)
                 .profilePhotoUrl(
                         user.getProfilePhotoUrl()
                 )
-
                 .build();
     }
 }

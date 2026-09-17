@@ -27,45 +27,39 @@ public class UserController {
     private final UserService userService;
 
     /*
-     * Get current user's profile
+     * GET CURRENT USER
      */
+
     @GetMapping("/me")
     public UserResponse getCurrentUser(
-            Authentication authentication
-    ) {
+            Authentication authentication) {
 
-        String phoneNumber =
-                authentication.getName();
+        String phoneNumber = authentication.getName();
 
-        return userService.getCurrentUser(
-                phoneNumber
-        );
+        return userService.getCurrentUser(phoneNumber);
     }
 
     /*
-     * Get public profile
+     * GET PUBLIC PROFILE
      */
+
     @GetMapping("/public/{userId}")
     public UserResponse getPublicProfile(
-            @PathVariable Long userId
-    ) {
+            @PathVariable Long userId) {
 
-        return userService.getPublicProfile(
-                userId
-        );
+        return userService.getPublicProfile(userId);
     }
 
     /*
-     * Update current user's profile
+     * UPDATE PROFILE
      */
+
     @PutMapping("/profile")
     public MessageResponse updateProfile(
             Authentication authentication,
-            @Valid @RequestBody UpdateProfileRequest request
-    ) {
+            @Valid @RequestBody UpdateProfileRequest request) {
 
-        String phoneNumber =
-                authentication.getName();
+        String phoneNumber = authentication.getName();
 
         userService.updateProfile(
                 phoneNumber,
@@ -73,39 +67,33 @@ public class UserController {
         );
 
         return MessageResponse.builder()
-                .message(
-                        "Profile updated successfully"
-                )
+                .message("Profile updated successfully")
                 .build();
     }
 
     /*
-     * Get current user's Settings
+     * GET SETTINGS
      */
+
     @GetMapping("/settings")
     public SettingsResponse getSettings(
-            Authentication authentication
-    ) {
+            Authentication authentication) {
 
-        String phoneNumber =
-                authentication.getName();
+        String phoneNumber = authentication.getName();
 
-        return userService.getSettings(
-                phoneNumber
-        );
+        return userService.getSettings(phoneNumber);
     }
 
     /*
-     * Update current user's Settings
+     * UPDATE SETTINGS
      */
+
     @PutMapping("/settings")
     public MessageResponse updateSettings(
             Authentication authentication,
-            @Valid @RequestBody UpdateSettingsRequest request
-    ) {
+            @Valid @RequestBody UpdateSettingsRequest request) {
 
-        String phoneNumber =
-                authentication.getName();
+        String phoneNumber = authentication.getName();
 
         userService.updateSettings(
                 phoneNumber,
@@ -113,9 +101,7 @@ public class UserController {
         );
 
         return MessageResponse.builder()
-                .message(
-                        "Settings updated successfully"
-                )
+                .message("Settings updated successfully")
                 .build();
     }
 }

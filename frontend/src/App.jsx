@@ -30,6 +30,7 @@ import MyActivity from "./pages/MyActivity";
 import UserProfile from "./pages/UserProfile";
 
 import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
 
 
 /* =========================
@@ -215,7 +216,14 @@ function App() {
             element={<Settings />}
           />
 
+          <Route
+           path="/notifications"
+           element={<Notifications />}
+         />
+
         </Route>
+        
+        
 
 
         {/* =========================
