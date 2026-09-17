@@ -271,15 +271,7 @@ function DashboardLayout() {
             <span>⚙️</span>
             Settings
           </button>
-
-          <button
-            className="popup-logout"
-            onClick={handleLogout}
-          >
-            <span>🚪</span>
-            Logout
-          </button>
-
+          
         </div>
       )}
 
