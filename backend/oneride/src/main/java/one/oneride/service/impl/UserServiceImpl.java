@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
      */
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public SettingsResponse getSettings(
             String phoneNumber) {
 
@@ -150,35 +150,43 @@ public class UserServiceImpl implements UserService {
          * Existing users may have NULL values
          * because these fields were added later.
          *
-         * Therefore we provide safe defaults.
+         * Initialize safe defaults and persist
+         * them to PostgreSQL.
          */
 
-        Boolean notificationsEnabled =
-                user.getNotificationsEnabled() != null
-                        ? user.getNotificationsEnabled()
-                        : true;
+        boolean changed = false;
 
-        Boolean bookingNotificationsEnabled =
-                user.getBookingNotificationsEnabled() != null
-                        ? user.getBookingNotificationsEnabled()
-                        : true;
+        if (user.getNotificationsEnabled() == null) {
+            user.setNotificationsEnabled(true);
+            changed = true;
+        }
 
-        Boolean rideNotificationsEnabled =
-                user.getRideNotificationsEnabled() != null
-                        ? user.getRideNotificationsEnabled()
-                        : true;
+        if (user.getBookingNotificationsEnabled() == null) {
+            user.setBookingNotificationsEnabled(true);
+            changed = true;
+        }
 
-        String language =
-                user.getLanguage() != null
-                        && !user.getLanguage().isBlank()
-                                ? user.getLanguage()
-                                : "English";
+        if (user.getRideNotificationsEnabled() == null) {
+            user.setRideNotificationsEnabled(true);
+            changed = true;
+        }
+
+        if (user.getLanguage() == null
+                || user.getLanguage().isBlank()) {
+
+            user.setLanguage("English");
+            changed = true;
+        }
+
+        if (changed) {
+            userRepository.save(user);
+        }
 
         return new SettingsResponse(
-                notificationsEnabled,
-                bookingNotificationsEnabled,
-                rideNotificationsEnabled,
-                language
+                user.getNotificationsEnabled(),
+                user.getBookingNotificationsEnabled(),
+                user.getRideNotificationsEnabled(),
+                user.getLanguage()
         );
     }
 
@@ -209,14 +217,26 @@ public class UserServiceImpl implements UserService {
             user.setNotificationsEnabled(
                     request.getNotificationsEnabled()
             );
+
+            /*
+             * If push notifications are disabled,
+             * disable the child notification types too.
+             */
+
+            if (!request.getNotificationsEnabled()) {
+
+                user.setBookingNotificationsEnabled(false);
+                user.setRideNotificationsEnabled(false);
+            }
         }
 
         /*
          * Booking Notifications
          */
 
-        if (request.getBookingNotificationsEnabled()
-                != null) {
+        if (request.getBookingNotificationsEnabled() != null
+                && Boolean.TRUE.equals(
+                        user.getNotificationsEnabled())) {
 
             user.setBookingNotificationsEnabled(
                     request.getBookingNotificationsEnabled()
@@ -227,8 +247,9 @@ public class UserServiceImpl implements UserService {
          * Ride Notifications
          */
 
-        if (request.getRideNotificationsEnabled()
-                != null) {
+        if (request.getRideNotificationsEnabled() != null
+                && Boolean.TRUE.equals(
+                        user.getNotificationsEnabled())) {
 
             user.setRideNotificationsEnabled(
                     request.getRideNotificationsEnabled()

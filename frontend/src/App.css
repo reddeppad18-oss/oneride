@@ -228,7 +228,6 @@
     max-width: 100%;
   }
 }
-```css
 .phone-input-container {
   display: flex;
   align-items: center;
@@ -260,5 +259,4 @@
 .phone-input-container input:focus {
   border-color: var(--accent);
 }
-```
 
