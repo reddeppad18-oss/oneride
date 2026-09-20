@@ -1,5 +1,6 @@
 package one.oneride.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import one.oneride.dto.UpdateSettingsRequest;
 import one.oneride.dto.UserResponse;
 import one.oneride.entity.Language;
 import one.oneride.entity.User;
+import one.oneride.repository.LanguageRepository;
 import one.oneride.repository.RatingRepository;
 import one.oneride.repository.UserRepository;
 import one.oneride.service.UserService;
@@ -23,6 +25,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final RatingRepository ratingRepository;
+
+    private final LanguageRepository languageRepository;
 
     /*
      * CREATE USER
@@ -90,6 +94,10 @@ public class UserServiceImpl implements UserService {
                         )
                 );
 
+        /*
+         * Basic profile information
+         */
+
         user.setFullName(
                 request.getFullName()
         );
@@ -102,9 +110,74 @@ public class UserServiceImpl implements UserService {
                 request.getAboutMe()
         );
 
-        user.setProfilePhotoUrl(
-                request.getProfilePhotoUrl()
-        );
+        /*
+         * Profile photo URL
+         */
+
+        if (request.getProfilePhotoUrl() != null) {
+
+            user.setProfilePhotoUrl(
+                    request.getProfilePhotoUrl()
+            );
+        }
+
+        /*
+         * UPDATE LANGUAGES
+         *
+         * The frontend sends language names such as:
+         *
+         * ["English", "Telugu", "Hindi"]
+         *
+         * We find the corresponding Language entities
+         * and update the user's ManyToMany relationship.
+         */
+
+        if (request.getLanguages() != null) {
+
+            List<Language> selectedLanguages =
+                    new ArrayList<>();
+
+            for (String languageName :
+                    request.getLanguages()) {
+
+                if (languageName == null
+                        || languageName.isBlank()) {
+
+                    continue;
+                }
+
+                Language language =
+                        languageRepository
+                                .findByNameIgnoreCase(
+                                        languageName.trim()
+                                )
+                                .orElseThrow(
+                                        () -> new RuntimeException(
+                                                "Language not found: "
+                                                        + languageName
+                                        )
+                                );
+
+                selectedLanguages.add(language);
+            }
+
+            /*
+             * Replace the existing language selection.
+             *
+             * This also allows the user to remove
+             * languages by saving an empty list.
+             */
+
+            user.getLanguages().clear();
+
+            user.getLanguages().addAll(
+                    selectedLanguages
+            );
+        }
+
+        /*
+         * Save everything
+         */
 
         userRepository.save(user);
     }
@@ -149,9 +222,6 @@ public class UserServiceImpl implements UserService {
         /*
          * Existing users may have NULL values
          * because these fields were added later.
-         *
-         * Initialize safe defaults and persist
-         * them to PostgreSQL.
          */
 
         boolean changed = false;
@@ -269,7 +339,7 @@ public class UserServiceImpl implements UserService {
         }
 
         /*
-         * Save changes to PostgreSQL
+         * Save changes
          */
 
         userRepository.save(user);
@@ -307,6 +377,10 @@ public class UserServiceImpl implements UserService {
                         })
                         .average()
                         .orElse(0.0);
+
+        /*
+         * Convert Language entities to names
+         */
 
         List<String> languageNames =
                 user.getLanguages()

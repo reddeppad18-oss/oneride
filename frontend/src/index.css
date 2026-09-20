@@ -16,7 +16,7 @@ body,
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 body {
@@ -47,10 +47,14 @@ textarea {
 ========================= */
 
 :root {
+  /* App */
   --app-bg: #f4f6f8;
   --app-card: #ffffff;
+
   --app-text: #1f2933;
   --app-secondary: #667085;
+
+  --app-heading: #173b5e;
 
   --app-border: #e5e7eb;
   --app-input-border: #d0d5dd;
@@ -59,7 +63,86 @@ textarea {
   --app-primary: #1976d2;
   --app-primary-hover: #125ea8;
 
-  --app-header: #173b5e;
+  /* Header */
+  --app-header-bg: #173b5e;
+  --app-header-text: #ffffff;
+  --app-header-subtitle: #c9d7e4;
+
+  --app-hover: #f4f8fc;
+
+  --app-danger: #c53b3b;
+  --app-danger-hover: #a82f2f;
+
+  --app-success: #198754;
+  --app-error: #c62828;
+
+  --app-shadow: rgba(0, 0, 0, 0.08);
+  --app-shadow-strong: rgba(0, 0, 0, 0.18);
+
+  /* =====================================================
+     SETTINGS
+  ===================================================== */
+
+  --settings-bg: #f7f8fa;
+  --settings-card: #ffffff;
+
+  --settings-text: #1f2937;
+  --settings-secondary: #6b7280;
+
+  --settings-border: #e5e7eb;
+
+  --settings-icon-bg: #eef2ff;
+  --settings-primary: #4f46e5;
+
+  --settings-shadow: rgba(0, 0, 0, 0.06);
+
+  --settings-input-bg: #ffffff;
+  --settings-input-border: #d1d5db;
+
+  --settings-theme-option-bg: #ffffff;
+  --settings-theme-selected-bg: #eef2ff;
+
+  --settings-success-bg: #f0fdf4;
+  --settings-success-border: #bbf7d0;
+  --settings-success-text: #15803d;
+
+  --settings-error-bg: #fef2f2;
+  --settings-error-border: #fecaca;
+  --settings-error-text: #b91c1c;
+
+  --settings-info-bg: #eff6ff;
+  --settings-info-border: #bfdbfe;
+  --settings-info-text: #1d4ed8;
+
+  --settings-danger: #dc2626;
+  --settings-danger-bg: #fef2f2;
+  --settings-danger-border: #fecaca;
+
+  --settings-secondary-icon: #9ca3af;
+}
+
+
+/* =========================================================
+   LIGHT MODE
+========================================================= */
+
+html[data-theme="light"] {
+  --app-bg: #f4f6f8;
+  --app-card: #ffffff;
+
+  --app-text: #1f2933;
+  --app-secondary: #667085;
+
+  --app-heading: #173b5e;
+
+  --app-border: #e5e7eb;
+  --app-input-border: #d0d5dd;
+  --app-input-bg: #ffffff;
+
+  --app-primary: #1976d2;
+  --app-primary-hover: #125ea8;
+
+  --app-header-bg: #173b5e;
   --app-header-text: #ffffff;
   --app-header-subtitle: #c9d7e4;
 
@@ -75,13 +158,18 @@ textarea {
   --app-shadow-strong: rgba(0, 0, 0, 0.18);
 
   /* Settings */
+
   --settings-bg: #f7f8fa;
   --settings-card: #ffffff;
+
   --settings-text: #1f2937;
   --settings-secondary: #6b7280;
+
   --settings-border: #e5e7eb;
+
   --settings-icon-bg: #eef2ff;
   --settings-primary: #4f46e5;
+
   --settings-shadow: rgba(0, 0, 0, 0.06);
 
   --settings-input-bg: #ffffff;
@@ -110,82 +198,21 @@ textarea {
 }
 
 
-/* =========================
-   LIGHT MODE
-========================= */
-
-html[data-theme="light"] {
-  --app-bg: #f4f6f8;
-  --app-card: #ffffff;
-  --app-text: #1f2933;
-  --app-secondary: #667085;
-
-  --app-border: #e5e7eb;
-  --app-input-border: #d0d5dd;
-  --app-input-bg: #ffffff;
-
-  --app-primary: #1976d2;
-  --app-primary-hover: #125ea8;
-
-  --app-header: #173b5e;
-  --app-header-text: #ffffff;
-  --app-header-subtitle: #c9d7e4;
-
-  --app-hover: #f4f8fc;
-
-  --app-danger: #c53b3b;
-  --app-danger-hover: #a82f2f;
-
-  --app-success: #198754;
-  --app-error: #c62828;
-
-  --app-shadow: rgba(0, 0, 0, 0.08);
-  --app-shadow-strong: rgba(0, 0, 0, 0.18);
-
-  --settings-bg: #f7f8fa;
-  --settings-card: #ffffff;
-  --settings-text: #1f2937;
-  --settings-secondary: #6b7280;
-  --settings-border: #e5e7eb;
-  --settings-icon-bg: #eef2ff;
-  --settings-primary: #4f46e5;
-  --settings-shadow: rgba(0, 0, 0, 0.06);
-
-  --settings-input-bg: #ffffff;
-  --settings-input-border: #d1d5db;
-
-  --settings-theme-option-bg: #ffffff;
-  --settings-theme-selected-bg: #eef2ff;
-
-  --settings-success-bg: #f0fdf4;
-  --settings-success-border: #bbf7d0;
-  --settings-success-text: #15803d;
-
-  --settings-error-bg: #fef2f2;
-  --settings-error-border: #fecaca;
-  --settings-error-text: #b91c1c;
-
-  --settings-info-bg: #eff6ff;
-  --settings-info-border: #bfdbfe;
-  --settings-info-text: #1d4ed8;
-
-  --settings-danger: #dc2626;
-  --settings-danger-bg: #fef2f2;
-  --settings-danger-border: #fecaca;
-
-  --settings-secondary-icon: #9ca3af;
-}
-
-
-/* =========================
+/* =========================================================
    DARK MODE
-========================= */
+========================================================= */
 
 html[data-theme="dark"] {
   --app-bg: #111827;
   --app-card: #1f2937;
+
   --app-text: #f9fafb;
-  --app-secondary: #9ca3af;
+  --app-secondary: #c4c9d1;
+
+  /*
+   * Separate heading color from header background.
+   */
+  --app-heading: #f9fafb;
 
   --app-border: #374151;
   --app-input-border: #4b5563;
@@ -194,9 +221,12 @@ html[data-theme="dark"] {
   --app-primary: #60a5fa;
   --app-primary-hover: #3b82f6;
 
-  --app-header: #0b2239;
+  /*
+   * Header has its own background variable.
+   */
+  --app-header-bg: #0b2239;
   --app-header-text: #ffffff;
-  --app-header-subtitle: #b8c7d6;
+  --app-header-subtitle: #c4d0dc;
 
   --app-hover: #374151;
 
@@ -209,13 +239,26 @@ html[data-theme="dark"] {
   --app-shadow: rgba(0, 0, 0, 0.25);
   --app-shadow-strong: rgba(0, 0, 0, 0.45);
 
+  /* =====================================================
+     SETTINGS - DARK
+  ===================================================== */
+
   --settings-bg: #111827;
   --settings-card: #1f2937;
+
   --settings-text: #f9fafb;
-  --settings-secondary: #9ca3af;
+
+  /*
+   * Brighter secondary text for readability.
+   */
+  --settings-secondary: #c4c9d1;
+
   --settings-border: #374151;
+
   --settings-icon-bg: #312e81;
-  --settings-primary: #818cf8;
+
+  --settings-primary: #a5b4fc;
+
   --settings-shadow: rgba(0, 0, 0, 0.25);
 
   --settings-input-bg: #111827;
@@ -240,19 +283,22 @@ html[data-theme="dark"] {
   --settings-danger-bg: #450a0a;
   --settings-danger-border: #991b1b;
 
-  --settings-secondary-icon: #9ca3af;
+  --settings-secondary-icon: #c4c9d1;
 }
 
 
-/* =========================
-   SYSTEM MODE
-========================= */
+/* =========================================================
+   SYSTEM MODE - LIGHT DEFAULT
+========================================================= */
 
 html[data-theme="system"] {
   --app-bg: #f4f6f8;
   --app-card: #ffffff;
+
   --app-text: #1f2933;
   --app-secondary: #667085;
+
+  --app-heading: #173b5e;
 
   --app-border: #e5e7eb;
   --app-input-border: #d0d5dd;
@@ -261,7 +307,7 @@ html[data-theme="system"] {
   --app-primary: #1976d2;
   --app-primary-hover: #125ea8;
 
-  --app-header: #173b5e;
+  --app-header-bg: #173b5e;
   --app-header-text: #ffffff;
   --app-header-subtitle: #c9d7e4;
 
@@ -276,13 +322,19 @@ html[data-theme="system"] {
   --app-shadow: rgba(0, 0, 0, 0.08);
   --app-shadow-strong: rgba(0, 0, 0, 0.18);
 
+  /* Settings */
+
   --settings-bg: #f7f8fa;
   --settings-card: #ffffff;
+
   --settings-text: #1f2937;
   --settings-secondary: #6b7280;
+
   --settings-border: #e5e7eb;
+
   --settings-icon-bg: #eef2ff;
   --settings-primary: #4f46e5;
+
   --settings-shadow: rgba(0, 0, 0, 0.06);
 
   --settings-input-bg: #ffffff;
@@ -316,11 +368,15 @@ html[data-theme="system"] {
 ========================================================= */
 
 @media (prefers-color-scheme: dark) {
+
   html[data-theme="system"] {
     --app-bg: #111827;
     --app-card: #1f2937;
+
     --app-text: #f9fafb;
-    --app-secondary: #9ca3af;
+    --app-secondary: #c4c9d1;
+
+    --app-heading: #f9fafb;
 
     --app-border: #374151;
     --app-input-border: #4b5563;
@@ -329,9 +385,9 @@ html[data-theme="system"] {
     --app-primary: #60a5fa;
     --app-primary-hover: #3b82f6;
 
-    --app-header: #0b2239;
+    --app-header-bg: #0b2239;
     --app-header-text: #ffffff;
-    --app-header-subtitle: #b8c7d6;
+    --app-header-subtitle: #c4d0dc;
 
     --app-hover: #374151;
 
@@ -344,13 +400,19 @@ html[data-theme="system"] {
     --app-shadow: rgba(0, 0, 0, 0.25);
     --app-shadow-strong: rgba(0, 0, 0, 0.45);
 
+    /* Settings */
+
     --settings-bg: #111827;
     --settings-card: #1f2937;
+
     --settings-text: #f9fafb;
-    --settings-secondary: #9ca3af;
+    --settings-secondary: #c4c9d1;
+
     --settings-border: #374151;
+
     --settings-icon-bg: #312e81;
-    --settings-primary: #818cf8;
+    --settings-primary: #a5b4fc;
+
     --settings-shadow: rgba(0, 0, 0, 0.25);
 
     --settings-input-bg: #111827;
@@ -375,7 +437,7 @@ html[data-theme="system"] {
     --settings-danger-bg: #450a0a;
     --settings-danger-border: #991b1b;
 
-    --settings-secondary-icon: #9ca3af;
+    --settings-secondary-icon: #c4c9d1;
   }
 }
 
@@ -387,6 +449,7 @@ html[data-theme="system"] {
 .login-container {
   min-height: 100vh;
   width: 100%;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -416,6 +479,8 @@ html[data-theme="system"] {
 
 .login-card h1 {
   margin-bottom: 5px;
+
+  color: var(--app-heading);
 }
 
 .login-card p {
@@ -429,16 +494,21 @@ html[data-theme="system"] {
 
   margin-top: 20px;
 
-  box-sizing: border-box;
-
   font-size: 16px;
 
   background: var(--app-input-bg);
   color: var(--app-text);
 
-  border: 1px solid var(--app-input-border);
+  border:
+    1px solid var(--app-input-border);
 
   border-radius: 5px;
+}
+
+.login-card input::placeholder {
+  color: var(--app-secondary);
+
+  opacity: 0.8;
 }
 
 .login-card button {
@@ -450,7 +520,7 @@ html[data-theme="system"] {
 
   background: var(--app-primary);
 
-  color: white;
+  color: #ffffff;
 
   border: none;
 
@@ -505,7 +575,7 @@ html[data-theme="system"] {
 
   padding: 0 30px;
 
-  background-color: var(--app-header);
+  background-color: var(--app-header-bg);
 
   color: var(--app-header-text);
 
@@ -532,7 +602,7 @@ html[data-theme="system"] {
 
   border-radius: 50%;
 
-  background-color: white;
+  background-color: #ffffff;
 
   color: #173b5e;
 
@@ -545,6 +615,8 @@ html[data-theme="system"] {
   margin: 0;
 
   font-size: 20px;
+
+  color: var(--app-header-text);
 }
 
 .app-brand span {
@@ -569,8 +641,6 @@ html[data-theme="system"] {
 
   padding: 35px;
 
-  box-sizing: border-box;
-
   overflow-x: hidden;
 
   color: var(--app-text);
@@ -588,7 +658,7 @@ html[data-theme="system"] {
 .dashboard-header h1 {
   margin: 0;
 
-  color: var(--app-text);
+  color: var(--app-heading);
 }
 
 .dashboard-header p {
@@ -643,13 +713,15 @@ html[data-theme="system"] {
 
   background-color: var(--app-hover);
 
+  color: var(--app-primary);
+
   font-size: 24px;
 }
 
 .dashboard-card h3 {
   margin-top: 0;
 
-  color: var(--app-header);
+  color: var(--app-heading);
 }
 
 .dashboard-card p {
@@ -669,7 +741,7 @@ html[data-theme="system"] {
 
   background-color: var(--app-primary);
 
-  color: white;
+  color: #ffffff;
 
   cursor: pointer;
 }
@@ -788,6 +860,8 @@ html[data-theme="system"] {
 
   box-shadow:
     0 8px 30px var(--app-shadow-strong);
+
+  color: var(--app-text);
 }
 
 .bottom-popup button {
@@ -810,7 +884,7 @@ html[data-theme="system"] {
 
   background-color: var(--app-card);
 
-  color: var(--app-header);
+  color: var(--app-heading);
 
   font-size: 13px;
 
@@ -845,8 +919,6 @@ html[data-theme="system"] {
 
   background-color: var(--app-bg);
 
-  box-sizing: border-box;
-
   color: var(--app-text);
 }
 
@@ -874,10 +946,14 @@ html[data-theme="system"] {
   color: var(--app-text);
 }
 
+.form-card h1,
+.form-card h2,
+.form-card h3 {
+  color: var(--app-heading);
+}
+
 .form-card h1 {
   margin-top: 0;
-
-  color: var(--app-header);
 }
 
 .page-description {
@@ -929,11 +1005,16 @@ html[data-theme="system"] {
 
   font-size: 15px;
 
-  box-sizing: border-box;
-
   background-color: var(--app-input-bg);
 
   color: var(--app-text);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--app-secondary);
+
+  opacity: 0.8;
 }
 
 .form-group textarea {
@@ -954,7 +1035,7 @@ html[data-theme="system"] {
 
   background-color: var(--app-primary);
 
-  color: white;
+  color: #ffffff;
 
   font-size: 16px;
 
@@ -1202,7 +1283,7 @@ html[data-theme="system"] {
 
   margin-bottom: 20px;
 
-  color: var(--app-header);
+  color: var(--app-heading);
 }
 
 .my-rental-booking-card p {
@@ -1288,7 +1369,7 @@ html[data-theme="system"] {
 }
 
 .notification-header-button:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 
@@ -1311,7 +1392,7 @@ html[data-theme="system"] {
 
   background: #e53935;
 
-  color: white;
+  color: #ffffff;
 
   font-size: 10px;
 
@@ -1322,7 +1403,8 @@ html[data-theme="system"] {
   align-items: center;
   justify-content: center;
 
-  border: 2px solid var(--app-card);
+  border:
+    2px solid var(--app-header-bg);
 }
 
 
@@ -1338,8 +1420,6 @@ html[data-theme="system"] {
   margin: 0 auto;
 
   padding: 20px;
-
-  box-sizing: border-box;
 
   color: var(--app-text);
 }
@@ -1504,6 +1584,8 @@ html[data-theme="system"] {
   justify-content: center;
 
   margin-bottom: 15px;
+
+  color: var(--app-primary);
 }
 
 .notifications-empty h3 {
@@ -1593,6 +1675,8 @@ html[data-theme="system"] {
   border-radius: 12px;
 
   background: var(--app-hover);
+
+  color: var(--app-primary);
 
   display: flex;
 

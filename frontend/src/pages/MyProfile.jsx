@@ -221,7 +221,6 @@ const MyProfile = () => {
       return;
     }
 
-    // Reset input so the same file can be selected again.
     event.target.value = "";
 
     if (!file.type.startsWith("image/")) {
@@ -764,22 +763,35 @@ const MyProfile = () => {
   );
 };
 
+
 // ======================================================
-// Styles
+// Theme-aware Styles
 // ======================================================
 
 const styles = {
+
+  /* ====================================================
+     PAGE
+  ==================================================== */
+
   page: {
     minHeight: "100%",
     padding: "24px",
-    background: "#f6f8fb",
+    background: "var(--app-bg)",
+    color: "var(--app-text)",
     boxSizing: "border-box",
+    transition:
+      "background-color 0.25s ease, color 0.25s ease",
   },
 
   container: {
     maxWidth: "1100px",
     margin: "0 auto",
   },
+
+  /* ====================================================
+     HEADER
+  ==================================================== */
 
   header: {
     display: "flex",
@@ -794,14 +806,18 @@ const styles = {
     margin: 0,
     fontSize: "30px",
     fontWeight: 700,
-    color: "#172033",
+    color: "var(--app-heading)",
   },
 
   subtitle: {
     margin: "6px 0 0",
-    color: "#6b7280",
+    color: "var(--app-secondary)",
     fontSize: "15px",
   },
+
+  /* ====================================================
+     BUTTONS
+  ==================================================== */
 
   editButton: {
     display: "flex",
@@ -810,7 +826,7 @@ const styles = {
     border: "none",
     borderRadius: "10px",
     padding: "12px 18px",
-    background: "#2563eb",
+    background: "var(--app-primary)",
     color: "#ffffff",
     fontSize: "14px",
     fontWeight: 600,
@@ -827,11 +843,12 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "7px",
-    border: "1px solid #d1d5db",
+    border:
+      "1px solid var(--app-border)",
     borderRadius: "10px",
     padding: "11px 16px",
-    background: "#ffffff",
-    color: "#374151",
+    background: "var(--app-card)",
+    color: "var(--app-text)",
     fontSize: "14px",
     fontWeight: 600,
     cursor: "pointer",
@@ -844,19 +861,31 @@ const styles = {
     border: "none",
     borderRadius: "10px",
     padding: "12px 17px",
-    background: "#16a34a",
+    background: "var(--app-success)",
     color: "#ffffff",
     fontSize: "14px",
     fontWeight: 600,
     cursor: "pointer",
   },
 
+  /* ====================================================
+     PROFILE CARD
+  ==================================================== */
+
   card: {
-    background: "#ffffff",
+    background: "var(--app-card)",
     borderRadius: "18px",
     padding: "30px",
-    boxShadow: "0 5px 20px rgba(0, 0, 0, 0.06)",
+    boxShadow:
+      "0 5px 20px var(--app-shadow)",
+    color: "var(--app-text)",
+    transition:
+      "background-color 0.25s ease, color 0.25s ease",
   },
+
+  /* ====================================================
+     PHOTO
+  ==================================================== */
 
   photoSection: {
     display: "flex",
@@ -864,7 +893,8 @@ const styles = {
     alignItems: "center",
     paddingBottom: "30px",
     marginBottom: "30px",
-    borderBottom: "1px solid #e5e7eb",
+    borderBottom:
+      "1px solid var(--app-border)",
   },
 
   photoWrapper: {
@@ -878,21 +908,27 @@ const styles = {
     height: "130px",
     borderRadius: "50%",
     objectFit: "cover",
-    border: "4px solid #ffffff",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.12)",
+    border:
+      "4px solid var(--app-card)",
+    boxShadow:
+      "0 4px 15px var(--app-shadow-strong)",
   },
 
   profilePlaceholder: {
     width: "130px",
     height: "130px",
     borderRadius: "50%",
-    background: "#e8eefc",
-    color: "#2563eb",
+    background:
+      "var(--settings-icon-bg)",
+    color:
+      "var(--settings-primary)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    border: "4px solid #ffffff",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.12)",
+    border:
+      "4px solid var(--app-card)",
+    boxShadow:
+      "0 4px 15px var(--app-shadow-strong)",
   },
 
   cameraButton: {
@@ -902,8 +938,9 @@ const styles = {
     width: "40px",
     height: "40px",
     borderRadius: "50%",
-    border: "3px solid #ffffff",
-    background: "#2563eb",
+    border:
+      "3px solid var(--app-card)",
+    background: "var(--app-primary)",
     color: "#ffffff",
     display: "flex",
     alignItems: "center",
@@ -923,11 +960,13 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "7px",
-    border: "1px solid #2563eb",
+    border:
+      "1px solid var(--app-primary)",
     borderRadius: "9px",
     padding: "9px 14px",
-    background: "#eff6ff",
-    color: "#2563eb",
+    background:
+      "var(--settings-info-bg)",
+    color: "var(--app-primary)",
     fontSize: "13px",
     fontWeight: 600,
     cursor: "pointer",
@@ -937,11 +976,13 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "7px",
-    border: "1px solid #dc2626",
+    border:
+      "1px solid var(--settings-danger-border)",
     borderRadius: "9px",
     padding: "9px 14px",
-    background: "#fef2f2",
-    color: "#dc2626",
+    background:
+      "var(--settings-danger-bg)",
+    color: "var(--settings-danger)",
     fontSize: "13px",
     fontWeight: 600,
     cursor: "pointer",
@@ -949,14 +990,19 @@ const styles = {
 
   photoHint: {
     margin: "10px 0 0",
-    color: "#9ca3af",
+    color: "var(--app-secondary)",
     fontSize: "12px",
     textAlign: "center",
   },
 
+  /* ====================================================
+     INFORMATION GRID
+  ==================================================== */
+
   infoGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gridTemplateColumns:
+      "repeat(2, minmax(0, 1fr))",
     gap: "24px",
   },
 
@@ -970,69 +1016,98 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "7px",
-    color: "#374151",
+    color: "var(--app-text)",
     fontSize: "13px",
     fontWeight: 600,
   },
 
+  /* ====================================================
+     INPUTS
+  ==================================================== */
+
   input: {
     width: "100%",
     boxSizing: "border-box",
-    border: "1px solid #d1d5db",
+    border:
+      "1px solid var(--app-input-border)",
     borderRadius: "9px",
     padding: "12px 13px",
     fontSize: "14px",
-    color: "#172033",
+    color: "var(--app-text)",
     outline: "none",
-    background: "#ffffff",
+    background:
+      "var(--app-input-bg)",
   },
 
   textarea: {
     width: "100%",
     boxSizing: "border-box",
-    border: "1px solid #d1d5db",
+    border:
+      "1px solid var(--app-input-border)",
     borderRadius: "9px",
     padding: "12px 13px",
     fontSize: "14px",
-    color: "#172033",
+    color: "var(--app-text)",
     outline: "none",
     resize: "vertical",
     fontFamily: "inherit",
+    background:
+      "var(--app-input-bg)",
   },
+
+  /* ====================================================
+     VALUES
+  ==================================================== */
 
   value: {
     minHeight: "20px",
     padding: "12px 13px",
     borderRadius: "9px",
-    background: "#f9fafb",
-    color: "#172033",
+    background:
+      "var(--app-hover)",
+    color: "var(--app-text)",
     fontSize: "14px",
   },
 
   readOnlyValue: {
     padding: "12px 13px",
     borderRadius: "9px",
-    background: "#f3f4f6",
-    color: "#4b5563",
+    background:
+      "var(--app-hover)",
+    color: "var(--app-text)",
     fontSize: "14px",
+    border:
+      "1px solid var(--app-border)",
   },
 
   readOnlyHint: {
-    color: "#9ca3af",
+    color: "var(--app-secondary)",
     fontSize: "11px",
   },
+
+  /* ====================================================
+     RATING
+  ==================================================== */
 
   ratingValue: {
     minHeight: "20px",
     padding: "12px 13px",
     borderRadius: "9px",
-    background: "#fff7ed",
-    color: "#d97706",
+    background:
+      "var(--settings-info-bg)",
+    color:
+      "var(--settings-primary)",
     display: "flex",
     alignItems: "center",
     gap: "6px",
     fontSize: "14px",
+    border:
+      "1px solid var(--settings-info-border)",
   },
+
+  /* ====================================================
+     LANGUAGES
+  ==================================================== */
 
   languageContainer: {
     display: "flex",
@@ -1045,19 +1120,24 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "5px",
-    border: "1px solid #d1d5db",
+    border:
+      "1px solid var(--app-border)",
     borderRadius: "20px",
     padding: "8px 13px",
-    background: "#ffffff",
-    color: "#374151",
+    background:
+      "var(--app-card)",
+    color: "var(--app-text)",
     fontSize: "13px",
     cursor: "pointer",
   },
 
   languageButtonSelected: {
-    border: "1px solid #2563eb",
-    background: "#eff6ff",
-    color: "#2563eb",
+    border:
+      "1px solid var(--settings-primary)",
+    background:
+      "var(--settings-theme-selected-bg)",
+    color:
+      "var(--settings-primary)",
     fontWeight: 600,
   },
 
@@ -1072,40 +1152,61 @@ const styles = {
   languageTag: {
     borderRadius: "20px",
     padding: "7px 12px",
-    background: "#eff6ff",
-    color: "#2563eb",
+    background:
+      "var(--settings-theme-selected-bg)",
+    color:
+      "var(--settings-primary)",
     fontSize: "13px",
     fontWeight: 500,
   },
 
   emptyText: {
-    color: "#9ca3af",
+    color: "var(--app-secondary)",
     fontSize: "14px",
   },
+
+  noLanguages: {
+    color: "var(--app-secondary)",
+    fontSize: "13px",
+  },
+
+  /* ====================================================
+     ABOUT ME
+  ==================================================== */
 
   aboutValue: {
     padding: "13px",
     borderRadius: "9px",
-    background: "#f9fafb",
-    color: "#4b5563",
+    background:
+      "var(--app-hover)",
+    color: "var(--app-text)",
     fontSize: "14px",
     lineHeight: 1.6,
     minHeight: "60px",
+    border:
+      "1px solid var(--app-border)",
   },
 
   characterCount: {
     alignSelf: "flex-end",
-    color: "#9ca3af",
+    color: "var(--app-secondary)",
     fontSize: "11px",
   },
+
+  /* ====================================================
+     MESSAGES
+  ==================================================== */
 
   errorMessage: {
     marginBottom: "18px",
     padding: "12px 15px",
     borderRadius: "9px",
-    background: "#fef2f2",
-    border: "1px solid #fecaca",
-    color: "#b91c1c",
+    background:
+      "var(--settings-error-bg)",
+    border:
+      "1px solid var(--settings-error-border)",
+    color:
+      "var(--settings-error-text)",
     fontSize: "14px",
   },
 
@@ -1113,11 +1214,18 @@ const styles = {
     marginBottom: "18px",
     padding: "12px 15px",
     borderRadius: "9px",
-    background: "#f0fdf4",
-    border: "1px solid #bbf7d0",
-    color: "#15803d",
+    background:
+      "var(--settings-success-bg)",
+    border:
+      "1px solid var(--settings-success-border)",
+    color:
+      "var(--settings-success-text)",
     fontSize: "14px",
   },
+
+  /* ====================================================
+     BOTTOM ACTIONS
+  ==================================================== */
 
   bottomActions: {
     display: "flex",
@@ -1130,11 +1238,13 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "7px",
-    border: "1px solid #d1d5db",
+    border:
+      "1px solid var(--app-border)",
     borderRadius: "10px",
     padding: "12px 18px",
-    background: "#ffffff",
-    color: "#374151",
+    background:
+      "var(--app-card)",
+    color: "var(--app-text)",
     fontSize: "14px",
     fontWeight: 600,
     cursor: "pointer",
@@ -1147,12 +1257,17 @@ const styles = {
     border: "none",
     borderRadius: "10px",
     padding: "12px 18px",
-    background: "#16a34a",
+    background:
+      "var(--app-success)",
     color: "#ffffff",
     fontSize: "14px",
     fontWeight: 600,
     cursor: "pointer",
   },
+
+  /* ====================================================
+     LOADING
+  ==================================================== */
 
   loadingContainer: {
     minHeight: "400px",
@@ -1160,43 +1275,52 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    color: "#6b7280",
+    color: "var(--app-secondary)",
   },
 
   spinner: {
     width: "35px",
     height: "35px",
-    border: "4px solid #e5e7eb",
-    borderTop: "4px solid #2563eb",
+    border:
+      "4px solid var(--app-border)",
+    borderTop:
+      "4px solid var(--app-primary)",
     borderRadius: "50%",
-    animation: "spin 1s linear infinite",
+    animation:
+      "spin 1s linear infinite",
     marginBottom: "15px",
   },
+
+  /* ====================================================
+     ERROR CARD
+  ==================================================== */
 
   errorCard: {
     maxWidth: "500px",
     margin: "80px auto",
     padding: "35px",
-    background: "#ffffff",
+    background:
+      "var(--app-card)",
+    color:
+      "var(--app-text)",
     borderRadius: "16px",
     textAlign: "center",
-    boxShadow: "0 5px 20px rgba(0, 0, 0, 0.06)",
+    boxShadow:
+      "0 5px 20px var(--app-shadow)",
+    border:
+      "1px solid var(--app-border)",
   },
 
   primaryButton: {
     border: "none",
     borderRadius: "9px",
     padding: "11px 18px",
-    background: "#2563eb",
+    background:
+      "var(--app-primary)",
     color: "#ffffff",
     fontWeight: 600,
     cursor: "pointer",
     marginTop: "10px",
-  },
-
-  noLanguages: {
-    color: "#9ca3af",
-    fontSize: "13px",
   },
 };
 
