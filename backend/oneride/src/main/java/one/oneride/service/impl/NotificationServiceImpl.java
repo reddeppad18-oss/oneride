@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-
 import one.oneride.dto.NotificationResponse;
 import one.oneride.entity.Notification;
 import one.oneride.entity.User;
@@ -18,17 +17,10 @@ import one.oneride.service.NotificationService;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationServiceImpl
-        implements NotificationService {
+public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
-
     private final UserRepository userRepository;
-
-
-    // =========================================================
-    // CREATE NOTIFICATION
-    // =========================================================
 
     @Override
     @Transactional
@@ -45,11 +37,6 @@ public class NotificationServiceImpl
         );
     }
 
-
-    // =========================================================
-    // CREATE NOTIFICATION WITH TYPE
-    // =========================================================
-
     @Override
     @Transactional
     public void createNotification(
@@ -58,56 +45,62 @@ public class NotificationServiceImpl
             String message,
             NotificationType type) {
 
-        /*
-         * Master notification setting
-         */
-        if (!Boolean.TRUE.equals(
-                user.getNotificationsEnabled())) {
-
+        if (user == null) {
             return;
         }
 
+        /*
+         * If notifications are explicitly disabled,
+         * do not create the notification.
+         *
+         * NULL is treated as enabled for compatibility
+         * with older users/settings.
+         */
+        if (Boolean.FALSE.equals(user.getNotificationsEnabled())) {
+            return;
+        }
 
         /*
-         * Booking-specific notification setting
+         * Never allow a NULL notification type.
+         * Older code/data may pass NULL, so use GENERAL.
          */
-        if (isBookingNotification(type)
-                && !Boolean.TRUE.equals(
+        NotificationType notificationType =
+                type != null
+                        ? type
+                        : NotificationType.GENERAL;
+
+        /*
+         * Booking notification settings
+         */
+        if (isBookingNotification(notificationType)
+                && Boolean.FALSE.equals(
                         user.getBookingNotificationsEnabled())) {
 
             return;
         }
 
-
         /*
-         * Ride-specific notification setting
+         * Ride notification settings
          */
-        if (type == NotificationType.RIDE_UPDATE
-                && !Boolean.TRUE.equals(
+        if (notificationType == NotificationType.RIDE_UPDATE
+                && Boolean.FALSE.equals(
                         user.getRideNotificationsEnabled())) {
 
             return;
         }
-
 
         Notification notification =
                 Notification.builder()
                         .user(user)
                         .title(title)
                         .message(message)
-                        .type(type)
+                        .type(notificationType)
                         .read(false)
                         .createdAt(LocalDateTime.now())
                         .build();
 
-
         notificationRepository.save(notification);
     }
-
-
-    // =========================================================
-    // GET MY NOTIFICATIONS
-    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
@@ -123,11 +116,6 @@ public class NotificationServiceImpl
                 .toList();
     }
 
-
-    // =========================================================
-    // GET UNREAD NOTIFICATIONS
-    // =========================================================
-
     @Override
     @Transactional(readOnly = true)
     public List<NotificationResponse> getUnreadNotifications(
@@ -142,26 +130,15 @@ public class NotificationServiceImpl
                 .toList();
     }
 
-
-    // =========================================================
-    // GET UNREAD COUNT
-    // =========================================================
-
     @Override
     @Transactional(readOnly = true)
-    public long getUnreadCount(
-            String phoneNumber) {
+    public long getUnreadCount(String phoneNumber) {
 
         User user = getUser(phoneNumber);
 
         return notificationRepository
                 .countByUserAndReadFalse(user);
     }
-
-
-    // =========================================================
-    // MARK ONE AS READ
-    // =========================================================
 
     @Override
     @Transactional
@@ -179,35 +156,28 @@ public class NotificationServiceImpl
                                         "Notification not found"
                                 ));
 
-
         /*
-         * Security check:
-         * User can only modify their own notification.
+         * Make sure the notification belongs
+         * to the currently authenticated user.
          */
-        if (!notification.getUser()
-                .getId()
-                .equals(user.getId())) {
+        if (notification.getUser() == null
+                || notification.getUser().getId() == null
+                || user.getId() == null
+                || !notification.getUser()
+                        .getId()
+                        .equals(user.getId())) {
 
-            throw new RuntimeException(
-                    "Unauthorized"
-            );
+            throw new RuntimeException("Unauthorized");
         }
-
 
         notification.setRead(true);
 
         notificationRepository.save(notification);
     }
 
-
-    // =========================================================
-    // MARK ALL AS READ
-    // =========================================================
-
     @Override
     @Transactional
-    public void markAllAsRead(
-            String phoneNumber) {
+    public void markAllAsRead(String phoneNumber) {
 
         User user = getUser(phoneNumber);
 
@@ -217,39 +187,49 @@ public class NotificationServiceImpl
                                 user
                         );
 
-
-        for (Notification notification : notifications) {
-
-            notification.setRead(true);
+        if (notifications.isEmpty()) {
+            return;
         }
 
+        for (Notification notification : notifications) {
+            notification.setRead(true);
+        }
 
         notificationRepository.saveAll(notifications);
     }
 
+    /**
+     * Find the authenticated user using the phone number
+     * stored as the JWT subject.
+     */
+    private User getUser(String phoneNumber) {
 
-    // =========================================================
-    // GET USER
-    // =========================================================
+        if (phoneNumber == null || phoneNumber.isBlank()) {
 
-    private User getUser(
-            String phoneNumber) {
+            throw new RuntimeException(
+                    "Authenticated phone number is missing"
+            );
+        }
 
         return userRepository
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(() ->
                         new RuntimeException(
-                                "User not found"
+                                "User not found for phone number: "
+                                        + phoneNumber
                         ));
     }
 
-
-    // =========================================================
-    // CHECK BOOKING NOTIFICATION
-    // =========================================================
-
+    /**
+     * Determines whether the notification is related
+     * to a booking.
+     */
     private boolean isBookingNotification(
             NotificationType type) {
+
+        if (type == null) {
+            return false;
+        }
 
         return type == NotificationType.BOOKING_REQUEST
                 || type == NotificationType.BOOKING_CONFIRMED
@@ -257,20 +237,33 @@ public class NotificationServiceImpl
                 || type == NotificationType.BOOKING_CANCELLED;
     }
 
-
-    // =========================================================
-    // MAP ENTITY → RESPONSE
-    // =========================================================
-
+    /**
+     * Converts Notification entity to NotificationResponse.
+     *
+     * IMPORTANT:
+     * Some older database records have NULL in the
+     * notification type column. Those records are treated
+     * as GENERAL instead of causing a NullPointerException.
+     */
     private NotificationResponse mapToResponse(
             Notification notification) {
+
+        String type =
+                notification.getType() != null
+                        ? notification.getType().name()
+                        : NotificationType.GENERAL.name();
+
+        boolean read =
+                Boolean.TRUE.equals(
+                        notification.getRead()
+                );
 
         return new NotificationResponse(
                 notification.getId(),
                 notification.getTitle(),
                 notification.getMessage(),
-                notification.getType().name(),
-                notification.getRead(),
+                type,
+                read,
                 notification.getCreatedAt()
         );
     }
