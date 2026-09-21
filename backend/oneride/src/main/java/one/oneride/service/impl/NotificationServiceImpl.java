@@ -22,6 +22,10 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
+    // =========================================================
+    // CREATE GENERAL NOTIFICATION
+    // =========================================================
+
     @Override
     @Transactional
     public void createNotification(
@@ -37,6 +41,10 @@ public class NotificationServiceImpl implements NotificationService {
         );
     }
 
+    // =========================================================
+    // CREATE NOTIFICATION
+    // =========================================================
+
     @Override
     @Transactional
     public void createNotification(
@@ -49,29 +57,29 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        /*
-         * If notifications are explicitly disabled,
-         * do not create the notification.
-         *
-         * NULL is treated as enabled for compatibility
-         * with older users/settings.
-         */
-        if (Boolean.FALSE.equals(user.getNotificationsEnabled())) {
+        // -----------------------------------------------------
+        // Global notification setting
+        // -----------------------------------------------------
+
+        if (Boolean.FALSE.equals(
+                user.getNotificationsEnabled())) {
+
             return;
         }
 
-        /*
-         * Never allow a NULL notification type.
-         * Older code/data may pass NULL, so use GENERAL.
-         */
+        // -----------------------------------------------------
+        // Prevent null notification type
+        // -----------------------------------------------------
+
         NotificationType notificationType =
                 type != null
                         ? type
                         : NotificationType.GENERAL;
 
-        /*
-         * Booking notification settings
-         */
+        // -----------------------------------------------------
+        // Booking notification setting
+        // -----------------------------------------------------
+
         if (isBookingNotification(notificationType)
                 && Boolean.FALSE.equals(
                         user.getBookingNotificationsEnabled())) {
@@ -79,9 +87,10 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        /*
-         * Ride notification settings
-         */
+        // -----------------------------------------------------
+        // Ride notification setting
+        // -----------------------------------------------------
+
         if (notificationType == NotificationType.RIDE_UPDATE
                 && Boolean.FALSE.equals(
                         user.getRideNotificationsEnabled())) {
@@ -89,11 +98,41 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
+        // -----------------------------------------------------
+        // Prevent null title
+        // -----------------------------------------------------
+
+        String notificationTitle = title;
+
+        if (notificationTitle == null
+                || notificationTitle.isBlank()) {
+
+            notificationTitle =
+                    getDefaultTitle(notificationType);
+        }
+
+        // -----------------------------------------------------
+        // Prevent null message
+        // -----------------------------------------------------
+
+        String notificationMessage = message;
+
+        if (notificationMessage == null
+                || notificationMessage.isBlank()) {
+
+            notificationMessage =
+                    "You have a new notification.";
+        }
+
+        // -----------------------------------------------------
+        // Create notification
+        // -----------------------------------------------------
+
         Notification notification =
                 Notification.builder()
                         .user(user)
-                        .title(title)
-                        .message(message)
+                        .title(notificationTitle)
+                        .message(notificationMessage)
                         .type(notificationType)
                         .read(false)
                         .createdAt(LocalDateTime.now())
@@ -101,6 +140,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         notificationRepository.save(notification);
     }
+
+    // =========================================================
+    // GET ALL NOTIFICATIONS
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
@@ -116,6 +159,10 @@ public class NotificationServiceImpl implements NotificationService {
                 .toList();
     }
 
+    // =========================================================
+    // GET UNREAD NOTIFICATIONS
+    // =========================================================
+
     @Override
     @Transactional(readOnly = true)
     public List<NotificationResponse> getUnreadNotifications(
@@ -130,15 +177,24 @@ public class NotificationServiceImpl implements NotificationService {
                 .toList();
     }
 
+    // =========================================================
+    // GET UNREAD COUNT
+    // =========================================================
+
     @Override
     @Transactional(readOnly = true)
-    public long getUnreadCount(String phoneNumber) {
+    public long getUnreadCount(
+            String phoneNumber) {
 
         User user = getUser(phoneNumber);
 
         return notificationRepository
                 .countByUserAndReadFalse(user);
     }
+
+    // =========================================================
+    // MARK ONE AS READ
+    // =========================================================
 
     @Override
     @Transactional
@@ -154,12 +210,13 @@ public class NotificationServiceImpl implements NotificationService {
                         .orElseThrow(() ->
                                 new RuntimeException(
                                         "Notification not found"
-                                ));
+                                )
+                        );
 
-        /*
-         * Make sure the notification belongs
-         * to the currently authenticated user.
-         */
+        // -----------------------------------------------------
+        // Verify ownership
+        // -----------------------------------------------------
+
         if (notification.getUser() == null
                 || notification.getUser().getId() == null
                 || user.getId() == null
@@ -167,7 +224,9 @@ public class NotificationServiceImpl implements NotificationService {
                         .getId()
                         .equals(user.getId())) {
 
-            throw new RuntimeException("Unauthorized");
+            throw new RuntimeException(
+                    "Unauthorized"
+            );
         }
 
         notification.setRead(true);
@@ -175,9 +234,14 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.save(notification);
     }
 
+    // =========================================================
+    // MARK ALL AS READ
+    // =========================================================
+
     @Override
     @Transactional
-    public void markAllAsRead(String phoneNumber) {
+    public void markAllAsRead(
+            String phoneNumber) {
 
         User user = getUser(phoneNumber);
 
@@ -192,19 +256,22 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         for (Notification notification : notifications) {
+
             notification.setRead(true);
         }
 
         notificationRepository.saveAll(notifications);
     }
 
-    /**
-     * Find the authenticated user using the phone number
-     * stored as the JWT subject.
-     */
-    private User getUser(String phoneNumber) {
+    // =========================================================
+    // GET USER
+    // =========================================================
 
-        if (phoneNumber == null || phoneNumber.isBlank()) {
+    private User getUser(
+            String phoneNumber) {
+
+        if (phoneNumber == null
+                || phoneNumber.isBlank()) {
 
             throw new RuntimeException(
                     "Authenticated phone number is missing"
@@ -217,13 +284,14 @@ public class NotificationServiceImpl implements NotificationService {
                         new RuntimeException(
                                 "User not found for phone number: "
                                         + phoneNumber
-                        ));
+                        )
+                );
     }
 
-    /**
-     * Determines whether the notification is related
-     * to a booking.
-     */
+    // =========================================================
+    // CHECK BOOKING NOTIFICATION
+    // =========================================================
+
     private boolean isBookingNotification(
             NotificationType type) {
 
@@ -237,31 +305,102 @@ public class NotificationServiceImpl implements NotificationService {
                 || type == NotificationType.BOOKING_CANCELLED;
     }
 
-    /**
-     * Converts Notification entity to NotificationResponse.
-     *
-     * IMPORTANT:
-     * Some older database records have NULL in the
-     * notification type column. Those records are treated
-     * as GENERAL instead of causing a NullPointerException.
-     */
+    // =========================================================
+    // DEFAULT TITLE FOR NEW NOTIFICATIONS
+    // =========================================================
+
+    private String getDefaultTitle(
+            NotificationType type) {
+
+        if (type == null) {
+            return "New Notification";
+        }
+
+        switch (type) {
+
+            case BOOKING_REQUEST:
+                return "New Booking Request";
+
+            case BOOKING_CONFIRMED:
+                return "Booking Confirmed";
+
+            case BOOKING_REJECTED:
+                return "Booking Rejected";
+
+            case BOOKING_CANCELLED:
+                return "Booking Cancelled";
+
+            case RIDE_UPDATE:
+                return "Ride Update";
+
+            case GENERAL:
+            default:
+                return "New Notification";
+        }
+    }
+
+    // =========================================================
+    // MAP ENTITY → RESPONSE
+    // =========================================================
+
     private NotificationResponse mapToResponse(
             Notification notification) {
+
+        // -----------------------------------------------------
+        // Handle NULL notification type from old database rows
+        // -----------------------------------------------------
 
         String type =
                 notification.getType() != null
                         ? notification.getType().name()
                         : NotificationType.GENERAL.name();
 
+        // -----------------------------------------------------
+        // Handle NULL title from old database rows
+        // -----------------------------------------------------
+
+        String title =
+                notification.getTitle();
+
+        if (title == null
+                || title.isBlank()) {
+
+            title = getDefaultTitle(
+                    notification.getType()
+            );
+        }
+
+        // -----------------------------------------------------
+        // Handle NULL message from old database rows
+        // -----------------------------------------------------
+
+        String message =
+                notification.getMessage();
+
+        if (message == null
+                || message.isBlank()) {
+
+            message =
+                    "You have a new notification.";
+        }
+
+        // -----------------------------------------------------
+        // Handle NULL read value
+        // -----------------------------------------------------
+
         boolean read =
                 Boolean.TRUE.equals(
                         notification.getRead()
                 );
 
+        // -----------------------------------------------------
+        // Return response
+        // -----------------------------------------------------
+
         return new NotificationResponse(
                 notification.getId(),
-                notification.getTitle(),
-                notification.getMessage(),
+                title,
+                message,
                 type,
                 read,
                 notification.getCreatedAt()

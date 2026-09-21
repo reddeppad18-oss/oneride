@@ -16,9 +16,30 @@ function DashboardLayout() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   /*
-   * =========================
+   * =========================================================
+   * THEME SYNCHRONIZATION
+   * =========================================================
+   *
+   * Make sure the saved theme remains applied whenever the
+   * protected application loads.
+   */
+
+  useEffect(() => {
+    const savedTheme =
+      localStorage.getItem("theme") || "light";
+
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+
+  /*
+   * =========================================================
    * LOAD NOTIFICATION COUNT
-   * =========================
+   * =========================================================
    */
 
   const loadUnreadCount = async () => {
@@ -36,10 +57,11 @@ function DashboardLayout() {
     }
   };
 
+
   /*
-   * =========================
+   * =========================================================
    * NOTIFICATION REFRESH
-   * =========================
+   * =========================================================
    */
 
   useEffect(() => {
@@ -52,10 +74,11 @@ function DashboardLayout() {
     return () => clearInterval(interval);
   }, []);
 
+
   /*
-   * =========================
+   * =========================================================
    * LOGOUT
-   * =========================
+   * =========================================================
    */
 
   const handleLogout = () => {
@@ -66,10 +89,11 @@ function DashboardLayout() {
     });
   };
 
+
   /*
-   * =========================
+   * =========================================================
    * NAVIGATION
-   * =========================
+   * =========================================================
    */
 
   const navigateTo = (path) => {
@@ -77,20 +101,23 @@ function DashboardLayout() {
     navigate(path);
   };
 
+
   const handleBottomMenu = (menu) => {
     setActiveMenu(
       activeMenu === menu ? null : menu
     );
   };
 
+
   const isActive = (path) => {
     return location.pathname === path;
   };
 
+
   /*
-   * =========================
+   * =========================================================
    * NOTIFICATIONS
-   * =========================
+   * =========================================================
    */
 
   const handleNotifications = () => {
@@ -98,12 +125,13 @@ function DashboardLayout() {
     navigate("/notifications");
   };
 
+
   return (
     <div className="dashboard-layout">
 
-      {/* =========================
+      {/* =====================================================
           MOBILE APP HEADER
-      ========================= */}
+      ===================================================== */}
 
       <header className="mobile-app-header">
 
@@ -123,9 +151,10 @@ function DashboardLayout() {
 
         </div>
 
-        {/* =========================
+
+        {/* ===================================================
             NOTIFICATION BUTTON
-        ========================= */}
+        =================================================== */}
 
         <button
           className="notification-header-button"
@@ -147,17 +176,19 @@ function DashboardLayout() {
 
       </header>
 
-      {/* =========================
+
+      {/* =====================================================
           PAGE CONTENT
-      ========================= */}
+      ===================================================== */}
 
       <main className="dashboard-content">
         <Outlet />
       </main>
 
-      {/* =========================
+
+      {/* =====================================================
           RIDES POPUP
-      ========================= */}
+      ===================================================== */}
 
       {activeMenu === "rides" && (
         <div className="bottom-popup">
@@ -192,9 +223,10 @@ function DashboardLayout() {
         </div>
       )}
 
-      {/* =========================
+
+      {/* =====================================================
           RENTALS POPUP
-      ========================= */}
+      ===================================================== */}
 
       {activeMenu === "rentals" && (
         <div className="bottom-popup">
@@ -238,9 +270,10 @@ function DashboardLayout() {
         </div>
       )}
 
-      {/* =========================
+
+      {/* =====================================================
           PROFILE POPUP
-      ========================= */}
+      ===================================================== */}
 
       {activeMenu === "profile" && (
         <div className="bottom-popup profile-popup">
@@ -271,13 +304,14 @@ function DashboardLayout() {
             <span>⚙️</span>
             Settings
           </button>
-          
+
         </div>
       )}
 
-      {/* =========================
+
+      {/* =====================================================
           BOTTOM NAVIGATION
-      ========================= */}
+      ===================================================== */}
 
       <nav className="bottom-navigation">
 
@@ -302,6 +336,7 @@ function DashboardLayout() {
           </span>
         </button>
 
+
         {/* RIDES */}
 
         <button
@@ -322,6 +357,7 @@ function DashboardLayout() {
             Rides
           </span>
         </button>
+
 
         {/* RENTALS */}
 
@@ -344,6 +380,7 @@ function DashboardLayout() {
           </span>
         </button>
 
+
         {/* BOOKINGS */}
 
         <button
@@ -364,6 +401,7 @@ function DashboardLayout() {
             Bookings
           </span>
         </button>
+
 
         {/* PROFILE */}
 

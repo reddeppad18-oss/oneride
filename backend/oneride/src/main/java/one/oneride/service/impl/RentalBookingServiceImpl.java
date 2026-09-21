@@ -7,6 +7,7 @@ import one.oneride.dto.RentalBookingResponse;
 import one.oneride.entity.RentalBooking;
 import one.oneride.entity.RentalListing;
 import one.oneride.entity.User;
+import one.oneride.enums.NotificationType;
 import one.oneride.enums.RentalBookingStatus;
 import one.oneride.enums.RentalStatus;
 import one.oneride.repository.RentalBookingRepository;
@@ -26,7 +27,6 @@ import java.util.List;
 public class RentalBookingServiceImpl
         implements RentalBookingService {
 
-
     private final RentalBookingRepository rentalBookingRepository;
 
     private final RentalRepository rentalRepository;
@@ -41,6 +41,7 @@ public class RentalBookingServiceImpl
     // =========================================================
 
     @Override
+    @Transactional
     public RentalBookingResponse createBooking(
             String phoneNumber,
             CreateRentalBookingRequest request) {
@@ -152,7 +153,10 @@ public class RentalBookingServiceImpl
                 );
 
 
-        // Notify owner
+        // -----------------------------------------------------
+        // Notify rental owner
+        // -----------------------------------------------------
+
         notificationService.createNotification(
                 rental.getOwner(),
                 "New Rental Booking",
@@ -160,7 +164,8 @@ public class RentalBookingServiceImpl
                         + " requested your "
                         + rental.getBrand()
                         + " "
-                        + rental.getModel()
+                        + rental.getModel(),
+                NotificationType.RENTAL_BOOKING_REQUEST
         );
 
 
@@ -173,6 +178,7 @@ public class RentalBookingServiceImpl
     // =========================================================
 
     @Override
+    @Transactional(readOnly = true)
     public List<RentalBookingResponse> getMyBookings(
             String phoneNumber) {
 
@@ -197,6 +203,7 @@ public class RentalBookingServiceImpl
     // =========================================================
 
     @Override
+    @Transactional(readOnly = true)
     public List<RentalBookingResponse> getBookingsForRental(
             Long rentalId,
             String phoneNumber) {
@@ -298,7 +305,10 @@ public class RentalBookingServiceImpl
         );
 
 
+        // -----------------------------------------------------
         // Notify customer
+        // -----------------------------------------------------
+
         notificationService.createNotification(
                 booking.getCustomer(),
                 "Rental Confirmed",
@@ -306,7 +316,8 @@ public class RentalBookingServiceImpl
                         + rental.getBrand()
                         + " "
                         + rental.getModel()
-                        + " has been confirmed."
+                        + " has been confirmed.",
+                NotificationType.RENTAL_BOOKING_CONFIRMED
         );
 
 
@@ -323,6 +334,7 @@ public class RentalBookingServiceImpl
     // =========================================================
 
     @Override
+    @Transactional
     public MessageResponse rejectBooking(
             Long bookingId,
             String phoneNumber) {
@@ -366,7 +378,10 @@ public class RentalBookingServiceImpl
         );
 
 
+        // -----------------------------------------------------
         // Notify customer
+        // -----------------------------------------------------
+
         notificationService.createNotification(
                 booking.getCustomer(),
                 "Rental Booking Rejected",
@@ -374,7 +389,8 @@ public class RentalBookingServiceImpl
                         + rental.getBrand()
                         + " "
                         + rental.getModel()
-                        + " has been rejected."
+                        + " has been rejected.",
+                NotificationType.RENTAL_BOOKING_REJECTED
         );
 
 
@@ -391,6 +407,7 @@ public class RentalBookingServiceImpl
     // =========================================================
 
     @Override
+    @Transactional
     public MessageResponse cancelBooking(
             Long bookingId,
             String phoneNumber) {
@@ -436,7 +453,10 @@ public class RentalBookingServiceImpl
         );
 
 
+        // -----------------------------------------------------
         // Notify owner
+        // -----------------------------------------------------
+
         notificationService.createNotification(
                 rental.getOwner(),
                 "Rental Booking Cancelled",
@@ -444,7 +464,8 @@ public class RentalBookingServiceImpl
                         + " cancelled the rental booking for "
                         + rental.getBrand()
                         + " "
-                        + rental.getModel()
+                        + rental.getModel(),
+                NotificationType.RENTAL_BOOKING_CANCELLED
         );
 
 
@@ -461,6 +482,7 @@ public class RentalBookingServiceImpl
     // =========================================================
 
     @Override
+    @Transactional
     public MessageResponse completeBooking(
             Long bookingId,
             String phoneNumber) {
@@ -515,7 +537,10 @@ public class RentalBookingServiceImpl
         );
 
 
+        // -----------------------------------------------------
         // Notify customer
+        // -----------------------------------------------------
+
         notificationService.createNotification(
                 booking.getCustomer(),
                 "Rental Completed",
@@ -523,7 +548,8 @@ public class RentalBookingServiceImpl
                         + rental.getBrand()
                         + " "
                         + rental.getModel()
-                        + " has been completed."
+                        + " has been completed.",
+                NotificationType.RENTAL_BOOKING_COMPLETED
         );
 
 

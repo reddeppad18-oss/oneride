@@ -8,20 +8,20 @@ import one.oneride.enums.NotificationType;
 
 public interface NotificationService {
 
-    /*
-     * Existing method used by BookingServiceImpl.
-     *
-     * This keeps your current booking code working.
-     */
+    // =========================================================
+    // CREATE GENERAL NOTIFICATION
+    // =========================================================
+
     void createNotification(
             User user,
             String title,
             String message
     );
 
-    /*
-     * Create notification with explicit type.
-     */
+    // =========================================================
+    // CREATE NOTIFICATION WITH TYPE
+    // =========================================================
+
     void createNotification(
             User user,
             String title,
@@ -29,38 +29,43 @@ public interface NotificationService {
             NotificationType type
     );
 
-    /*
-     * Get all notifications for a user.
-     */
+    // =========================================================
+    // GET ALL NOTIFICATIONS
+    // =========================================================
+
     List<NotificationResponse> getMyNotifications(
             String phoneNumber
     );
 
-    /*
-     * Get unread notifications.
-     */
+    // =========================================================
+    // GET UNREAD NOTIFICATIONS
+    // =========================================================
+
     List<NotificationResponse> getUnreadNotifications(
             String phoneNumber
     );
 
-    /*
-     * Get unread notification count.
-     */
+    // =========================================================
+    // GET UNREAD COUNT
+    // =========================================================
+
     long getUnreadCount(
             String phoneNumber
     );
 
-    /*
-     * Mark one notification as read.
-     */
+    // =========================================================
+    // MARK ONE AS READ
+    // =========================================================
+
     void markAsRead(
             Long notificationId,
             String phoneNumber
     );
 
-    /*
-     * Mark all notifications as read.
-     */
+    // =========================================================
+    // MARK ALL AS READ
+    // =========================================================
+
     void markAllAsRead(
             String phoneNumber
     );
