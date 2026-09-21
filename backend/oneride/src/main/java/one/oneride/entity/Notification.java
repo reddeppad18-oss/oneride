@@ -33,42 +33,64 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*
-     * User who receives the notification
-     */
+    // =========================================================
+    // USER
+    // =========================================================
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(
+            name = "user_id",
+            nullable = false
+    )
     private User user;
 
-    /*
-     * Notification title
-     */
-    @Column(nullable = false, length = 200)
+    // =========================================================
+    // TITLE
+    // =========================================================
+
+    @Column(
+            nullable = false,
+            length = 200
+    )
     private String title;
 
-    /*
-     * Notification message
-     */
-    @Column(nullable = false, length = 1000)
+    // =========================================================
+    // MESSAGE
+    // =========================================================
+
+    @Column(
+            nullable = false,
+            length = 1000
+    )
     private String message;
 
-    /*
-     * Notification category
-     */
+    // =========================================================
+    // NOTIFICATION TYPE
+    // =========================================================
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(
+            nullable = false,
+            length = 50
+    )
     private NotificationType type;
 
-    /*
-     * Whether the user has opened/read the notification
-     */
-    @Column(nullable = false)
+    // =========================================================
+    // READ STATUS
+    // =========================================================
+
+    @Column(
+            nullable = false
+    )
     @Builder.Default
     private Boolean read = false;
 
-    /*
-     * Creation time
-     */
-    @Column(nullable = false)
+    // =========================================================
+    // CREATED TIME
+    // =========================================================
+
+    @Column(
+            nullable = false
+    )
     private LocalDateTime createdAt;
 }

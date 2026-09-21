@@ -23,7 +23,6 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-
     // =========================================================
     // GET ALL NOTIFICATIONS
     // =========================================================
@@ -36,7 +35,6 @@ public class NotificationController {
                 authentication.getName()
         );
     }
-
 
     // =========================================================
     // GET UNREAD NOTIFICATIONS
@@ -51,7 +49,6 @@ public class NotificationController {
         );
     }
 
-
     // =========================================================
     // GET UNREAD COUNT
     // =========================================================
@@ -64,7 +61,6 @@ public class NotificationController {
                 authentication.getName()
         );
     }
-
 
     // =========================================================
     // MARK ONE AS READ
@@ -81,12 +77,9 @@ public class NotificationController {
         );
 
         return MessageResponse.builder()
-                .message(
-                        "Notification marked as read"
-                )
+                .message("Notification marked as read")
                 .build();
     }
-
 
     // =========================================================
     // MARK ALL AS READ
@@ -101,9 +94,7 @@ public class NotificationController {
         );
 
         return MessageResponse.builder()
-                .message(
-                        "All notifications marked as read"
-                )
+                .message("All notifications marked as read")
                 .build();
     }
 }
