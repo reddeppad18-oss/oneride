@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
+
+import {
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "../api/notificationService";
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -8,67 +13,115 @@ function Notifications() {
 
   const loadNotifications = async () => {
     try {
+      setLoading(true);
       setError("");
 
-      const response = await api.get("/notifications");
+      const data = await getNotifications();
 
       setNotifications(
-        Array.isArray(response.data)
-          ? response.data
+        Array.isArray(data)
+          ? data
           : []
       );
+
     } catch (err) {
+
       console.error(
         "Failed to load notifications:",
         err
       );
 
-      setError("Unable to load notifications.");
+      console.error(
+        "Status:",
+        err.response?.status
+      );
+
+      console.error(
+        "Response:",
+        err.response?.data
+      );
+
+      console.error(
+        "Request URL:",
+        err.config?.url
+      );
+
+      console.error(
+        "Base URL:",
+        err.config?.baseURL
+      );
+
+      setError(
+        "Unable to load notifications."
+      );
+
     } finally {
       setLoading(false);
     }
   };
 
-  const markAsRead = async (notificationId) => {
+  const markAsRead = async (
+    notificationId
+  ) => {
     try {
-      await api.put(
-        `/notifications/${notificationId}/read`
+
+      await markNotificationAsRead(
+        notificationId
       );
 
-      setNotifications((previous) =>
-        previous.map((notification) =>
-          notification.id === notificationId
-            ? {
-                ...notification,
-                read: true,
-              }
-            : notification
-        )
+      setNotifications(
+        (previous) =>
+          previous.map(
+            (notification) =>
+              notification.id ===
+              notificationId
+                ? {
+                    ...notification,
+                    read: true,
+                  }
+                : notification
+          )
       );
+
     } catch (err) {
+
       console.error(
         "Failed to mark notification as read:",
         err
+      );
+
+      console.error(
+        "Response:",
+        err.response?.data
       );
     }
   };
 
   const markAllAsRead = async () => {
     try {
-      await api.put(
-        "/notifications/read-all"
+
+      await markAllNotificationsAsRead();
+
+      setNotifications(
+        (previous) =>
+          previous.map(
+            (notification) => ({
+              ...notification,
+              read: true,
+            })
+          )
       );
 
-      setNotifications((previous) =>
-        previous.map((notification) => ({
-          ...notification,
-          read: true,
-        }))
-      );
     } catch (err) {
+
       console.error(
         "Failed to mark all notifications as read:",
         err
+      );
+
+      console.error(
+        "Response:",
+        err.response?.data
       );
     }
   };
@@ -81,107 +134,161 @@ function Notifications() {
     <div className="notifications-page">
 
       <div className="page-header">
+
         <div>
           <h1>Notifications</h1>
+
           <p>
-            Stay updated with your Alrides activity.
+            Stay updated with your
+            Alrides activity.
           </p>
         </div>
 
         {notifications.some(
-          (notification) => !notification.read
+          (notification) =>
+            !notification.read
         ) && (
+
           <button
             type="button"
             onClick={markAllAsRead}
           >
             Mark all as read
           </button>
+
         )}
+
       </div>
 
       {loading && (
+
         <div className="empty-state">
-          <p>Loading notifications...</p>
+          <p>
+            Loading notifications...
+          </p>
         </div>
+
       )}
 
-      {!loading && error && (
-        <div className="empty-state">
-          <p>{error}</p>
+      {!loading &&
+        error && (
 
-          <button
-            type="button"
-            onClick={loadNotifications}
-          >
-            Try Again
-          </button>
-        </div>
-      )}
+          <div className="empty-state">
+
+            <p>{error}</p>
+
+            <button
+              type="button"
+              onClick={
+                loadNotifications
+              }
+            >
+              Try Again
+            </button>
+
+          </div>
+
+        )}
 
       {!loading &&
         !error &&
         notifications.length === 0 && (
+
           <div className="empty-state">
-            <div style={{ fontSize: "40px" }}>
+
+            <div
+              style={{
+                fontSize: "40px",
+              }}
+            >
               🔔
             </div>
 
-            <h3>No notifications yet</h3>
+            <h3>
+              No notifications yet
+            </h3>
 
             <p>
-              You will see booking and ride updates here.
+              You will see booking and
+              ride updates here.
             </p>
+
           </div>
+
         )}
 
       {!loading &&
         !error &&
         notifications.length > 0 && (
+
           <div className="notifications-list">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={
-                  notification.read
-                    ? "notification-item"
-                    : "notification-item unread"
-                }
-                onClick={() => {
-                  if (!notification.read) {
-                    markAsRead(notification.id);
+
+            {notifications.map(
+              (notification) => (
+
+                <div
+                  key={notification.id}
+                  className={
+                    notification.read
+                      ? "notification-item"
+                      : "notification-item unread"
                   }
-                }}
-              >
-                <div className="notification-icon">
-                  🔔
-                </div>
+                  onClick={() => {
 
-                <div className="notification-content">
-                  <h3>
-                    {notification.title}
-                  </h3>
+                    if (
+                      !notification.read
+                    ) {
+                      markAsRead(
+                        notification.id
+                      );
+                    }
 
-                  <p>
-                    {notification.message}
-                  </p>
+                  }}
+                >
 
-                  {notification.createdAt && (
-                    <small>
-                      {new Date(
-                        notification.createdAt
-                      ).toLocaleString()}
-                    </small>
+                  <div className="notification-icon">
+                    🔔
+                  </div>
+
+                  <div className="notification-content">
+
+                    <h3>
+                      {notification.title}
+                    </h3>
+
+                    <p>
+                      {notification.message}
+                    </p>
+
+                    {notification.createdAt && (
+
+                      <small>
+                        {new Date(
+                          notification.createdAt
+                        ).toLocaleString()}
+                      </small>
+
+                    )}
+
+                  </div>
+
+                  {!notification.read && (
+
+                    <span
+                      className="notification-unread-dot"
+                    />
+
                   )}
+
                 </div>
 
-                {!notification.read && (
-                  <span className="notification-unread-dot" />
-                )}
-              </div>
-            ))}
+              )
+            )}
+
           </div>
+
         )}
+
     </div>
   );
 }
