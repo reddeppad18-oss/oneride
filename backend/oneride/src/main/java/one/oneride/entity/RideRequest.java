@@ -1,0 +1,66 @@
+package one.oneride.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import one.oneride.enums.RideRequestStatus;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "ride_requests")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class RideRequest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private User customer;
+
+    @Column(nullable = false, length = 300)
+    private String pickupAddress;
+
+    @Column(nullable = false)
+    private Double pickupLatitude;
+
+    @Column(nullable = false)
+    private Double pickupLongitude;
+
+    @Column(nullable = false, length = 300)
+    private String destinationAddress;
+
+    @Column(nullable = false)
+    private Double destinationLatitude;
+
+    @Column(nullable = false)
+    private Double destinationLongitude;
+
+    @Column(nullable = false)
+    private Integer requestedSeats;
+
+    @Column(nullable = false)
+    private Double offeredPrice;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean negotiable = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    @Builder.Default
+    private RideRequestStatus status =
+            RideRequestStatus.SEARCHING;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime expiresAt;
+
+    private Double finalPrice;
+}

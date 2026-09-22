@@ -19,8 +19,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final AuthenticationProvider authenticationProvider;
+    private final JwtAuthenticationFilter
+            jwtAuthenticationFilter;
+
+    private final AuthenticationProvider
+            authenticationProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -30,7 +33,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .cors(cors ->
-                        cors.configurationSource(corsConfigurationSource())
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
                 )
 
                 .sessionManagement(session ->
@@ -40,13 +45,37 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers(
+                                "/api/auth/**"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                "/error"
+                        ).permitAll()
+
+                        /*
+                         * WebSocket handshake is public.
+                         *
+                         * JWT authentication happens on the
+                         * STOMP CONNECT frame through
+                         * WebSocketAuthInterceptor.
+                         */
+                        .requestMatchers(
+                                "/ws/**"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.OPTIONS,
+                                "/**"
+                        ).permitAll()
+
                         .anyRequest().authenticated()
                 )
 
-                .authenticationProvider(authenticationProvider)
+                .authenticationProvider(
+                        authenticationProvider
+                )
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,
@@ -57,9 +86,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource
+    corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration configuration =
+                new CorsConfiguration();
 
         configuration.setAllowedOriginPatterns(
                 List.of(
