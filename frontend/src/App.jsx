@@ -25,6 +25,9 @@ import RentalBookingHistory from "./pages/RentalBookingHistory";
 import RentalBookingRequests from "./pages/RentalBookingRequests";
 import MyRentals from "./pages/MyRentals";
 
+import ProviderRideRequests from "./pages/ProviderRideRequests";
+import MyRideRequests from "./pages/MyRideRequests";
+
 import MyProfile from "./pages/MyProfile";
 import MyActivity from "./pages/MyActivity";
 import UserProfile from "./pages/UserProfile";
@@ -152,6 +155,16 @@ function App() {
             path="/ride-bookings/:rideId"
             element={<RideBookings />}
           />
+
+          <Route
+            path="/my-ride-requests"
+            element={<MyRideRequests />}
+          />
+
+          <Route 
+            path="/provider-ride-requests" 
+            element={<ProviderRideRequests />}
+             />
 
 
           {/* =========================
