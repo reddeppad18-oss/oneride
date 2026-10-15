@@ -4,7 +4,19 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { Bell } from "lucide-react";
+import {
+  Bell,
+  Home,
+  CarFront,
+  Search,
+  ClipboardList,
+  KeyRound,
+  UserRound,
+  Settings as SettingsIcon,
+  Activity,
+  Handshake,
+  History,
+} from "lucide-react";
 
 import { getUnreadCount } from "../api/notificationService";
 
@@ -15,33 +27,18 @@ function DashboardLayout() {
   const [activeMenu, setActiveMenu] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  /*
-   * =========================================================
-   * THEME SYNCHRONIZATION
-   * =========================================================
-   *
-   * Make sure the saved theme remains applied whenever the
-   * protected application loads.
-   */
-
+  // Theme synchronization
   useEffect(() => {
     const savedTheme =
       localStorage.getItem("theme") || "light";
 
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle( 
+      "dark",
+      savedTheme === "dark"
+    );
   }, []);
 
-
-  /*
-   * =========================================================
-   * LOAD NOTIFICATION COUNT
-   * =========================================================
-   */
-
+  // Load unread notification count
   const loadUnreadCount = async () => {
     try {
       const count = await getUnreadCount();
@@ -57,30 +54,19 @@ function DashboardLayout() {
     }
   };
 
-
-  /*
-   * =========================================================
-   * NOTIFICATION REFRESH
-   * =========================================================
-   */
-
+  // Refresh notifications every 30 seconds
   useEffect(() => {
     loadUnreadCount();
 
-    const interval = setInterval(() => {
-      loadUnreadCount();
-    }, 30000);
+    const interval = setInterval(
+      loadUnreadCount,
+      30000
+    );
 
     return () => clearInterval(interval);
   }, []);
 
-
-  /*
-   * =========================================================
-   * LOGOUT
-   * =========================================================
-   */
-
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
 
@@ -89,79 +75,58 @@ function DashboardLayout() {
     });
   };
 
-
-  /*
-   * =========================================================
-   * NAVIGATION
-   * =========================================================
-   */
-
+  // Navigation helpers
   const navigateTo = (path) => {
     setActiveMenu(null);
     navigate(path);
   };
 
-
   const handleBottomMenu = (menu) => {
-    setActiveMenu(
-      activeMenu === menu ? null : menu
+    setActiveMenu((current) =>
+      current === menu ? null : menu
     );
   };
-
 
   const isActive = (path) => {
     return location.pathname === path;
   };
 
-
-  /*
-   * =========================================================
-   * NOTIFICATIONS
-   * =========================================================
-   */
+  const isRouteActive = (paths) => {
+    return paths.some((path) =>
+      location.pathname.startsWith(path)
+    );
+  };
 
   const handleNotifications = () => {
     setActiveMenu(null);
     navigate("/notifications");
   };
 
-
   return (
     <div className="dashboard-layout">
 
-      {/* =====================================================
-          MOBILE APP HEADER
-      ===================================================== */}
-
+      {/* MOBILE APP HEADER */}
       <header className="mobile-app-header">
-
         <div className="app-brand">
-
-          <div className="app-logo">
-            A
-          </div>
+          <div className="app-logo">A</div>
 
           <div>
-            <h2>Alrides</h2>
-
-            <span>
-              Ride Sharing Made Easy
-            </span>
+            <h2>Alridez</h2>
+            <span>Ride Sharing Made Easy</span>
           </div>
-
         </div>
 
-
-        {/* ===================================================
-            NOTIFICATION BUTTON
-        =================================================== */}
-
+        {/* Notifications */}
         <button
+          type="button"
           className="notification-header-button"
           onClick={handleNotifications}
-          aria-label="Notifications"
+          aria-label={`Notifications${
+            unreadCount > 0
+              ? `, ${unreadCount} unread`
+              : ""
+          }`}
         >
-
           <Bell size={23} />
 
           {unreadCount > 0 && (
@@ -171,153 +136,165 @@ function DashboardLayout() {
                 : unreadCount}
             </span>
           )}
-
         </button>
-
       </header>
 
-
-      {/* =====================================================
-          PAGE CONTENT
-      ===================================================== */}
-
+      {/* MAIN PAGE CONTENT */}
       <main className="dashboard-content">
         <Outlet />
       </main>
 
-
-      {/* =====================================================
-          RIDES POPUP
-      ===================================================== */}
-
+      {/* RIDES MENU */}
       {activeMenu === "rides" && (
         <div className="bottom-popup">
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/post-ride")
             }
           >
-            <span>🚗</span>
+            <CarFront size={19} />
             Post Ride
           </button>
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/search-rides")
             }
           >
-            <span>🔍</span>
+            <Search size={19} />
             Search Rides
           </button>
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/my-rides")
             }
           >
-            <span>📋</span>
+            <ClipboardList size={19} />
             My Posted Rides
           </button>
 
+          <button
+            type="button"
+            onClick={() =>
+              navigateTo("/my-ride-requests")
+            }
+          >
+            <History size={19} />
+            My Ride Requests
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigateTo("/provider-ride-requests")
+            }
+          >
+            <Handshake size={19} />
+            Provider Ride Requests
+          </button>
         </div>
       )}
 
-
-      {/* =====================================================
-          RENTALS POPUP
-      ===================================================== */}
-
+      {/* RENTALS MENU */}
       {activeMenu === "rentals" && (
         <div className="bottom-popup">
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/post-rental-vehicle")
             }
           >
-            <span>🚙</span>
-            Post Rental
+            <KeyRound size={19} />
+            Post Rental Vehicle
           </button>
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/rental-vehicles")
             }
           >
-            <span>🔍</span>
-            Search Rental
+            <Search size={19} />
+            Search Rental Vehicles
           </button>
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/my-rentals")
             }
           >
-            <span>🚘</span>
-            My Rentals
+            <CarFront size={19} />
+            My Rental Vehicles
           </button>
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/rental-booking-history")
             }
           >
-            <span>📋</span>
-            Rental Bookings
+            <ClipboardList size={19} />
+            Rental Booking History
           </button>
-
         </div>
       )}
 
-
-      {/* =====================================================
-          PROFILE POPUP
-      ===================================================== */}
-
+      {/* PROFILE MENU */}
       {activeMenu === "profile" && (
         <div className="bottom-popup profile-popup">
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/my-profile")
             }
           >
-            <span>👤</span>
+            <UserRound size={19} />
             My Profile
           </button>
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/my-activity")
             }
           >
-            <span>📊</span>
+            <Activity size={19} />
             My Activity
           </button>
 
           <button
+            type="button"
             onClick={() =>
               navigateTo("/settings")
             }
           >
-            <span>⚙️</span>
+            <SettingsIcon size={19} />
             Settings
           </button>
 
+          <button
+            type="button"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
         </div>
       )}
 
-
-      {/* =====================================================
-          BOTTOM NAVIGATION
-      ===================================================== */}
-
+      {/* BOTTOM NAVIGATION */}
       <nav className="bottom-navigation">
 
         {/* HOME */}
-
         <button
+          type="button"
           className={
             isActive("/dashboard")
               ? "bottom-nav-item active"
@@ -327,21 +304,22 @@ function DashboardLayout() {
             navigateTo("/dashboard")
           }
         >
-          <span className="nav-icon">
-            ⌂
-          </span>
-
-          <span>
-            Home
-          </span>
+          <Home size={22} />
+          <span>Home</span>
         </button>
 
-
         {/* RIDES */}
-
         <button
+          type="button"
           className={
-            activeMenu === "rides"
+            activeMenu === "rides" ||
+            isRouteActive([
+              "/post-ride",
+              "/search-rides",
+              "/my-rides",
+              "/my-ride-requests",
+              "/provider-ride-requests",
+            ])
               ? "bottom-nav-item active"
               : "bottom-nav-item"
           }
@@ -349,21 +327,23 @@ function DashboardLayout() {
             handleBottomMenu("rides")
           }
         >
-          <span className="nav-icon">
-            🚗
-          </span>
-
-          <span>
-            Rides
-          </span>
+          <CarFront size={22} />
+          <span>Rides</span>
         </button>
 
-
         {/* RENTALS */}
-
         <button
+          type="button"
           className={
-            activeMenu === "rentals"
+            activeMenu === "rentals" ||
+            isRouteActive([
+              "/post-rental-vehicle",
+              "/rental-vehicles",
+              "/my-rentals",
+              "/rental-booking",
+              "/rental-booking-history",
+              "/rental-booking-requests",
+            ])
               ? "bottom-nav-item active"
               : "bottom-nav-item"
           }
@@ -371,21 +351,18 @@ function DashboardLayout() {
             handleBottomMenu("rentals")
           }
         >
-          <span className="nav-icon">
-            🚙
-          </span>
-
-          <span>
-            Rentals
-          </span>
+          <KeyRound size={22} />
+          <span>Rentals</span>
         </button>
 
-
         {/* BOOKINGS */}
-
         <button
+          type="button"
           className={
-            isActive("/my-bookings")
+            isRouteActive([
+              "/my-bookings",
+              "/ride-bookings",
+            ])
               ? "bottom-nav-item active"
               : "bottom-nav-item"
           }
@@ -393,21 +370,20 @@ function DashboardLayout() {
             navigateTo("/my-bookings")
           }
         >
-          <span className="nav-icon">
-            📋
-          </span>
-
-          <span>
-            Bookings
-          </span>
+          <ClipboardList size={22} />
+          <span>Bookings</span>
         </button>
 
-
         {/* PROFILE */}
-
         <button
+          type="button"
           className={
-            activeMenu === "profile"
+            activeMenu === "profile" ||
+            isRouteActive([
+              "/my-profile",
+              "/my-activity",
+              "/settings",
+            ])
               ? "bottom-nav-item active"
               : "bottom-nav-item"
           }
@@ -415,17 +391,11 @@ function DashboardLayout() {
             handleBottomMenu("profile")
           }
         >
-          <span className="nav-icon">
-            👤
-          </span>
-
-          <span>
-            Profile
-          </span>
+          <UserRound size={22} />
+          <span>Profile</span>
         </button>
 
       </nav>
-
     </div>
   );
 }

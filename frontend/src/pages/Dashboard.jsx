@@ -1,211 +1,251 @@
+import { Link } from "react-router-dom";
+
 function Dashboard() {
-
   return (
-
     <>
-
       <header className="dashboard-header">
-
         <div>
-
-          <h1>
-            Welcome to Alrides
-          </h1>
+          <h1>Welcome to Alridez</h1>
 
           <p>
-            Find a ride, share a ride,
-            or rent a vehicle.
+            Find a ride, share a ride, or rent a vehicle.
           </p>
-
         </div>
-
       </header>
-
 
       <section className="dashboard-cards">
 
-
-        {/* =========================
-            POST RIDE
-        ========================= */}
-
+        {/* POST RIDE */}
         <div className="dashboard-card">
+          <div className="card-icon">🚗</div>
 
-          <div className="card-icon">
-            🚗
-          </div>
-
-          <h3>
-            Post a Ride
-          </h3>
+          <h3>Post a Ride</h3>
 
           <p>
-            Share your journey and allow
-            other users to book available
-            seats.
+            Share your journey and allow other users
+            to book available seats.
           </p>
 
-          <a
-            href="/post-ride"
+          <Link
+            to="/post-ride"
             className="dashboard-card-button"
           >
             Post Ride
-          </a>
-
+          </Link>
         </div>
 
-
-        {/* =========================
-            SEARCH RIDES
-        ========================= */}
-
+        {/* SEARCH RIDES */}
         <div className="dashboard-card">
+          <div className="card-icon">🔍</div>
 
-          <div className="card-icon">
-            🔍
-          </div>
-
-          <h3>
-            Search Rides
-          </h3>
+          <h3>Search Rides</h3>
 
           <p>
-            Search for rides based on your
-            source, destination, and travel
-            date.
+            Find rides by source, destination,
+            and travel date.
           </p>
 
-          <a
-            href="/search-rides"
+          <Link
+            to="/search-rides"
             className="dashboard-card-button"
           >
             Search Rides
-          </a>
-
+          </Link>
         </div>
 
-
-        {/* =========================
-            MY RIDES
-        ========================= */}
-
+        {/* MY POSTED RIDES */}
         <div className="dashboard-card">
+          <div className="card-icon">📋</div>
 
-          <div className="card-icon">
-            📋
-          </div>
-
-          <h3>
-            My Posted Rides
-          </h3>
+          <h3>My Posted Rides</h3>
 
           <p>
-            View your posted rides and
-            manage passenger booking
-            requests.
+            View your posted rides and manage
+            passenger bookings.
           </p>
 
-          <a
-            href="/my-rides"
+          <Link
+            to="/my-rides"
             className="dashboard-card-button"
           >
             Manage Rides
-          </a>
-
+          </Link>
         </div>
 
-
-        {/* =========================
-            RENTAL VEHICLES
-        ========================= */}
-
+        {/* MY RIDE REQUESTS */}
         <div className="dashboard-card">
+          <div className="card-icon">🛣️</div>
 
-          <div className="card-icon">
-            🚙
-          </div>
-
-          <h3>
-            Rental Vehicles
-          </h3>
+          <h3>My Ride Requests</h3>
 
           <p>
-            Find available rental vehicles
-            or post your own vehicle.
+            View the ride requests you have submitted
+            and track their progress.
           </p>
 
-          <a
-            href="/rental-vehicles"
+          <Link
+            to="/my-ride-requests"
+            className="dashboard-card-button"
+          >
+            View My Requests
+          </Link>
+        </div>
+
+        {/* PROVIDER RIDE REQUESTS */}
+        <div className="dashboard-card">
+          <div className="card-icon">🤝</div>
+
+          <h3>Provider Ride Requests</h3>
+
+          <p>
+            Review incoming ride requests and respond
+            to eligible customer requests.
+          </p>
+
+          <Link
+            to="/provider-ride-requests"
+            className="dashboard-card-button"
+          >
+            Manage Requests
+          </Link>
+        </div>
+
+        {/* SEARCH RENTAL VEHICLES */}
+        <div className="dashboard-card">
+          <div className="card-icon">🚙</div>
+
+          <h3>Rental Vehicles</h3>
+
+          <p>
+            Explore available vehicles for your
+            personal or business needs.
+          </p>
+
+          <Link
+            to="/rental-vehicles"
             className="dashboard-card-button"
           >
             View Vehicles
-          </a>
-
+          </Link>
         </div>
 
-
-        {/* =========================
-            MY RENTALS
-        ========================= */}
-
+        {/* POST RENTAL VEHICLE */}
         <div className="dashboard-card">
+          <div className="card-icon">🔑</div>
 
-          <div className="card-icon">
-            🔑
-          </div>
-
-          <h3>
-            My Rental Vehicles
-          </h3>
+          <h3>Post a Rental Vehicle</h3>
 
           <p>
-            Manage your rental vehicles
-            and customer booking requests.
+            List your vehicle and make it available
+            for other users to rent.
           </p>
 
-          <a
-            href="/my-rentals"
+          <Link
+            to="/post-rental-vehicle"
+            className="dashboard-card-button"
+          >
+            Post Vehicle
+          </Link>
+        </div>
+
+        {/* MY RENTALS */}
+        <div className="dashboard-card">
+          <div className="card-icon">🚘</div>
+
+          <h3>My Rental Vehicles</h3>
+
+          <p>
+            Manage your listed vehicles and access
+            their existing booking management pages.
+          </p>
+
+          <Link
+            to="/my-rentals"
             className="dashboard-card-button"
           >
             Manage Rentals
-          </a>
-
+          </Link>
         </div>
-        {/* =========================
-    SETTINGS
-========================= */}
 
-<div className="dashboard-card">
+        {/* MY BOOKINGS */}
+        <div className="dashboard-card">
+          <div className="card-icon">📅</div>
 
-  <div className="card-icon">
-    ⚙️
-  </div>
+          <h3>My Bookings</h3>
 
-  <h3>
-    Settings
-  </h3>
+          <p>
+            Review your ride bookings and their
+            current booking status.
+          </p>
 
-  <p>
-    Manage your Alrides preferences,
-    notifications, and account settings.
-  </p>
+          <Link
+            to="/my-bookings"
+            className="dashboard-card-button"
+          >
+            View Bookings
+          </Link>
+        </div>
 
-  <a
-    href="/settings"
-    className="dashboard-card-button"
-  >
-    Open Settings
-  </a>
+        {/* RENTAL BOOKING HISTORY */}
+        <div className="dashboard-card">
+          <div className="card-icon">🧾</div>
 
-</div>
+          <h3>Rental Booking History</h3>
 
+          <p>
+            Review your previous and current
+            rental booking records.
+          </p>
+
+          <Link
+            to="/rental-booking-history"
+            className="dashboard-card-button"
+          >
+            View Rental History
+          </Link>
+        </div>
+
+        {/* NOTIFICATIONS */}
+        <div className="dashboard-card">
+          <div className="card-icon">🔔</div>
+
+          <h3>Notifications</h3>
+
+          <p>
+            Check booking updates, request responses,
+            and other account notifications.
+          </p>
+
+          <Link
+            to="/notifications"
+            className="dashboard-card-button"
+          >
+            View Notifications
+          </Link>
+        </div>
+
+        {/* SETTINGS */}
+        <div className="dashboard-card">
+          <div className="card-icon">⚙️</div>
+
+          <h3>Settings</h3>
+
+          <p>
+            Manage your Alridez preferences,
+            notifications, and account settings.
+          </p>
+
+          <Link
+            to="/settings"
+            className="dashboard-card-button"
+          >
+            Open Settings
+          </Link>
+        </div>
 
       </section>
-
     </>
-
   );
-
 }
 
 export default Dashboard;
