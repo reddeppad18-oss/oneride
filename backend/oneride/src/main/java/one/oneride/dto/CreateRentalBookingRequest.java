@@ -1,3 +1,4 @@
+
 package one.oneride.dto;
 
 import jakarta.validation.constraints.FutureOrPresent;
@@ -11,17 +12,18 @@ import java.time.LocalDate;
 @Setter
 public class CreateRentalBookingRequest {
 
-
     @NotNull(message = "Rental ID is required")
     private Long rentalId;
-
 
     @NotNull(message = "Start date is required")
     @FutureOrPresent(message = "Start date cannot be in the past")
     private LocalDate startDate;
 
-
     @NotNull(message = "End date is required")
     @FutureOrPresent(message = "End date cannot be in the past")
     private LocalDate endDate;
+
+    public Long getRentalId() {
+        return rentalId;
+    }
 }

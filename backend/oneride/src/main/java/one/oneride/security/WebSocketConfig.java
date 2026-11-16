@@ -1,6 +1,6 @@
+
 package one.oneride.security;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -10,45 +10,29 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-@RequiredArgsConstructor
-public class WebSocketConfig
-        implements WebSocketMessageBrokerConfigurer {
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
 
-    @Override
-    public void configureMessageBroker(
-            MessageBrokerRegistry registry) {
-
-        registry.enableSimpleBroker(
-                "/topic",
-                "/queue"
-        );
-
-        registry.setApplicationDestinationPrefixes(
-                "/app"
-        );
-
-        registry.setUserDestinationPrefix(
-                "/user"
-        );
+    public WebSocketConfig(WebSocketAuthInterceptor webSocketAuthInterceptor) {
+        this.webSocketAuthInterceptor = webSocketAuthInterceptor;
     }
 
     @Override
-    public void configureClientInboundChannel(
-            ChannelRegistration registration) {
-
-        registration.interceptors(
-                webSocketAuthInterceptor
-        );
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker("/topic", "/queue");
+        registry.setApplicationDestinationPrefixes("/app");
+        registry.setUserDestinationPrefix("/user");
     }
 
     @Override
-    public void registerStompEndpoints(
-            StompEndpointRegistry registry) {
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(webSocketAuthInterceptor);
+    }
 
-        registry
-                .addEndpoint("/ws")
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns(
                         "http://localhost:5173",
                         "https://oneride.vercel.app",

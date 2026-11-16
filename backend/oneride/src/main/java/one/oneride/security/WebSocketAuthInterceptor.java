@@ -1,18 +1,21 @@
+
 package one.oneride.security;
 
 import lombok.RequiredArgsConstructor;
+import one.oneride.entity.User;
+import one.oneride.repository.UserRepository;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import one.oneride.entity.User;
-import one.oneride.repository.UserRepository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -28,65 +31,75 @@ public class WebSocketAuthInterceptor
             MessageChannel channel) {
 
         StompHeaderAccessor accessor =
-                StompHeaderAccessor.wrap(message);
+                MessageHeaderAccessor.getAccessor(
+                        message,
+                        StompHeaderAccessor.class
+                );
 
-        if (StompCommand.CONNECT.equals(
-                accessor.getCommand())) {
+        if (accessor == null) {
+            return message;
+        }
 
-            String authorization =
-                    accessor.getFirstNativeHeader(
-                            "Authorization"
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+
+            String authHeader =
+                    accessor.getFirstNativeHeader("Authorization");
+
+            if (authHeader == null ||
+                    !authHeader.startsWith("Bearer ")) {
+
+                throw new BadCredentialsException(
+                        "Missing authentication token"
+                );
+            }
+
+            String jwt = authHeader.substring(7);
+
+            try {
+
+                String phoneNumber =
+                        jwtService.extractPhoneNumber(jwt);
+
+                if (phoneNumber == null) {
+                    throw new BadCredentialsException(
+                            "Invalid authentication token"
                     );
+                }
 
-            if (authorization == null
-                    || !authorization.startsWith("Bearer ")) {
+                Optional<User> optionalUser =
+                        userRepository.findByPhoneNumber(phoneNumber);
 
-                throw new IllegalArgumentException(
-                        "Missing WebSocket Authorization header"
-                );
-            }
-
-            String token =
-                    authorization.substring(7);
-
-            String phoneNumber =
-                    jwtService.extractPhoneNumber(token);
-
-            if (phoneNumber == null
-                    || phoneNumber.isBlank()) {
-
-                throw new IllegalArgumentException(
-                        "Invalid JWT"
-                );
-            }
-
-            User user =
-                    userRepository
-                            .findByPhoneNumber(phoneNumber)
-                            .orElseThrow(() ->
-                                    new IllegalArgumentException(
-                                            "User not found"
-                                    )
-                            );
-
-            if (!jwtService.isTokenValid(
-                    token,
-                    user
-            )) {
-
-                throw new IllegalArgumentException(
-                        "Invalid or expired JWT"
-                );
-            }
-
-            Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            user.getPhoneNumber(),
-                            null,
-                            user.getAuthorities()
+                if (optionalUser.isEmpty()) {
+                    throw new BadCredentialsException(
+                            "User not found"
                     );
+                }
 
-            accessor.setUser(authentication);
+                User user = optionalUser.get();
+
+                if (!jwtService.isTokenValid(jwt, user)) {
+                    throw new BadCredentialsException(
+                            "Invalid or expired token"
+                    );
+                }
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                user.getPhoneNumber(),
+                                null,
+                                user.getAuthorities()
+                        );
+
+                accessor.setUser(authentication);
+
+            } catch (BadCredentialsException exception) {
+                throw exception;
+            } catch (Exception exception) {
+                throw new BadCredentialsException(
+                        "WebSocket authentication failed",
+                        exception
+                );
+            }
         }
 
         return message;
