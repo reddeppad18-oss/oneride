@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter,
   Routes,
@@ -24,9 +25,13 @@ import RentalBooking from "./pages/RentalBooking";
 import RentalBookingHistory from "./pages/RentalBookingHistory";
 import RentalBookingRequests from "./pages/RentalBookingRequests";
 import MyRentals from "./pages/MyRentals";
+import RentalRequest from "./pages/RentalRequest";
+import MyRentalRequests from "./pages/MyRentalRequests";
 
 import ProviderRideRequests from "./pages/ProviderRideRequests";
 import MyRideRequests from "./pages/MyRideRequests";
+
+import Chat from "./pages/Chat";
 
 import MyProfile from "./pages/MyProfile";
 import MyActivity from "./pages/MyActivity";
@@ -35,12 +40,6 @@ import UserProfile from "./pages/UserProfile";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 
-
-/*
- * =========================
- * PROTECTED ROUTE
- * =========================
- */
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -53,61 +52,40 @@ function ProtectedRoute({ children }) {
 }
 
 
-/*
- * =========================
- * APP
- * =========================
- */
-
 function App() {
   const token = localStorage.getItem("token");
 
   return (
     <BrowserRouter>
-
       <Routes>
 
-        {/* =========================
-            LOGIN
-        ========================= */}
+        {/* LOGIN */}
 
         <Route
           path="/"
           element={
             token ? (
-              <Navigate
-                to="/dashboard"
-                replace
-              />
+              <Navigate to="/dashboard" replace />
             ) : (
               <Login />
             )
           }
         />
 
-
-        {/* =========================
-            VERIFY OTP
-        ========================= */}
+        {/* VERIFY OTP */}
 
         <Route
           path="/verify-otp"
           element={
             token ? (
-              <Navigate
-                to="/dashboard"
-                replace
-              />
+              <Navigate to="/dashboard" replace />
             ) : (
               <VerifyOtp />
             )
           }
         />
 
-
-        {/* =========================
-            PROTECTED APPLICATION
-        ========================= */}
+        {/* PROTECTED APPLICATION */}
 
         <Route
           element={
@@ -117,19 +95,19 @@ function App() {
           }
         >
 
-          {/* =========================
-              DASHBOARD
-          ========================= */}
+          {/* DASHBOARD */}
 
           <Route
             path="/dashboard"
             element={<Dashboard />}
           />
 
+          <Route
+            path="/chat"
+            element={<Chat />}
+          />
 
-          {/* =========================
-              RIDES
-          ========================= */}
+          {/* RIDES */}
 
           <Route
             path="/post-ride"
@@ -161,15 +139,12 @@ function App() {
             element={<MyRideRequests />}
           />
 
-          <Route 
-            path="/provider-ride-requests" 
+          <Route
+            path="/provider-ride-requests"
             element={<ProviderRideRequests />}
-             />
+          />
 
-
-          {/* =========================
-              RENTALS
-          ========================= */}
+          {/* RENTALS */}
 
           <Route
             path="/post-rental-vehicle"
@@ -187,6 +162,16 @@ function App() {
           />
 
           <Route
+            path="/request-rental"
+            element={<RentalRequest />}
+          />
+
+          <Route
+            path="/my-rental-requests"
+            element={<MyRentalRequests />}
+          />
+
+          <Route
             path="/rental-booking/:rentalId"
             element={<RentalBooking />}
           />
@@ -201,10 +186,7 @@ function App() {
             element={<RentalBookingRequests />}
           />
 
-
-          {/* =========================
-              PROFILE
-          ========================= */}
+          {/* PROFILE */}
 
           <Route
             path="/my-profile"
@@ -216,30 +198,21 @@ function App() {
             element={<MyActivity />}
           />
 
-
-          {/* =========================
-              PUBLIC USER PROFILE
-          ========================= */}
+          {/* PUBLIC USER PROFILE */}
 
           <Route
             path="/user-profile/:userId"
             element={<UserProfile />}
           />
 
-
-          {/* =========================
-              SETTINGS
-          ========================= */}
+          {/* SETTINGS */}
 
           <Route
             path="/settings"
             element={<Settings />}
           />
 
-
-          {/* =========================
-              NOTIFICATIONS
-          ========================= */}
+          {/* NOTIFICATIONS */}
 
           <Route
             path="/notifications"
@@ -248,20 +221,14 @@ function App() {
 
         </Route>
 
-
-        {/* =========================
-            UNKNOWN ROUTES
-        ========================= */}
+        {/* UNKNOWN ROUTES */}
 
         <Route
           path="*"
-          element={
-            <Navigate to="/" replace />
-          }
+          element={<Navigate to="/" replace />}
         />
 
       </Routes>
-
     </BrowserRouter>
   );
 }

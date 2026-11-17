@@ -1,9 +1,11 @@
+
 import { useEffect, useState } from "react";
 import {
   Outlet,
   useLocation,
   useNavigate,
 } from "react-router-dom";
+
 import {
   Bell,
   Home,
@@ -16,6 +18,7 @@ import {
   Activity,
   Handshake,
   History,
+  MessageCircle,
 } from "lucide-react";
 
 import { getUnreadCount } from "../api/notificationService";
@@ -28,15 +31,33 @@ function DashboardLayout() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Theme synchronization
-  useEffect(() => {
+// Theme synchronization
+useEffect(() => {
+  const applySavedTheme = () => {
     const savedTheme =
-      localStorage.getItem("theme") || "light";
+      localStorage.getItem("alrides-theme") || "system";
 
-    document.documentElement.classList.toggle( 
-      "dark",
-      savedTheme === "dark"
+    document.documentElement.setAttribute(
+      "data-theme",
+      savedTheme
     );
-  }, []);
+
+    document.documentElement.style.colorScheme =
+      savedTheme === "dark"
+        ? "dark"
+        : savedTheme === "light"
+        ? "light"
+        : "light dark";
+  };
+
+  applySavedTheme();
+
+  window.addEventListener("storage", applySavedTheme);
+
+  return () => {
+    window.removeEventListener("storage", applySavedTheme);
+  };
+}, []);
 
   // Load unread notification count
   const loadUnreadCount = async () => {
@@ -102,12 +123,36 @@ function DashboardLayout() {
     navigate("/notifications");
   };
 
+  const handleChat = () => {
+    setActiveMenu(null);
+    navigate("/chat");
+  };
+
   return (
     <div className="dashboard-layout">
 
       {/* MOBILE APP HEADER */}
-      <header className="mobile-app-header">
-        <div className="app-brand">
+      <header
+        className="mobile-app-header"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        {/* APP BRAND */}
+        <div
+          className="app-brand"
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            flex: "1 1 auto",
+            minWidth: 0,
+          }}
+        >
           <div className="app-logo">A</div>
 
           <div>
@@ -116,27 +161,53 @@ function DashboardLayout() {
           </div>
         </div>
 
-        {/* Notifications */}
-        <button
-          type="button"
-          className="notification-header-button"
-          onClick={handleNotifications}
-          aria-label={`Notifications${
-            unreadCount > 0
-              ? `, ${unreadCount} unread`
-              : ""
-          }`}
+        {/* HEADER ACTIONS */}
+        <div
+          className="header-actions"
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: "12px",
+            flexShrink: 0,
+            marginLeft: "auto",
+          }}
         >
-          <Bell size={23} />
+          {/* CHAT BUTTON */}
+          <button
+            type="button"
+            className="notification-header-button"
+            onClick={handleChat}
+            aria-label="Chat messages"
+            title="Messages"
+          >
+            <MessageCircle size={23} />
+          </button>
 
-          {unreadCount > 0 && (
-            <span className="notification-badge">
-              {unreadCount > 99
-                ? "99+"
-                : unreadCount}
-            </span>
-          )}
-        </button>
+          {/* NOTIFICATIONS BUTTON */}
+          <button
+            type="button"
+            className="notification-header-button"
+            onClick={handleNotifications}
+            aria-label={`Notifications${
+              unreadCount > 0
+                ? `, ${unreadCount} unread`
+                : ""
+            }`}
+            title="Notifications"
+          >
+            <Bell size={23} />
+
+            {unreadCount > 0 && (
+              <span className="notification-badge">
+                {unreadCount > 99
+                  ? "99+"
+                  : unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
       </header>
 
       {/* MAIN PAGE CONTENT */}
@@ -197,6 +268,7 @@ function DashboardLayout() {
             <Handshake size={19} />
             Provider Ride Requests
           </button>
+
         </div>
       )}
 
@@ -243,6 +315,7 @@ function DashboardLayout() {
             <ClipboardList size={19} />
             Rental Booking History
           </button>
+
         </div>
       )}
 
@@ -286,6 +359,7 @@ function DashboardLayout() {
           >
             Logout
           </button>
+
         </div>
       )}
 
@@ -372,6 +446,20 @@ function DashboardLayout() {
         >
           <ClipboardList size={22} />
           <span>Bookings</span>
+        </button>
+
+        {/* MESSAGES */}
+        <button
+          type="button"
+          className={
+            isActive("/chat")
+              ? "bottom-nav-item active"
+              : "bottom-nav-item"
+          }
+          onClick={handleChat}
+        >
+          <MessageCircle size={22} />
+          <span>Messages</span>
         </button>
 
         {/* PROFILE */}

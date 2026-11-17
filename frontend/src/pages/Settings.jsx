@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   FiBell,
@@ -16,45 +17,53 @@ import {
 
 import api from "../api/axios";
 
+// ======================================================
+// THEME UTILITIES
+// ======================================================
+
+const THEME_KEY = "alrides-theme";
+
+const getSavedTheme = () => {
+  const savedTheme = localStorage.getItem(THEME_KEY);
+
+  return ["light", "dark", "system"].includes(savedTheme)
+    ? savedTheme
+    : "system";
+};
+
+const applyGlobalTheme = (selectedTheme) => {
+  const root = document.documentElement;
+
+  root.setAttribute("data-theme", selectedTheme);
+
+  root.style.colorScheme =
+    selectedTheme === "dark"
+      ? "dark"
+      : selectedTheme === "light"
+      ? "light"
+      : "light dark";
+};
+
+// ======================================================
+// SETTINGS COMPONENT
+// ======================================================
+
 const Settings = () => {
-
-  // =========================
-  // SETTINGS STATE
-  // =========================
-
   const [notifications, setNotifications] = useState(true);
-
-  const [bookingNotifications, setBookingNotifications] =
-    useState(true);
-
-  const [rideNotifications, setRideNotifications] =
-    useState(true);
-
+  const [bookingNotifications, setBookingNotifications] = useState(true);
+  const [rideNotifications, setRideNotifications] = useState(true);
   const [language, setLanguage] = useState("English");
 
-  // =========================
-  // APPEARANCE STATE
-  // =========================
-
-  const [theme, setTheme] = useState(
-    localStorage.getItem("alrides-theme") || "system"
-  );
-
-  // =========================
-  // UI STATE
-  // =========================
+  const [theme, setTheme] = useState(getSavedTheme);
 
   const [success, setSuccess] = useState("");
-
   const [loading, setLoading] = useState(true);
-
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
 
-  // =========================
+  // ======================================================
   // SUCCESS MESSAGE
-  // =========================
+  // ======================================================
 
   const showSuccess = (message) => {
     setSuccess(message);
@@ -64,34 +73,20 @@ const Settings = () => {
     }, 2500);
   };
 
-  // =========================
+  // ======================================================
   // APPLY THEME
-  // =========================
+  // ======================================================
 
   const applyTheme = (selectedTheme) => {
+    if (!["light", "dark", "system"].includes(selectedTheme)) {
+      return;
+    }
 
     setTheme(selectedTheme);
 
-    localStorage.setItem(
-      "alrides-theme",
-      selectedTheme
-    );
+    localStorage.setItem(THEME_KEY, selectedTheme);
 
-    document.documentElement.setAttribute(
-      "data-theme",
-      selectedTheme
-    );
-
-    // Update browser color scheme preference.
-    // This helps browser controls follow
-    // the selected Alrides theme.
-    if (selectedTheme === "dark") {
-      document.documentElement.style.colorScheme = "dark";
-    } else if (selectedTheme === "light") {
-      document.documentElement.style.colorScheme = "light";
-    } else {
-      document.documentElement.style.colorScheme = "light dark";
-    }
+    applyGlobalTheme(selectedTheme);
 
     const themeName =
       selectedTheme === "system"
@@ -100,162 +95,103 @@ const Settings = () => {
         ? "Light"
         : "Dark";
 
-    showSuccess(
-      `${themeName} mode enabled.`
-    );
+    showSuccess(`${themeName} mode enabled.`);
   };
 
-  // =========================
-  // LOAD SAVED THEME
-  // =========================
+  // ======================================================
+  // INITIALIZE THEME
+  // ======================================================
 
   useEffect(() => {
-
-    const savedTheme =
-      localStorage.getItem("alrides-theme") ||
-      "system";
+    const savedTheme = getSavedTheme();
 
     setTheme(savedTheme);
-
-    document.documentElement.setAttribute(
-      "data-theme",
-      savedTheme
-    );
-
-    if (savedTheme === "dark") {
-      document.documentElement.style.colorScheme =
-        "dark";
-    } else if (savedTheme === "light") {
-      document.documentElement.style.colorScheme =
-        "light";
-    } else {
-      document.documentElement.style.colorScheme =
-        "light dark";
-    }
-
+    applyGlobalTheme(savedTheme);
   }, []);
 
-  // =========================
+  // ======================================================
   // LOAD SETTINGS
-  // =========================
+  // ======================================================
 
   useEffect(() => {
     loadSettings();
   }, []);
 
   const loadSettings = async () => {
-
     try {
-
       setLoading(true);
       setError("");
 
-      const response =
-        await api.get("/user/settings");
-
+      const response = await api.get("/user/settings");
       const data = response.data;
 
-      setNotifications(
-        data.notificationsEnabled ?? true
-      );
-
+      setNotifications(data.notificationsEnabled ?? true);
       setBookingNotifications(
         data.bookingNotificationsEnabled ?? true
       );
-
       setRideNotifications(
         data.rideNotificationsEnabled ?? true
       );
-
-      setLanguage(
-        data.language || "English"
-      );
-
+      setLanguage(data.language || "English");
     } catch (err) {
-
-      console.error(
-        "Failed to load settings:",
-        err
-      );
+      console.error("Failed to load settings:", err);
 
       setError(
         err.response?.data?.message ||
         "Unable to load your settings."
       );
-
     } finally {
-
       setLoading(false);
-
     }
   };
 
-  // =========================
+  // ======================================================
   // SAVE SETTINGS
-  // =========================
+  // ======================================================
 
   const saveSettings = async ({
     notificationsEnabled = notifications,
-    bookingNotificationsEnabled =
-      bookingNotifications,
-    rideNotificationsEnabled =
-      rideNotifications,
+    bookingNotificationsEnabled = bookingNotifications,
+    rideNotificationsEnabled = rideNotifications,
     selectedLanguage = language,
-    successMessage =
-      "Settings updated successfully.",
+    successMessage = "Settings updated successfully.",
   }) => {
-
     try {
-
       setSaving(true);
       setError("");
 
-      await api.put(
-        "/user/settings",
-        {
-          notificationsEnabled,
-          bookingNotificationsEnabled,
-          rideNotificationsEnabled,
-          language: selectedLanguage,
-        }
-      );
+      await api.put("/user/settings", {
+        notificationsEnabled,
+        bookingNotificationsEnabled,
+        rideNotificationsEnabled,
+        language: selectedLanguage,
+      });
 
       showSuccess(successMessage);
-
     } catch (err) {
-
-      console.error(
-        "Failed to save settings:",
-        err
-      );
+      console.error("Failed to save settings:", err);
 
       setError(
         err.response?.data?.message ||
         "Unable to save your settings."
       );
 
-      // Reload saved values from backend
       await loadSettings();
-
     } finally {
-
       setSaving(false);
-
     }
   };
 
-  // =========================
+  // ======================================================
   // MASTER NOTIFICATION
-  // =========================
+  // ======================================================
 
   const handleNotificationToggle = async () => {
-
     const newValue = !notifications;
 
     setNotifications(newValue);
 
     if (!newValue) {
-
       setBookingNotifications(false);
       setRideNotifications(false);
 
@@ -264,916 +200,431 @@ const Settings = () => {
         bookingNotificationsEnabled: false,
         rideNotificationsEnabled: false,
         selectedLanguage: language,
-        successMessage:
-          "Notifications disabled.",
+        successMessage: "Notifications disabled.",
       });
-
     } else {
-
       await saveSettings({
         notificationsEnabled: true,
-        bookingNotificationsEnabled:
-          bookingNotifications,
-        rideNotificationsEnabled:
-          rideNotifications,
+        bookingNotificationsEnabled: bookingNotifications,
+        rideNotificationsEnabled: rideNotifications,
         selectedLanguage: language,
-        successMessage:
-          "Notifications enabled.",
+        successMessage: "Notifications enabled.",
       });
-
     }
   };
 
-  // =========================
+  // ======================================================
   // BOOKING NOTIFICATIONS
-  // =========================
+  // ======================================================
 
-  const handleBookingNotificationToggle =
-    async () => {
+  const handleBookingNotificationToggle = async () => {
+    if (!notifications) return;
 
-      if (!notifications) {
-        return;
-      }
+    const newValue = !bookingNotifications;
 
-      const newValue =
-        !bookingNotifications;
+    setBookingNotifications(newValue);
 
-      setBookingNotifications(newValue);
+    await saveSettings({
+      notificationsEnabled: notifications,
+      bookingNotificationsEnabled: newValue,
+      rideNotificationsEnabled: rideNotifications,
+      selectedLanguage: language,
+      successMessage: newValue
+        ? "Booking notifications enabled."
+        : "Booking notifications disabled.",
+    });
+  };
 
-      await saveSettings({
-        notificationsEnabled: notifications,
-        bookingNotificationsEnabled: newValue,
-        rideNotificationsEnabled:
-          rideNotifications,
-        selectedLanguage: language,
-        successMessage:
-          newValue
-            ? "Booking notifications enabled."
-            : "Booking notifications disabled.",
-      });
-
-    };
-
-  // =========================
+  // ======================================================
   // RIDE NOTIFICATIONS
-  // =========================
+  // ======================================================
 
-  const handleRideNotificationToggle =
-    async () => {
+  const handleRideNotificationToggle = async () => {
+    if (!notifications) return;
 
-      if (!notifications) {
-        return;
-      }
+    const newValue = !rideNotifications;
 
-      const newValue =
-        !rideNotifications;
+    setRideNotifications(newValue);
 
-      setRideNotifications(newValue);
+    await saveSettings({
+      notificationsEnabled: notifications,
+      bookingNotificationsEnabled: bookingNotifications,
+      rideNotificationsEnabled: newValue,
+      selectedLanguage: language,
+      successMessage: newValue
+        ? "Ride notifications enabled."
+        : "Ride notifications disabled.",
+    });
+  };
 
-      await saveSettings({
-        notificationsEnabled: notifications,
-        bookingNotificationsEnabled:
-          bookingNotifications,
-        rideNotificationsEnabled: newValue,
-        selectedLanguage: language,
-        successMessage:
-          newValue
-            ? "Ride notifications enabled."
-            : "Ride notifications disabled.",
-      });
-
-    };
-
-  // =========================
+  // ======================================================
   // LANGUAGE
-  // =========================
+  // ======================================================
 
-  const handleLanguageChange = async (
-    event
-  ) => {
-
+  const handleLanguageChange = async (event) => {
     const value = event.target.value;
 
     setLanguage(value);
 
     await saveSettings({
       notificationsEnabled: notifications,
-      bookingNotificationsEnabled:
-        bookingNotifications,
-      rideNotificationsEnabled:
-        rideNotifications,
+      bookingNotificationsEnabled: bookingNotifications,
+      rideNotificationsEnabled: rideNotifications,
       selectedLanguage: value,
-      successMessage:
-        `Language changed to ${value}.`,
+      successMessage: `Language changed to ${value}.`,
     });
-
   };
 
-  // =========================
+  // ======================================================
   // LOGOUT
-  // =========================
+  // ======================================================
 
   const handleLogout = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to logout?"
+    );
 
-    const confirmed =
-      window.confirm(
-        "Are you sure you want to logout?"
-      );
-
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     localStorage.removeItem("token");
 
     window.location.href = "/";
-
   };
 
-  // =========================
+  // ======================================================
   // LOADING
-  // =========================
+  // ======================================================
 
   if (loading) {
-
     return (
-
       <div style={styles.container}>
-
         <div style={styles.loadingBox}>
-
           <div style={styles.loadingText}>
             Loading your settings...
           </div>
-
         </div>
-
       </div>
-
     );
-
   }
 
-  // =========================
-  // RETURN
-  // =========================
+  // ======================================================
+  // MAIN UI
+  // ======================================================
 
   return (
-
     <div style={styles.container}>
-
-      {/* =========================
-          HEADER
-      ========================= */}
-
       <div style={styles.header}>
-
-        <h1 style={styles.title}>
-          Settings
-        </h1>
-
+        <h1 style={styles.title}>Settings</h1>
         <p style={styles.subtitle}>
-          Manage your Alrides preferences
-          and account settings.
+          Manage your Alridez preferences and account settings.
         </p>
-
       </div>
 
-
-      {/* =========================
-          SUCCESS MESSAGE
-      ========================= */}
-
       {success && (
-
         <div style={styles.successBox}>
-
           <FiCheck size={18} />
-
-          <span>
-            {success}
-          </span>
-
+          <span>{success}</span>
         </div>
-
       )}
-
-
-      {/* =========================
-          ERROR MESSAGE
-      ========================= */}
 
       {error && (
-
         <div style={styles.errorBox}>
-
-          <span>
-            {error}
-          </span>
-
+          <span>{error}</span>
         </div>
-
       )}
 
-
-      {/* =========================
-          SAVING MESSAGE
-      ========================= */}
-
       {saving && (
-
         <div style={styles.savingBox}>
           Saving settings...
         </div>
-
       )}
 
-
-      {/* =========================
-          NOTIFICATIONS
-      ========================= */}
+      {/* NOTIFICATIONS */}
 
       <section style={styles.section}>
-
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.sectionIcon}>
-            <FiBell size={21} />
-          </div>
-
-          <div>
-
-            <h2 style={styles.sectionTitle}>
-              Notifications
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Choose which notifications
-              you want to receive.
-            </p>
-
-          </div>
-
-        </div>
-
+        <SectionHeader
+          icon={<FiBell size={21} />}
+          title="Notifications"
+          description="Choose which notifications you want to receive."
+        />
 
         <SettingRow
           title="Push Notifications"
-          description="Receive notifications from Alrides."
+          description="Receive notifications from Alridez."
           enabled={notifications}
-          onToggle={
-            handleNotificationToggle
-          }
+          onToggle={handleNotificationToggle}
           disabled={saving}
         />
-
 
         <SettingRow
           title="Booking Notifications"
           description="Get updates about your ride and rental bookings."
           enabled={bookingNotifications}
-          onToggle={
-            handleBookingNotificationToggle
-          }
-          disabled={
-            !notifications || saving
-          }
+          onToggle={handleBookingNotificationToggle}
+          disabled={!notifications || saving}
         />
-
 
         <SettingRow
           title="Ride Notifications"
           description="Receive updates about rides you have posted or joined."
           enabled={rideNotifications}
-          onToggle={
-            handleRideNotificationToggle
-          }
-          disabled={
-            !notifications || saving
-          }
+          onToggle={handleRideNotificationToggle}
+          disabled={!notifications || saving}
         />
-
       </section>
 
-
-      {/* =========================
-          APPEARANCE
-      ========================= */}
+      {/* APPEARANCE */}
 
       <section style={styles.section}>
-
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.sectionIcon}>
-            <FiSettings size={21} />
-          </div>
-
-          <div>
-
-            <h2 style={styles.sectionTitle}>
-              Appearance
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Choose how Alrides looks on
-              your device.
-            </p>
-
-          </div>
-
-        </div>
-
+        <SectionHeader
+          icon={<FiSettings size={21} />}
+          title="Appearance"
+          description="Choose how Alridez looks on your device."
+        />
 
         <div style={styles.themeContainer}>
-
-          {/* SYSTEM */}
-
           <ThemeOption
-            value="system"
             selected={theme === "system"}
             icon={<FiMonitor size={20} />}
             title="System"
             description="Follow your device theme"
-            onClick={() =>
-              applyTheme("system")
-            }
+            onClick={() => applyTheme("system")}
           />
 
-
-          {/* LIGHT */}
-
           <ThemeOption
-            value="light"
             selected={theme === "light"}
             icon={<FiSun size={20} />}
             title="Light"
             description="Always use light mode"
-            onClick={() =>
-              applyTheme("light")
-            }
+            onClick={() => applyTheme("light")}
           />
 
-
-          {/* DARK */}
-
           <ThemeOption
-            value="dark"
             selected={theme === "dark"}
             icon={<FiMoon size={20} />}
             title="Dark"
             description="Always use dark mode"
-            onClick={() =>
-              applyTheme("dark")
-            }
+            onClick={() => applyTheme("dark")}
           />
-
         </div>
-
       </section>
 
-
-      {/* =========================
-          PRIVACY & SECURITY
-      ========================= */}
+      {/* PRIVACY & SECURITY */}
 
       <section style={styles.section}>
+        <SectionHeader
+          icon={<FiShield size={21} />}
+          title="Privacy & Security"
+          description="Information about your account security."
+        />
 
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.sectionIcon}>
-            <FiShield size={21} />
-          </div>
-
-          <div>
-
-            <h2 style={styles.sectionTitle}>
-              Privacy & Security
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Information about your
-              account security.
-            </p>
-
-          </div>
-
-        </div>
-
+        <NavigationRow
+          title="Account Security"
+          description="Your account uses phone OTP authentication and JWT security."
+        />
 
         <div style={styles.navigationRow}>
-
           <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              Account Security
-            </strong>
-
-            <span style={styles.rowDescription}>
-              Your account uses phone OTP
-              authentication and JWT security.
-            </span>
-
-          </div>
-
-          <FiChevronRight
-            size={20}
-            color="var(--settings-secondary)"
-          />
-
-        </div>
-
-
-        <div style={styles.navigationRow}>
-
-          <div style={styles.navigationText}>
-
             <strong style={styles.rowTitle}>
               Phone Verification
             </strong>
-
             <span style={styles.rowDescription}>
-              Your phone number is used to
-              securely authenticate your account.
+              Your phone number is used to securely authenticate your account.
             </span>
-
           </div>
-
-          <span style={styles.verifiedBadge}>
-            Verified
-          </span>
-
+          <span style={styles.verifiedBadge}>Verified</span>
         </div>
-
       </section>
 
-
-      {/* =========================
-          LANGUAGE
-      ========================= */}
+      {/* LANGUAGE */}
 
       <section style={styles.section}>
-
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.sectionIcon}>
-            <FiGlobe size={21} />
-          </div>
-
-          <div>
-
-            <h2 style={styles.sectionTitle}>
-              Language
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Choose your preferred
-              application language.
-            </p>
-
-          </div>
-
-        </div>
-
+        <SectionHeader
+          icon={<FiGlobe size={21} />}
+          title="Language"
+          description="Choose your preferred application language."
+        />
 
         <div style={styles.languageRow}>
-
           <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              App Language
-            </strong>
-
+            <strong style={styles.rowTitle}>App Language</strong>
             <span style={styles.rowDescription}>
-              Select the language used
-              by Alrides.
+              Select the language used by Alridez.
             </span>
-
           </div>
-
 
           <select
             value={language}
-            onChange={
-              handleLanguageChange
-            }
+            onChange={handleLanguageChange}
             disabled={saving}
             style={styles.languageSelect}
           >
-
-            <option value="English">
-              English
-            </option>
-
-            <option value="Hindi">
-              Hindi
-            </option>
-
-            <option value="Telugu">
-              Telugu
-            </option>
-
-            <option value="Tamil">
-              Tamil
-            </option>
-
-            <option value="Kannada">
-              Kannada
-            </option>
-
+            <option value="English">English</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Telugu">Telugu</option>
+            <option value="Tamil">Tamil</option>
+            <option value="Kannada">Kannada</option>
           </select>
-
         </div>
-
       </section>
 
-
-      {/* =========================
-          APP PREFERENCES
-      ========================= */}
+      {/* APP PREFERENCES */}
 
       <section style={styles.section}>
+        <SectionHeader
+          icon={<FiSettings size={21} />}
+          title="App Preferences"
+          description="Manage your Alridez application preferences."
+        />
 
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.sectionIcon}>
-            <FiSettings size={21} />
-          </div>
-
-          <div>
-
-            <h2 style={styles.sectionTitle}>
-              App Preferences
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Manage your Alrides
-              application preferences.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div
-          style={styles.clickableRow}
+        <ClickableRow
+          title="Ride Preferences"
+          description="Configure your preferred ride options."
           onClick={() =>
-            showSuccess(
-              "Ride preferences will be available soon."
-            )
+            showSuccess("Ride preferences will be available soon.")
           }
-        >
+        />
 
-          <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              Ride Preferences
-            </strong>
-
-            <span style={styles.rowDescription}>
-              Configure your preferred
-              ride options.
-            </span>
-
-          </div>
-
-          <FiChevronRight
-            size={20}
-            color="var(--settings-secondary)"
-          />
-
-        </div>
-
-
-        <div
-          style={styles.clickableRow}
+        <ClickableRow
+          title="Data Usage"
+          description="Manage how the application uses network data."
           onClick={() =>
-            showSuccess(
-              "Data usage settings will be available soon."
-            )
+            showSuccess("Data usage settings will be available soon.")
           }
-        >
-
-          <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              Data Usage
-            </strong>
-
-            <span style={styles.rowDescription}>
-              Manage how the application
-              uses network data.
-            </span>
-
-          </div>
-
-          <FiChevronRight
-            size={20}
-            color="var(--settings-secondary)"
-          />
-
-        </div>
-
+        />
       </section>
 
-
-      {/* =========================
-          HELP & SUPPORT
-      ========================= */}
+      {/* HELP & SUPPORT */}
 
       <section style={styles.section}>
+        <SectionHeader
+          icon={<FiHelpCircle size={21} />}
+          title="Help & Support"
+          description="Need help? Find answers or contact Alridez support."
+        />
 
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.sectionIcon}>
-            <FiHelpCircle size={21} />
-          </div>
-
-          <div>
-
-            <h2 style={styles.sectionTitle}>
-              Help & Support
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Need help? Find answers or
-              contact Alrides support.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div
-          style={styles.clickableRow}
+        <ClickableRow
+          title="Help Center"
+          description="Find answers to common questions."
           onClick={() =>
-            showSuccess(
-              "Help Center will be available soon."
-            )
+            showSuccess("Help Center will be available soon.")
           }
-        >
+        />
 
-          <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              Help Center
-            </strong>
-
-            <span style={styles.rowDescription}>
-              Find answers to common
-              questions.
-            </span>
-
-          </div>
-
-          <FiChevronRight
-            size={20}
-            color="var(--settings-secondary)"
-          />
-
-        </div>
-
-
-        <div
-          style={styles.clickableRow}
+        <ClickableRow
+          title="Contact Support"
+          description="Contact the Alridez support team."
           onClick={() =>
-            showSuccess(
-              "Contact Support will be available soon."
-            )
+            showSuccess("Contact Support will be available soon.")
           }
-        >
-
-          <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              Contact Support
-            </strong>
-
-            <span style={styles.rowDescription}>
-              Contact the Alrides
-              support team.
-            </span>
-
-          </div>
-
-          <FiChevronRight
-            size={20}
-            color="var(--settings-secondary)"
-          />
-
-        </div>
-
+        />
       </section>
 
-
-      {/* =========================
-          ABOUT ALRIDES
-      ========================= */}
+      {/* ABOUT */}
 
       <section style={styles.section}>
-
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.sectionIcon}>
-            <FiInfo size={21} />
-          </div>
-
-          <div>
-
-            <h2 style={styles.sectionTitle}>
-              About Alrides
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Information about the
-              Alrides application.
-            </p>
-
-          </div>
-
-        </div>
-
+        <SectionHeader
+          icon={<FiInfo size={21} />}
+          title="About Alridez"
+          description="Information about the Alridez application."
+        />
 
         <div style={styles.infoRow}>
-
-          <span style={styles.rowTitle}>
-            App Name
-          </span>
-
-          <span style={styles.infoValue}>
-            Alrides
-          </span>
-
+          <span style={styles.rowTitle}>App Name</span>
+          <span style={styles.infoValue}>Alridez</span>
         </div>
-
 
         <div style={styles.infoRow}>
-
-          <span style={styles.rowTitle}>
-            Version
-          </span>
-
-          <span style={styles.infoValue}>
-            1.0.0
-          </span>
-
+          <span style={styles.rowTitle}>Version</span>
+          <span style={styles.infoValue}>1.0.0</span>
         </div>
 
-
-        <div
-          style={styles.clickableRow}
+        <ClickableRow
+          title="Terms & Conditions"
+          description="Review the terms for using Alridez."
           onClick={() =>
-            showSuccess(
-              "Terms & Conditions will be available soon."
-            )
+            showSuccess("Terms & Conditions will be available soon.")
           }
-        >
+        />
 
-          <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              Terms & Conditions
-            </strong>
-
-            <span style={styles.rowDescription}>
-              Review the terms for using
-              Alrides.
-            </span>
-
-          </div>
-
-          <FiChevronRight
-            size={20}
-            color="var(--settings-secondary)"
-          />
-
-        </div>
-
-
-        <div
-          style={styles.clickableRow}
+        <ClickableRow
+          title="Privacy Policy"
+          description="Learn how Alridez handles your information."
           onClick={() =>
-            showSuccess(
-              "Privacy Policy will be available soon."
-            )
+            showSuccess("Privacy Policy will be available soon.")
           }
-        >
-
-          <div style={styles.navigationText}>
-
-            <strong style={styles.rowTitle}>
-              Privacy Policy
-            </strong>
-
-            <span style={styles.rowDescription}>
-              Learn how Alrides handles
-              your information.
-            </span>
-
-          </div>
-
-          <FiChevronRight
-            size={20}
-            color="var(--settings-secondary)"
-          />
-
-        </div>
-
+        />
       </section>
 
-
-      {/* =========================
-          ACCOUNT
-      ========================= */}
+      {/* ACCOUNT */}
 
       <section style={styles.dangerSection}>
-
-        <div style={styles.sectionHeader}>
-
-          <div style={styles.dangerIcon}>
-            ⚠️
-          </div>
-
-          <div>
-
-            <h2 style={styles.dangerTitle}>
-              Account
-            </h2>
-
-            <p style={styles.sectionDescription}>
-              Manage your Alrides account.
-            </p>
-
-          </div>
-
-        </div>
-
+        <SectionHeader
+          icon={<span>⚠️</span>}
+          title="Account"
+          description="Manage your Alridez account."
+          danger
+        />
 
         <div style={styles.deleteRow}>
-
           <div style={styles.navigationText}>
-
-            <strong style={styles.deleteTitle}>
-              Delete Account
-            </strong>
-
+            <strong style={styles.deleteTitle}>Delete Account</strong>
             <span style={styles.rowDescription}>
-              Permanently delete your Alrides
-              account and associated data.
+              Permanently delete your Alridez account and associated data.
             </span>
-
           </div>
-
 
           <button
             type="button"
             onClick={() =>
-              showSuccess(
-                "Account deletion will be available soon."
-              )
+              showSuccess("Account deletion will be available soon.")
             }
             style={styles.deleteButton}
           >
             Delete Account
           </button>
-
         </div>
-
       </section>
 
-
-      {/* =========================
-          LOGOUT
-      ========================= */}
+      {/* LOGOUT */}
 
       <section style={styles.logoutSection}>
-
         <button
           type="button"
           onClick={handleLogout}
           style={styles.logoutButton}
         >
-
           <FiLogOut size={19} />
-
-          <span>
-            Logout
-          </span>
-
+          <span>Logout</span>
         </button>
-
       </section>
-
     </div>
-
   );
 };
 
+// ======================================================
+// REUSABLE COMPONENTS
+// ======================================================
 
-// ======================================================
-// SETTING ROW COMPONENT
-// ======================================================
+const SectionHeader = ({
+  icon,
+  title,
+  description,
+  danger = false,
+}) => (
+  <div style={styles.sectionHeader}>
+    <div style={danger ? styles.dangerIcon : styles.sectionIcon}>
+      {icon}
+    </div>
+
+    <div>
+      <h2 style={danger ? styles.dangerTitle : styles.sectionTitle}>
+        {title}
+      </h2>
+      <p style={styles.sectionDescription}>{description}</p>
+    </div>
+  </div>
+);
 
 const SettingRow = ({
   title,
@@ -1181,68 +632,42 @@ const SettingRow = ({
   enabled,
   onToggle,
   disabled = false,
-}) => {
-
-  return (
-
-    <div
-      style={{
-        ...styles.settingRow,
-        ...(disabled
-          ? styles.disabledRow
-          : {}),
-      }}
-    >
-
-      <div style={styles.navigationText}>
-
-        <strong style={styles.rowTitle}>
-          {title}
-        </strong>
-
-        <span style={styles.rowDescription}>
-          {description}
-        </span>
-
-      </div>
-
-
-      <button
-        type="button"
-        onClick={onToggle}
-        disabled={disabled}
-        aria-label={`Toggle ${title}`}
-        style={{
-          ...styles.toggle,
-          ...(enabled
-            ? styles.toggleEnabled
-            : styles.toggleDisabled),
-          ...(disabled
-            ? styles.toggleDisabledRow
-            : {}),
-        }}
-      >
-
-        <span
-          style={{
-            ...styles.toggleCircle,
-            ...(enabled
-              ? styles.toggleCircleEnabled
-              : styles.toggleCircleDisabled),
-          }}
-        />
-
-      </button>
-
+}) => (
+  <div
+    style={{
+      ...styles.settingRow,
+      ...(disabled ? styles.disabledRow : {}),
+    }}
+  >
+    <div style={styles.navigationText}>
+      <strong style={styles.rowTitle}>{title}</strong>
+      <span style={styles.rowDescription}>{description}</span>
     </div>
 
-  );
-};
-
-
-// ======================================================
-// THEME OPTION COMPONENT
-// ======================================================
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={disabled}
+      aria-label={`Toggle ${title}`}
+      style={{
+        ...styles.toggle,
+        ...(enabled
+          ? styles.toggleEnabled
+          : styles.toggleDisabled),
+        ...(disabled ? styles.toggleDisabledRow : {}),
+      }}
+    >
+      <span
+        style={{
+          ...styles.toggleCircle,
+          ...(enabled
+            ? styles.toggleCircleEnabled
+            : styles.toggleCircleDisabled),
+        }}
+      />
+    </button>
+  </div>
+);
 
 const ThemeOption = ({
   selected,
@@ -1250,67 +675,67 @@ const ThemeOption = ({
   title,
   description,
   onClick,
-}) => {
-
-  return (
-
-    <button
-      type="button"
-      onClick={onClick}
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    style={{
+      ...styles.themeOption,
+      ...(selected ? styles.themeOptionSelected : {}),
+    }}
+    aria-pressed={selected}
+  >
+    <div
       style={{
-        ...styles.themeOption,
-        ...(selected
-          ? styles.themeOptionSelected
-          : {}),
+        ...styles.themeIcon,
+        ...(selected ? styles.themeIconSelected : {}),
       }}
-      aria-pressed={selected}
     >
+      {icon}
+    </div>
 
-      <div
-        style={{
-          ...styles.themeIcon,
-          ...(selected
-            ? styles.themeIconSelected
-            : {}),
-        }}
-      >
-        {icon}
-      </div>
+    <div style={styles.themeText}>
+      <strong style={styles.rowTitle}>{title}</strong>
+      <span style={styles.rowDescription}>{description}</span>
+    </div>
 
+    <div style={styles.themeCheck}>
+      {selected && <FiCheck size={18} />}
+    </div>
+  </button>
+);
 
-      <div style={styles.themeText}>
+const NavigationRow = ({ title, description }) => (
+  <div style={styles.navigationRow}>
+    <div style={styles.navigationText}>
+      <strong style={styles.rowTitle}>{title}</strong>
+      <span style={styles.rowDescription}>{description}</span>
+    </div>
+    <FiChevronRight
+      size={20}
+      color="var(--settings-secondary)"
+    />
+  </div>
+);
 
-        <strong style={styles.rowTitle}>
-          {title}
-        </strong>
-
-        <span style={styles.rowDescription}>
-          {description}
-        </span>
-
-      </div>
-
-
-      <div style={styles.themeCheck}>
-
-        {selected && (
-          <FiCheck size={18} />
-        )}
-
-      </div>
-
-    </button>
-
-  );
-};
-
+const ClickableRow = ({ title, description, onClick }) => (
+  <div style={styles.clickableRow} onClick={onClick}>
+    <div style={styles.navigationText}>
+      <strong style={styles.rowTitle}>{title}</strong>
+      <span style={styles.rowDescription}>{description}</span>
+    </div>
+    <FiChevronRight
+      size={20}
+      color="var(--settings-secondary)"
+    />
+  </div>
+);
 
 // ======================================================
 // STYLES
 // ======================================================
 
 const styles = {
-
   container: {
     width: "100%",
     maxWidth: "900px",
@@ -1343,8 +768,7 @@ const styles = {
     borderRadius: "16px",
     padding: "40px",
     textAlign: "center",
-    boxShadow:
-      "0 4px 18px var(--settings-shadow)",
+    boxShadow: "0 4px 18px var(--settings-shadow)",
   },
 
   loadingText: {
@@ -1392,12 +816,9 @@ const styles = {
     borderRadius: "16px",
     marginBottom: "20px",
     padding: "24px",
-    boxShadow:
-      "0 4px 18px var(--settings-shadow)",
-    border:
-      "1px solid var(--settings-border)",
-    transition:
-      "background-color 0.25s ease, border-color 0.25s ease",
+    boxShadow: "0 4px 18px var(--settings-shadow)",
+    border: "1px solid var(--settings-border)",
+    transition: "background-color 0.25s ease, border-color 0.25s ease",
   },
 
   sectionHeader: {
@@ -1439,8 +860,7 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     padding: "18px 0",
-    borderTop:
-      "1px solid var(--settings-border)",
+    borderTop: "1px solid var(--settings-border)",
   },
 
   disabledRow: {
@@ -1453,8 +873,7 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     padding: "18px 0",
-    borderTop:
-      "1px solid var(--settings-border)",
+    borderTop: "1px solid var(--settings-border)",
   },
 
   clickableRow: {
@@ -1463,8 +882,7 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     padding: "18px 0",
-    borderTop:
-      "1px solid var(--settings-border)",
+    borderTop: "1px solid var(--settings-border)",
     cursor: "pointer",
   },
 
@@ -1486,10 +904,6 @@ const styles = {
     fontSize: "13px",
     lineHeight: "1.5",
   },
-
-  // =========================
-  // TOGGLE
-  // =========================
 
   toggle: {
     position: "relative",
@@ -1523,8 +937,7 @@ const styles = {
     borderRadius: "50%",
     background: "#ffffff",
     transition: "0.2s",
-    boxShadow:
-      "0 1px 3px rgba(0, 0, 0, 0.2)",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
   },
 
   toggleCircleEnabled: {
@@ -1534,10 +947,6 @@ const styles = {
   toggleCircleDisabled: {
     left: "3px",
   },
-
-  // =========================
-  // APPEARANCE
-  // =========================
 
   themeContainer: {
     display: "flex",
@@ -1553,22 +962,17 @@ const styles = {
     gap: "14px",
     padding: "14px",
     borderRadius: "12px",
-    border:
-      "1px solid var(--settings-border)",
-    background:
-      "var(--settings-theme-option-bg)",
+    border: "1px solid var(--settings-border)",
+    background: "var(--settings-theme-option-bg)",
     color: "var(--settings-text)",
     textAlign: "left",
     cursor: "pointer",
-    transition:
-      "background-color 0.2s ease, border-color 0.2s ease",
+    transition: "background-color 0.2s ease, border-color 0.2s ease",
   },
 
   themeOptionSelected: {
-    border:
-      "1px solid var(--settings-primary)",
-    background:
-      "var(--settings-theme-selected-bg)",
+    border: "1px solid var(--settings-primary)",
+    background: "var(--settings-theme-selected-bg)",
   },
 
   themeIcon: {
@@ -1576,8 +980,7 @@ const styles = {
     height: "42px",
     minWidth: "42px",
     borderRadius: "10px",
-    background:
-      "var(--settings-icon-bg)",
+    background: "var(--settings-icon-bg)",
     color: "var(--settings-secondary)",
     display: "flex",
     alignItems: "center",
@@ -1605,27 +1008,20 @@ const styles = {
     justifyContent: "center",
   },
 
-  // =========================
-  // LANGUAGE
-  // =========================
-
   languageRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "20px",
     paddingTop: "18px",
-    borderTop:
-      "1px solid var(--settings-border)",
+    borderTop: "1px solid var(--settings-border)",
   },
 
   languageSelect: {
     padding: "9px 35px 9px 12px",
     borderRadius: "8px",
-    border:
-      "1px solid var(--settings-input-border)",
-    background:
-      "var(--settings-input-bg)",
+    border: "1px solid var(--settings-input-border)",
+    background: "var(--settings-input-bg)",
     color: "var(--settings-text)",
     fontSize: "14px",
     cursor: "pointer",
@@ -1635,26 +1031,19 @@ const styles = {
   verifiedBadge: {
     padding: "5px 10px",
     borderRadius: "20px",
-    background:
-      "var(--settings-success-bg)",
-    color:
-      "var(--settings-success-text)",
+    background: "var(--settings-success-bg)",
+    color: "var(--settings-success-text)",
     fontSize: "12px",
     fontWeight: "600",
     whiteSpace: "nowrap",
   },
-
-  // =========================
-  // INFO
-  // =========================
 
   infoRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     padding: "16px 0",
-    borderTop:
-      "1px solid var(--settings-border)",
+    borderTop: "1px solid var(--settings-border)",
   },
 
   infoValue: {
@@ -1663,20 +1052,13 @@ const styles = {
     fontWeight: "500",
   },
 
-  // =========================
-  // DANGER
-  // =========================
-
   dangerSection: {
-    background:
-      "var(--settings-card)",
+    background: "var(--settings-card)",
     borderRadius: "16px",
     marginBottom: "20px",
     padding: "24px",
-    border:
-      "1px solid var(--settings-danger-border)",
-    boxShadow:
-      "0 4px 18px var(--settings-shadow)",
+    border: "1px solid var(--settings-danger-border)",
+    boxShadow: "0 4px 18px var(--settings-shadow)",
   },
 
   dangerIcon: {
@@ -1684,8 +1066,7 @@ const styles = {
     height: "42px",
     minWidth: "42px",
     borderRadius: "10px",
-    background:
-      "var(--settings-danger-bg)",
+    background: "var(--settings-danger-bg)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1704,8 +1085,7 @@ const styles = {
     justifyContent: "space-between",
     gap: "20px",
     paddingTop: "18px",
-    borderTop:
-      "1px solid var(--settings-danger-border)",
+    borderTop: "1px solid var(--settings-danger-border)",
   },
 
   deleteTitle: {
@@ -1718,18 +1098,13 @@ const styles = {
     border: "none",
     borderRadius: "8px",
     padding: "10px 15px",
-    background:
-      "var(--settings-danger)",
+    background: "var(--settings-danger)",
     color: "#ffffff",
     fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
     whiteSpace: "nowrap",
   },
-
-  // =========================
-  // LOGOUT
-  // =========================
 
   logoutSection: {
     display: "flex",
@@ -1746,18 +1121,14 @@ const styles = {
     maxWidth: "300px",
     padding: "13px 20px",
     borderRadius: "10px",
-    border:
-      "1px solid var(--settings-danger-border)",
-    background:
-      "var(--settings-card)",
-    color:
-      "var(--settings-danger)",
+    border: "1px solid var(--settings-danger-border)",
+    background: "var(--settings-card)",
+    color: "var(--settings-danger)",
     fontSize: "15px",
     fontWeight: "600",
     cursor: "pointer",
     transition: "0.2s",
   },
-
 };
 
 export default Settings;
