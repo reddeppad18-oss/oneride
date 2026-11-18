@@ -15,6 +15,7 @@ import DashboardLayout from "./pages/DashboardLayout";
 import PostRide from "./pages/PostRide";
 import SearchRides from "./pages/SearchRides";
 import MyRides from "./pages/MyRides";
+import RequestRide from "./pages/RequestRide";
 
 import MyBookings from "./pages/MyBookings";
 import RideBookings from "./pages/RideBookings";
@@ -124,6 +125,15 @@ function App() {
             element={<MyRides />}
           />
 
+          {/* REQUEST A RIDE */}
+
+          <Route
+            path="/request-ride"
+            element={<RequestRide />}
+          />
+
+          {/* MY BOOKINGS */}
+
           <Route
             path="/my-bookings"
             element={<MyBookings />}
@@ -133,6 +143,8 @@ function App() {
             path="/ride-bookings/:rideId"
             element={<RideBookings />}
           />
+
+          {/* RIDE REQUESTS */}
 
           <Route
             path="/my-ride-requests"
