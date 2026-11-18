@@ -5,7 +5,7 @@ import api from "../api/axios";
  * Get all conversations of the logged-in user
  */
 export const getMyConversations = async () => {
-  const response = await api.get("/api/chat/conversations");
+  const response = await api.get("/chat/conversations");
   return response.data;
 };
 
@@ -18,7 +18,7 @@ export const getChatMessages = async (
   size = 30
 ) => {
   const response = await api.get(
-    `/api/chat/conversations/${conversationId}/messages`,
+    `/chat/conversations/${conversationId}/messages`,
     {
       params: {
         page,
@@ -38,7 +38,7 @@ export const sendChatMessage = async (
   content
 ) => {
   const response = await api.post(
-    `/api/chat/conversations/${conversationId}/messages`,
+    `/chat/conversations/${conversationId}/messages`,
     {
       content,
     }
@@ -52,7 +52,7 @@ export const sendChatMessage = async (
  */
 export const markChatAsRead = async (conversationId) => {
   const response = await api.put(
-    `/api/chat/conversations/${conversationId}/read`
+    `/chat/conversations/${conversationId}/read`
   );
 
   return response.data;
@@ -63,7 +63,7 @@ export const markChatAsRead = async (conversationId) => {
  */
 export const closeChatConversation = async (conversationId) => {
   const response = await api.put(
-    `/api/chat/conversations/${conversationId}/close`
+    `/chat/conversations/${conversationId}/close`
   );
 
   return response.data;
