@@ -28,7 +28,6 @@ function Chat() {
 
   const [error, setError] = useState("");
 
-  // Load logged-in user and conversations
   useEffect(() => {
     loadChatData();
   }, []);
@@ -58,7 +57,7 @@ function Chat() {
 
   // Identify the other participant
   const getOtherParticipant = (conversation) => {
-    if (!currentUser) return {};
+    if (!currentUser || !conversation) return {};
 
     if (String(conversation.customerId) === String(currentUser.id)) {
       return {
@@ -79,6 +78,7 @@ function Chat() {
       setSelectedConversation(conversation);
       setMessages([]);
       setMessagesLoading(true);
+      setMessageText("");
       setError("");
 
       const data = await getChatMessages(
@@ -112,6 +112,14 @@ function Chat() {
     } finally {
       setMessagesLoading(false);
     }
+  };
+
+  // Return to conversation list on mobile
+  const handleBackToConversations = () => {
+    setSelectedConversation(null);
+    setMessages([]);
+    setMessageText("");
+    setError("");
   };
 
   // Send a message
@@ -248,10 +256,13 @@ function Chat() {
   return (
     <div className="chat-page">
 
-      {/* INBOX SIDEBAR */}
+      {/* CONVERSATION SIDEBAR */}
 
-      <aside className="chat-sidebar">
-
+      <aside
+        className={`chat-sidebar ${
+          selectedConversation ? "mobile-sidebar-hidden" : ""
+        }`}
+      >
         <div className="chat-sidebar-header">
           <div>
             <h2>Messages</h2>
@@ -264,7 +275,6 @@ function Chat() {
         </div>
 
         <div className="chat-conversation-list">
-
           {conversations.length === 0 ? (
             <div className="chat-empty-inbox">
               <h3>No conversations yet</h3>
@@ -297,7 +307,6 @@ function Chat() {
                   </div>
 
                   <div className="chat-conversation-info">
-
                     <div className="chat-conversation-top">
                       <strong>
                         {participant.name || "Alridez User"}
@@ -319,20 +328,21 @@ function Chat() {
                         </span>
                       )}
                     </div>
-
                   </div>
                 </button>
               );
             })
           )}
-
         </div>
       </aside>
 
-      {/* CHAT WINDOW */}
+      {/* MAIN CHAT WINDOW */}
 
-      <main className="chat-main">
-
+      <main
+        className={`chat-main ${
+          selectedConversation ? "mobile-chat-visible" : "mobile-chat-hidden"
+        }`}
+      >
         {!selectedConversation ? (
           <div className="chat-welcome">
             <div className="chat-welcome-icon">
@@ -353,6 +363,16 @@ function Chat() {
             <div className="chat-header">
 
               <div className="chat-header-user">
+
+                <button
+                  type="button"
+                  className="chat-back-button"
+                  onClick={handleBackToConversations}
+                  aria-label="Back to conversations"
+                >
+                  ←
+                </button>
+
                 <div className="chat-avatar">
                   {(
                     getOtherParticipant(selectedConversation).name || "?"
@@ -361,7 +381,7 @@ function Chat() {
                     .toUpperCase()}
                 </div>
 
-                <div>
+                <div className="chat-header-user-info">
                   <h3>
                     {
                       getOtherParticipant(selectedConversation).name ||
@@ -492,15 +512,18 @@ function Chat() {
             </form>
           </>
         )}
-
       </main>
+
+      {/* ERROR MESSAGE */}
 
       {error && (
         <div className="chat-error">
-          {error}
+          <span>{error}</span>
+
           <button
             type="button"
             onClick={() => setError("")}
+            aria-label="Dismiss error"
           >
             ×
           </button>
