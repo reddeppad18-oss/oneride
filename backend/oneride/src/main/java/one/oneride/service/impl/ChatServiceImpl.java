@@ -39,6 +39,10 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMessageRepository messageRepository;
     private final UserRepository userRepository;
 
+    // --------------------------------------------------
+    // CREATE OR GET CONVERSATION
+    // --------------------------------------------------
+
     @Override
     public ChatConversationResponse getOrCreateConversation(
             ChatServiceType serviceType,
@@ -48,6 +52,7 @@ public class ChatServiceImpl implements ChatService {
 
         if (serviceType == null || serviceReferenceId == null
                 || customer == null || provider == null) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Chat details are required"
@@ -69,14 +74,16 @@ public class ChatServiceImpl implements ChatService {
                         provider
                 )
                 .orElseGet(() -> {
-                    ChatConversation newConversation = ChatConversation.builder()
-                            .serviceType(serviceType)
-                            .serviceReferenceId(serviceReferenceId)
-                            .customer(customer)
-                            .provider(provider)
-                            .status(ChatConversationStatus.ACTIVE)
-                            .createdAt(LocalDateTime.now())
-                            .build();
+
+                    ChatConversation newConversation =
+                            ChatConversation.builder()
+                                    .serviceType(serviceType)
+                                    .serviceReferenceId(serviceReferenceId)
+                                    .customer(customer)
+                                    .provider(provider)
+                                    .status(ChatConversationStatus.ACTIVE)
+                                    .createdAt(LocalDateTime.now())
+                                    .build();
 
                     return conversationRepository.save(newConversation);
                 });
@@ -84,18 +91,28 @@ public class ChatServiceImpl implements ChatService {
         return mapConversation(conversation, customer);
     }
 
+    // --------------------------------------------------
+    // GET MY CONVERSATIONS
+    // --------------------------------------------------
+
     @Override
     @Transactional(readOnly = true)
-    public List<ChatConversationResponse> getMyConversations(String phoneNumber) {
+    public List<ChatConversationResponse> getMyConversations(
+            String phoneNumber) {
 
         User user = getUser(phoneNumber);
 
         return conversationRepository
                 .findByCustomerOrProviderOrderByLastMessageAtDesc(user, user)
                 .stream()
+                .filter(conversation -> isConversationVisible(conversation, user))
                 .map(conversation -> mapConversation(conversation, user))
                 .toList();
     }
+
+    // --------------------------------------------------
+    // GET CHAT MESSAGES
+    // --------------------------------------------------
 
     @Override
     @Transactional(readOnly = true)
@@ -113,9 +130,11 @@ public class ChatServiceImpl implements ChatService {
         }
 
         User user = getUser(phoneNumber);
+
         ChatConversation conversation = getConversation(conversationId);
 
         verifyParticipant(conversation, user);
+        verifyConversationVisible(conversation, user);
 
         Pageable pageable = PageRequest.of(
                 page,
@@ -125,8 +144,12 @@ public class ChatServiceImpl implements ChatService {
 
         return messageRepository
                 .findByConversationOrderBySentAtDesc(conversation, pageable)
-                .map(this::mapMessage);
+                .map(message -> mapMessage(message, user));
     }
+
+    // --------------------------------------------------
+    // SEND MESSAGE
+    // --------------------------------------------------
 
     @Override
     public ChatMessageResponse sendMessage(
@@ -135,9 +158,11 @@ public class ChatServiceImpl implements ChatService {
             SendChatMessageRequest request) {
 
         User user = getUser(phoneNumber);
+
         ChatConversation conversation = getConversation(conversationId);
 
         verifyParticipant(conversation, user);
+        verifyConversationVisible(conversation, user);
 
         if (conversation.getStatus() != ChatConversationStatus.ACTIVE) {
             throw new ResponseStatusException(
@@ -148,6 +173,7 @@ public class ChatServiceImpl implements ChatService {
 
         if (request == null || request.getContent() == null
                 || request.getContent().isBlank()) {
+
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Message cannot be empty"
@@ -176,35 +202,231 @@ public class ChatServiceImpl implements ChatService {
         ChatMessage savedMessage = messageRepository.save(message);
 
         conversation.setLastMessageAt(now);
+
         conversationRepository.save(conversation);
 
-        return mapMessage(savedMessage);
+        return mapMessage(savedMessage, user);
     }
 
+    // --------------------------------------------------
+    // EDIT MESSAGE
+    // --------------------------------------------------
+
     @Override
-    public void markAsRead(Long conversationId, String phoneNumber) {
+    public ChatMessageResponse editMessage(
+            Long conversationId,
+            Long messageId,
+            String phoneNumber,
+            SendChatMessageRequest request) {
 
         User user = getUser(phoneNumber);
+
         ChatConversation conversation = getConversation(conversationId);
 
         verifyParticipant(conversation, user);
+        verifyConversationVisible(conversation, user);
+
+        ChatMessage message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Message not found"
+                ));
+
+        if (!Objects.equals(
+                message.getConversation().getId(),
+                conversationId)) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Message does not belong to this conversation"
+            );
+        }
+
+        if (!Objects.equals(
+                message.getSender().getId(),
+                user.getId())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You can only edit your own messages"
+            );
+        }
+
+        if (message.isDeletedForEveryone()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Deleted messages cannot be edited"
+            );
+        }
+
+        if (request == null || request.getContent() == null
+                || request.getContent().isBlank()) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Message cannot be empty"
+            );
+        }
+
+        String content = request.getContent().trim();
+
+        if (content.length() > 2000) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Message cannot exceed 2000 characters"
+            );
+        }
+
+        message.setContent(content);
+        message.setEditedAt(LocalDateTime.now());
+
+        ChatMessage updatedMessage = messageRepository.save(message);
+
+        return mapMessage(updatedMessage, user);
+    }
+
+    // --------------------------------------------------
+    // DELETE MESSAGE
+    // --------------------------------------------------
+
+    @Override
+    public void deleteMessage(
+            Long conversationId,
+            Long messageId,
+            String phoneNumber,
+            boolean forEveryone) {
+
+        User user = getUser(phoneNumber);
+
+        ChatConversation conversation = getConversation(conversationId);
+
+        verifyParticipant(conversation, user);
+        verifyConversationVisible(conversation, user);
+
+        ChatMessage message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Message not found"
+                ));
+
+        if (!Objects.equals(
+                message.getConversation().getId(),
+                conversationId)) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Message does not belong to this conversation"
+            );
+        }
+
+        boolean isCustomer = Objects.equals(
+                conversation.getCustomer().getId(),
+                user.getId()
+        );
+
+        boolean isSender = Objects.equals(
+                message.getSender().getId(),
+                user.getId()
+        );
+
+        if (forEveryone) {
+
+            if (!isSender) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "You can only delete your own messages for everyone"
+                );
+            }
+
+            message.setDeletedForEveryone(true);
+
+        } else {
+
+            if (isCustomer) {
+                message.setDeletedByCustomer(true);
+            } else {
+                message.setDeletedByProvider(true);
+            }
+        }
+
+        messageRepository.save(message);
+    }
+
+    // --------------------------------------------------
+    // DELETE CONVERSATION FOR CURRENT USER
+    // --------------------------------------------------
+
+    @Override
+    public void deleteConversation(
+            Long conversationId,
+            String phoneNumber) {
+
+        User user = getUser(phoneNumber);
+
+        ChatConversation conversation = getConversation(conversationId);
+
+        verifyParticipant(conversation, user);
+
+        boolean isCustomer = Objects.equals(
+                conversation.getCustomer().getId(),
+                user.getId()
+        );
+
+        if (isCustomer) {
+            conversation.setDeletedByCustomer(true);
+        } else {
+            conversation.setDeletedByProvider(true);
+        }
+
+        conversationRepository.save(conversation);
+    }
+
+    // --------------------------------------------------
+    // MARK MESSAGES AS READ
+    // --------------------------------------------------
+
+    @Override
+    public void markAsRead(
+            Long conversationId,
+            String phoneNumber) {
+
+        User user = getUser(phoneNumber);
+
+        ChatConversation conversation = getConversation(conversationId);
+
+        verifyParticipant(conversation, user);
+        verifyConversationVisible(conversation, user);
 
         messageRepository.markMessagesAsRead(conversation, user);
     }
 
+    // --------------------------------------------------
+    // CLOSE CONVERSATION
+    // --------------------------------------------------
+
     @Override
-    public void closeConversation(Long conversationId, String phoneNumber) {
+    public void closeConversation(
+            Long conversationId,
+            String phoneNumber) {
 
         User user = getUser(phoneNumber);
+
         ChatConversation conversation = getConversation(conversationId);
 
         verifyParticipant(conversation, user);
+        verifyConversationVisible(conversation, user);
 
         conversation.setStatus(ChatConversationStatus.CLOSED);
+
         conversationRepository.save(conversation);
     }
 
+    // --------------------------------------------------
+    // GET USER
+    // --------------------------------------------------
+
     private User getUser(String phoneNumber) {
+
         return userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -212,13 +434,22 @@ public class ChatServiceImpl implements ChatService {
                 ));
     }
 
+    // --------------------------------------------------
+    // GET CONVERSATION
+    // --------------------------------------------------
+
     private ChatConversation getConversation(Long conversationId) {
+
         return conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Conversation not found"
                 ));
     }
+
+    // --------------------------------------------------
+    // VERIFY PARTICIPANT
+    // --------------------------------------------------
 
     private void verifyParticipant(
             ChatConversation conversation,
@@ -241,6 +472,42 @@ public class ChatServiceImpl implements ChatService {
             );
         }
     }
+
+    // --------------------------------------------------
+    // CHECK CONVERSATION VISIBILITY
+    // --------------------------------------------------
+
+    private boolean isConversationVisible(
+            ChatConversation conversation,
+            User user) {
+
+        boolean isCustomer = Objects.equals(
+                conversation.getCustomer().getId(),
+                user.getId()
+        );
+
+        if (isCustomer) {
+            return !conversation.isDeletedByCustomer();
+        }
+
+        return !conversation.isDeletedByProvider();
+    }
+
+    private void verifyConversationVisible(
+            ChatConversation conversation,
+            User user) {
+
+        if (!isConversationVisible(conversation, user)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Conversation not found"
+            );
+        }
+    }
+
+    // --------------------------------------------------
+    // MAP CONVERSATION RESPONSE
+    // --------------------------------------------------
 
     private ChatConversationResponse mapConversation(
             ChatConversation conversation,
@@ -267,17 +534,45 @@ public class ChatServiceImpl implements ChatService {
                 .build();
     }
 
-    private ChatMessageResponse mapMessage(ChatMessage message) {
+    // --------------------------------------------------
+    // MAP MESSAGE RESPONSE
+    // --------------------------------------------------
+
+    private ChatMessageResponse mapMessage(
+            ChatMessage message,
+            User currentUser) {
+
+        ChatConversation conversation = message.getConversation();
+
+        boolean isCustomer = Objects.equals(
+                conversation.getCustomer().getId(),
+                currentUser.getId()
+        );
+
+        boolean deletedForMe = isCustomer
+                ? message.isDeletedByCustomer()
+                : message.isDeletedByProvider();
+
+        boolean deletedForEveryone = message.isDeletedForEveryone();
+
+        String content = null;
+
+        if (!deletedForMe && !deletedForEveryone) {
+            content = message.getContent();
+        }
 
         return ChatMessageResponse.builder()
                 .messageId(message.getId())
-                .conversationId(message.getConversation().getId())
+                .conversationId(conversation.getId())
                 .senderId(message.getSender().getId())
                 .senderName(message.getSender().getFullName())
-                .content(message.getContent())
+                .content(content)
                 .messageType(message.getMessageType())
                 .sentAt(message.getSentAt())
                 .readAt(message.getReadAt())
+                .editedAt(message.getEditedAt())
+                .deletedForMe(deletedForMe)
+                .deletedForEveryone(deletedForEveryone)
                 .build();
     }
 }
