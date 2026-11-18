@@ -1,3 +1,4 @@
+
 package one.oneride.service.impl;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import one.oneride.entity.Ride;
 import one.oneride.entity.User;
 
 import one.oneride.enums.BookingStatus;
+import one.oneride.enums.ChatServiceType;
 import one.oneride.enums.NotificationType;
 import one.oneride.enums.RideStatus;
 
@@ -25,6 +27,7 @@ import one.oneride.repository.RideRepository;
 import one.oneride.repository.UserRepository;
 
 import one.oneride.service.BookingService;
+import one.oneride.service.ChatService;
 import one.oneride.service.NotificationService;
 
 @Service
@@ -38,6 +41,9 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
 
     private final NotificationService notificationService;
+
+    // Chat integration
+    private final ChatService chatService;
 
 
     // =========================================================
@@ -53,77 +59,50 @@ public class BookingServiceImpl implements BookingService {
         User passenger =
                 userRepository.findByPhoneNumber(phoneNumber)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "User not found"
-                                )
+                                new RuntimeException("User not found")
                         );
-
 
         Ride ride =
                 rideRepository.findById(request.getRideId())
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Ride not found"
-                                )
+                                new RuntimeException("Ride not found")
                         );
 
-
-        // -----------------------------------------------------
         // Check existing active booking
-        // -----------------------------------------------------
 
         List<BookingStatus> activeStatuses = List.of(
                 BookingStatus.PENDING,
                 BookingStatus.CONFIRMED
         );
 
-
         boolean alreadyBooked =
-                bookingRepository
-                        .existsByRideIdAndUserIdAndStatusIn(
-                                ride.getId(),
-                                passenger.getId(),
-                                activeStatuses
-                        );
-
+                bookingRepository.existsByRideIdAndUserIdAndStatusIn(
+                        ride.getId(),
+                        passenger.getId(),
+                        activeStatuses
+                );
 
         if (alreadyBooked) {
-
             throw new RuntimeException(
                     "You already have a booking request for this ride"
             );
         }
 
-
-        // -----------------------------------------------------
         // Passenger cannot book own ride
-        // -----------------------------------------------------
 
-        if (ride.getUser()
-                .getId()
-                .equals(passenger.getId())) {
-
+        if (ride.getUser().getId().equals(passenger.getId())) {
             throw new RuntimeException(
                     "You cannot book your own ride"
             );
         }
 
-
-        // -----------------------------------------------------
         // Ride must be active
-        // -----------------------------------------------------
 
         if (ride.getStatus() != RideStatus.ACTIVE) {
-
-            throw new RuntimeException(
-                    "Ride is not available"
-            );
+            throw new RuntimeException("Ride is not available");
         }
 
-
-        // -----------------------------------------------------
         // Validate seats
-        // -----------------------------------------------------
 
         if (request.getSeatsBooked() == null
                 || request.getSeatsBooked() <= 0) {
@@ -133,36 +112,22 @@ public class BookingServiceImpl implements BookingService {
             );
         }
 
-
-        // -----------------------------------------------------
         // Check available seats
-        // -----------------------------------------------------
 
-        if (request.getSeatsBooked()
-                > ride.getAvailableSeats()) {
-
+        if (request.getSeatsBooked() > ride.getAvailableSeats()) {
             throw new RuntimeException(
                     "Not enough seats available"
             );
         }
 
-
-        // -----------------------------------------------------
         // Create booking
-        // -----------------------------------------------------
 
         Booking booking = Booking.builder()
                 .ride(ride)
                 .user(passenger)
-                .seatsBooked(
-                        request.getSeatsBooked()
-                )
-                .status(
-                        BookingStatus.PENDING
-                )
-                .createdAt(
-                        LocalDateTime.now()
-                )
+                .seatsBooked(request.getSeatsBooked())
+                .status(BookingStatus.PENDING)
+                .createdAt(LocalDateTime.now())
                 .expiresAt(
                         LocalDateTime.of(
                                 ride.getTravelDate(),
@@ -171,13 +136,9 @@ public class BookingServiceImpl implements BookingService {
                 )
                 .build();
 
-
         booking = bookingRepository.save(booking);
 
-
-        // -----------------------------------------------------
         // Notify ride owner
-        // -----------------------------------------------------
 
         notificationService.createNotification(
                 ride.getUser(),
@@ -192,7 +153,6 @@ public class BookingServiceImpl implements BookingService {
                 NotificationType.BOOKING_REQUEST
         );
 
-
         return mapToBookingResponse(booking);
     }
 
@@ -203,17 +163,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingResponse> getMyBookings(
-            String phoneNumber) {
+    public List<BookingResponse> getMyBookings(String phoneNumber) {
 
         User user =
                 userRepository.findByPhoneNumber(phoneNumber)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "User not found"
-                                )
+                                new RuntimeException("User not found")
                         );
-
 
         return bookingRepository
                 .findByUser(user)
@@ -224,7 +180,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     // =========================================================
-    // CONFIRM BOOKING
+    // CONFIRM BOOKING + CREATE CHAT
     // =========================================================
 
     @Override
@@ -236,102 +192,68 @@ public class BookingServiceImpl implements BookingService {
         Booking booking =
                 bookingRepository.findById(bookingId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Booking not found"
-                                )
+                                new RuntimeException("Booking not found")
                         );
-
 
         Ride ride =
                 rideRepository.findByIdForUpdate(
                         booking.getRide().getId()
                 )
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Ride not found"
-                        )
+                        new RuntimeException("Ride not found")
                 );
 
-
-        // -----------------------------------------------------
         // Verify ride owner
-        // -----------------------------------------------------
 
-        if (!ride.getUser()
-                .getPhoneNumber()
-                .equals(phoneNumber)) {
-
-            throw new RuntimeException(
-                    "Unauthorized"
-            );
+        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
+            throw new RuntimeException("Unauthorized");
         }
 
-
-        // -----------------------------------------------------
         // Only pending bookings
-        // -----------------------------------------------------
 
-        if (booking.getStatus()
-                != BookingStatus.PENDING) {
-
-            throw new RuntimeException(
-                    "Booking already processed"
-            );
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Booking already processed");
         }
 
-
-        // -----------------------------------------------------
         // Check available seats
-        // -----------------------------------------------------
 
-        if (booking.getSeatsBooked()
-                > ride.getAvailableSeats()) {
-
-            throw new RuntimeException(
-                    "Not enough seats available"
-            );
+        if (booking.getSeatsBooked() > ride.getAvailableSeats()) {
+            throw new RuntimeException("Not enough seats available");
         }
 
-
-        // -----------------------------------------------------
         // Confirm booking
-        // -----------------------------------------------------
 
-        booking.setStatus(
-                BookingStatus.CONFIRMED
-        );
+        booking.setStatus(BookingStatus.CONFIRMED);
 
-
-        // -----------------------------------------------------
         // Reduce seats
-        // -----------------------------------------------------
 
         ride.setAvailableSeats(
-                ride.getAvailableSeats()
-                        - booking.getSeatsBooked()
+                ride.getAvailableSeats() - booking.getSeatsBooked()
         );
 
-
-        // -----------------------------------------------------
         // Mark ride FULL if no seats remain
-        // -----------------------------------------------------
 
         if (ride.getAvailableSeats() == 0) {
-
-            ride.setStatus(
-                    RideStatus.FULL
-            );
+            ride.setStatus(RideStatus.FULL);
         }
 
+        // Save booking and ride
 
         bookingRepository.save(booking);
-
         rideRepository.save(ride);
 
+        // =====================================================
+        // CREATE OR RETRIEVE CHAT CONVERSATION
+        // =====================================================
 
-        // -----------------------------------------------------
+        chatService.getOrCreateConversation(
+                ChatServiceType.RIDE_SHARING,
+                booking.getId(),
+                booking.getUser(),   // Customer / Passenger
+                ride.getUser()       // Provider / Ride Owner
+        );
+
         // Notify passenger
-        // -----------------------------------------------------
 
         notificationService.createNotification(
                 booking.getUser(),
@@ -344,10 +266,9 @@ public class BookingServiceImpl implements BookingService {
                 NotificationType.BOOKING_CONFIRMED
         );
 
-
         return MessageResponse.builder()
                 .message(
-                        "Booking confirmed successfully"
+                        "Booking confirmed successfully. You can now chat with the ride provider."
                 )
                 .build();
     }
@@ -366,57 +287,30 @@ public class BookingServiceImpl implements BookingService {
         Booking booking =
                 bookingRepository.findById(bookingId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Booking not found"
-                                )
+                                new RuntimeException("Booking not found")
                         );
-
 
         Ride ride = booking.getRide();
 
-
-        // -----------------------------------------------------
         // Verify ride owner
-        // -----------------------------------------------------
 
-        if (!ride.getUser()
-                .getPhoneNumber()
-                .equals(phoneNumber)) {
-
-            throw new RuntimeException(
-                    "Unauthorized"
-            );
+        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
+            throw new RuntimeException("Unauthorized");
         }
 
-
-        // -----------------------------------------------------
         // Only pending bookings
-        // -----------------------------------------------------
 
-        if (booking.getStatus()
-                != BookingStatus.PENDING) {
-
-            throw new RuntimeException(
-                    "Booking already processed"
-            );
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Booking already processed");
         }
 
-
-        // -----------------------------------------------------
         // Reject booking
-        // -----------------------------------------------------
 
-        booking.setStatus(
-                BookingStatus.REJECTED
-        );
-
+        booking.setStatus(BookingStatus.REJECTED);
 
         bookingRepository.save(booking);
 
-
-        // -----------------------------------------------------
         // Notify passenger
-        // -----------------------------------------------------
 
         notificationService.createNotification(
                 booking.getUser(),
@@ -429,11 +323,8 @@ public class BookingServiceImpl implements BookingService {
                 NotificationType.BOOKING_REJECTED
         );
 
-
         return MessageResponse.builder()
-                .message(
-                        "Booking rejected successfully"
-                )
+                .message("Booking rejected successfully")
                 .build();
     }
 
@@ -451,25 +342,14 @@ public class BookingServiceImpl implements BookingService {
         Ride ride =
                 rideRepository.findById(rideId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Ride not found"
-                                )
+                                new RuntimeException("Ride not found")
                         );
 
-
-        // -----------------------------------------------------
         // Only ride owner can view bookings
-        // -----------------------------------------------------
 
-        if (!ride.getUser()
-                .getPhoneNumber()
-                .equals(phoneNumber)) {
-
-            throw new RuntimeException(
-                    "Unauthorized"
-            );
+        if (!ride.getUser().getPhoneNumber().equals(phoneNumber)) {
+            throw new RuntimeException("Unauthorized");
         }
-
 
         return bookingRepository
                 .findByRide(ride)
@@ -485,17 +365,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingResponse> getBookingHistory(
-            String phoneNumber) {
+    public List<BookingResponse> getBookingHistory(String phoneNumber) {
 
         User user =
                 userRepository.findByPhoneNumber(phoneNumber)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "User not found"
-                                )
+                                new RuntimeException("User not found")
                         );
-
 
         List<BookingStatus> historyStatuses = List.of(
                 BookingStatus.COMPLETED,
@@ -504,12 +380,8 @@ public class BookingServiceImpl implements BookingService {
                 BookingStatus.EXPIRED
         );
 
-
         return bookingRepository
-                .findByUserAndStatusIn(
-                        user,
-                        historyStatuses
-                )
+                .findByUserAndStatusIn(user, historyStatuses)
                 .stream()
                 .map(this::mapToBookingResponse)
                 .toList();
@@ -529,112 +401,69 @@ public class BookingServiceImpl implements BookingService {
         Booking booking =
                 bookingRepository.findById(bookingId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Booking not found"
-                                )
+                                new RuntimeException("Booking not found")
                         );
 
-
-        // -----------------------------------------------------
         // Verify booking owner
-        // -----------------------------------------------------
 
-        if (!booking.getUser()
-                .getPhoneNumber()
-                .equals(phoneNumber)) {
-
+        if (!booking.getUser().getPhoneNumber().equals(phoneNumber)) {
             throw new RuntimeException(
                     "You can cancel only your own booking"
             );
         }
 
-
-        // -----------------------------------------------------
         // Check booking status
-        // -----------------------------------------------------
 
-        if (booking.getStatus()
-                != BookingStatus.PENDING
-                && booking.getStatus()
-                != BookingStatus.CONFIRMED) {
+        if (booking.getStatus() != BookingStatus.PENDING
+                && booking.getStatus() != BookingStatus.CONFIRMED) {
 
             throw new RuntimeException(
                     "Only pending or confirmed bookings can be cancelled"
             );
         }
 
-
-        // -----------------------------------------------------
         // Lock ride
-        // -----------------------------------------------------
 
         Ride ride =
                 rideRepository.findByIdForUpdate(
                         booking.getRide().getId()
                 )
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Ride not found"
-                        )
+                        new RuntimeException("Ride not found")
                 );
 
-
-        // -----------------------------------------------------
         // Remember previous status
-        // -----------------------------------------------------
 
         boolean wasConfirmed =
-                booking.getStatus()
-                        == BookingStatus.CONFIRMED;
+                booking.getStatus() == BookingStatus.CONFIRMED;
 
-
-        // -----------------------------------------------------
         // Cancel booking
-        // -----------------------------------------------------
 
-        booking.setStatus(
-                BookingStatus.CANCELLED
-        );
+        booking.setStatus(BookingStatus.CANCELLED);
 
-
-        // -----------------------------------------------------
         // Return seats
-        // -----------------------------------------------------
 
         if (wasConfirmed) {
 
             ride.setAvailableSeats(
-                    ride.getAvailableSeats()
-                            + booking.getSeatsBooked()
+                    ride.getAvailableSeats() + booking.getSeatsBooked()
             );
 
-
-            // -------------------------------------------------
             // If ride was FULL, make it ACTIVE again
-            // -------------------------------------------------
 
             if (ride.getStatus() == RideStatus.FULL
                     && ride.getAvailableSeats() > 0) {
 
-                ride.setStatus(
-                        RideStatus.ACTIVE
-                );
+                ride.setStatus(RideStatus.ACTIVE);
             }
         }
 
-
-        // -----------------------------------------------------
         // Save
-        // -----------------------------------------------------
 
         bookingRepository.save(booking);
-
         rideRepository.save(ride);
 
-
-        // -----------------------------------------------------
         // Notify ride owner
-        // -----------------------------------------------------
 
         notificationService.createNotification(
                 ride.getUser(),
@@ -646,11 +475,8 @@ public class BookingServiceImpl implements BookingService {
                 NotificationType.BOOKING_CANCELLED
         );
 
-
         return MessageResponse.builder()
-                .message(
-                        "Booking cancelled successfully"
-                )
+                .message("Booking cancelled successfully")
                 .build();
     }
 
@@ -659,8 +485,7 @@ public class BookingServiceImpl implements BookingService {
     // MAP BOOKING → RESPONSE
     // =========================================================
 
-    private BookingResponse mapToBookingResponse(
-            Booking booking) {
+    private BookingResponse mapToBookingResponse(Booking booking) {
 
         Ride ride = booking.getRide();
 
@@ -668,73 +493,39 @@ public class BookingServiceImpl implements BookingService {
 
         User passenger = booking.getUser();
 
-
         return BookingResponse.builder()
 
-                .bookingId(
-                        booking.getId()
-                )
+                .bookingId(booking.getId())
 
-                .rideId(
-                        ride.getId()
-                )
+                .rideId(ride.getId())
 
-                .source(
-                        ride.getSource()
-                )
+                .source(ride.getSource())
 
-                .destination(
-                        ride.getDestination()
-                )
+                .destination(ride.getDestination())
 
-                .rideOwnerName(
-                        rideOwner.getFullName()
-                )
+                .rideOwnerName(rideOwner.getFullName())
 
-                .passengerName(
-                        passenger.getFullName()
-                )
+                .passengerName(passenger.getFullName())
 
-                .travelDate(
-                        ride.getTravelDate().toString()
-                )
+                .travelDate(ride.getTravelDate().toString())
 
-                .travelTime(
-                        ride.getTravelTime().toString()
-                )
+                .travelTime(ride.getTravelTime().toString())
 
-                .seatsBooked(
-                        booking.getSeatsBooked()
-                )
+                .seatsBooked(booking.getSeatsBooked())
 
-                .pricePerSeat(
-                        ride.getPricePerSeat()
-                )
+                .pricePerSeat(ride.getPricePerSeat())
 
                 .totalAmount(
-                        ride.getPricePerSeat()
-                                * booking.getSeatsBooked()
+                        ride.getPricePerSeat() * booking.getSeatsBooked()
                 )
 
-                .bookingStatus(
-                        booking.getStatus().name()
-                )
+                .bookingStatus(booking.getStatus().name())
 
-                // -------------------------------------------------
-                // Vehicle details
-                // -------------------------------------------------
+                .vehicleType(ride.getVehicleType())
 
-                .vehicleType(
-                        ride.getVehicleType()
-                )
+                .brand(ride.getVehicleName())
 
-                .brand(
-                        ride.getVehicleName()
-                )
-
-                .registrationNumber(
-                        ride.getVehicleNumber()
-                )
+                .registrationNumber(ride.getVehicleNumber())
 
                 .build();
     }
