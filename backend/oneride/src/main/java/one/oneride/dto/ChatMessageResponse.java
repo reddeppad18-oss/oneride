@@ -19,18 +19,15 @@ import one.oneride.enums.ChatMessageType;
 public class ChatMessageResponse {
 
     private Long messageId;
-
     private Long conversationId;
-
     private Long senderId;
-
     private String senderName;
-
     private String content;
-
     private ChatMessageType messageType;
-
     private LocalDateTime sentAt;
-
     private LocalDateTime readAt;
+    private LocalDateTime editedAt;
+
+    private boolean deletedForMe;
+    private boolean deletedForEveryone;
 }

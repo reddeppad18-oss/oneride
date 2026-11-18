@@ -24,7 +24,6 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    // Get all conversations of the logged-in user
     @GetMapping("/conversations")
     public ResponseEntity<List<ChatConversationResponse>> getMyConversations(
             Authentication authentication) {
@@ -34,7 +33,6 @@ public class ChatController {
         );
     }
 
-    // Get messages from a conversation
     @GetMapping("/conversations/{conversationId}/messages")
     public ResponseEntity<Page<ChatMessageResponse>> getMessages(
             @PathVariable Long conversationId,
@@ -52,7 +50,6 @@ public class ChatController {
         );
     }
 
-    // Send a text message
     @PostMapping("/conversations/{conversationId}/messages")
     public ResponseEntity<ChatMessageResponse> sendMessage(
             @PathVariable Long conversationId,
@@ -68,7 +65,53 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Mark received messages as read
+    @PutMapping("/conversations/{conversationId}/messages/{messageId}")
+    public ResponseEntity<ChatMessageResponse> editMessage(
+            @PathVariable Long conversationId,
+            @PathVariable Long messageId,
+            @Valid @RequestBody SendChatMessageRequest request,
+            Authentication authentication) {
+
+        return ResponseEntity.ok(
+                chatService.editMessage(
+                        conversationId,
+                        messageId,
+                        authentication.getName(),
+                        request
+                )
+        );
+    }
+
+    @DeleteMapping("/conversations/{conversationId}/messages/{messageId}")
+    public ResponseEntity<Void> deleteMessage(
+            @PathVariable Long conversationId,
+            @PathVariable Long messageId,
+            @RequestParam(defaultValue = "false") boolean forEveryone,
+            Authentication authentication) {
+
+        chatService.deleteMessage(
+                conversationId,
+                messageId,
+                authentication.getName(),
+                forEveryone
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/conversations/{conversationId}")
+    public ResponseEntity<Void> deleteConversation(
+            @PathVariable Long conversationId,
+            Authentication authentication) {
+
+        chatService.deleteConversation(
+                conversationId,
+                authentication.getName()
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/conversations/{conversationId}/read")
     public ResponseEntity<Void> markAsRead(
             @PathVariable Long conversationId,
@@ -82,7 +125,6 @@ public class ChatController {
         return ResponseEntity.noContent().build();
     }
 
-    // Close a conversation
     @PutMapping("/conversations/{conversationId}/close")
     public ResponseEntity<Void> closeConversation(
             @PathVariable Long conversationId,

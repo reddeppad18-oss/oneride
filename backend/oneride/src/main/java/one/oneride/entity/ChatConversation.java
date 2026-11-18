@@ -60,6 +60,14 @@ public class ChatConversation {
 
     private LocalDateTime lastMessageAt;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean deletedByCustomer = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean deletedByProvider = false;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {

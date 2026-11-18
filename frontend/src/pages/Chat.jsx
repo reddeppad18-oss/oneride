@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   getMyConversations,
@@ -7,6 +7,9 @@ import {
   sendChatMessage,
   markChatAsRead,
   closeChatConversation,
+  editChatMessage,
+  deleteChatMessage,
+  deleteChatConversation,
 } from "../services/chatService";
 
 import { getCurrentUser } from "../services/userService";
@@ -15,7 +18,6 @@ import "./Chat.css";
 
 function Chat() {
   const [currentUser, setCurrentUser] = useState(null);
-
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
 
@@ -25,11 +27,19 @@ function Chat() {
   const [loading, setLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sending, setSending] = useState(false);
-
   const [error, setError] = useState("");
+
+  const [contextMenu, setContextMenu] = useState(null);
+
+  const longPressTimer = useRef(null);
+  const longPressTriggered = useRef(false);
 
   useEffect(() => {
     loadChatData();
+
+    return () => {
+      clearTimeout(longPressTimer.current);
+    };
   }, []);
 
   const loadChatData = async () => {
@@ -41,11 +51,9 @@ function Chat() {
       setCurrentUser(user);
 
       const data = await getMyConversations();
-
       setConversations(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load chat:", err);
-
       setError(
         err.response?.data?.message ||
         "Unable to load conversations. Please try again."
@@ -55,7 +63,6 @@ function Chat() {
     }
   };
 
-  // Identify the other participant
   const getOtherParticipant = (conversation) => {
     if (!currentUser || !conversation) return {};
 
@@ -72,9 +79,9 @@ function Chat() {
     };
   };
 
-  // Open a conversation
   const openConversation = async (conversation) => {
     try {
+      setContextMenu(null);
       setSelectedConversation(conversation);
       setMessages([]);
       setMessagesLoading(true);
@@ -91,7 +98,8 @@ function Chat() {
         ? data
         : data?.content || [];
 
-      setMessages(messageList);
+      // Backend returns newest first; display oldest first.
+      setMessages([...messageList].reverse());
 
       await markChatAsRead(conversation.conversationId);
 
@@ -104,7 +112,6 @@ function Chat() {
       );
     } catch (err) {
       console.error("Failed to open conversation:", err);
-
       setError(
         err.response?.data?.message ||
         "Unable to load messages."
@@ -114,23 +121,20 @@ function Chat() {
     }
   };
 
-  // Return to conversation list on mobile
   const handleBackToConversations = () => {
     setSelectedConversation(null);
     setMessages([]);
     setMessageText("");
     setError("");
+    setContextMenu(null);
   };
 
-  // Send a message
   const handleSendMessage = async (event) => {
     event.preventDefault();
 
     const content = messageText.trim();
 
-    if (!content || !selectedConversation || sending) {
-      return;
-    }
+    if (!content || !selectedConversation || sending) return;
 
     if (content.length > 2000) {
       setError("Message cannot exceed 2000 characters.");
@@ -152,16 +156,12 @@ function Chat() {
       setConversations((previous) =>
         previous.map((item) =>
           item.conversationId === selectedConversation.conversationId
-            ? {
-                ...item,
-                lastMessageAt: response.sentAt,
-              }
+            ? { ...item, lastMessageAt: response.sentAt }
             : item
         )
       );
     } catch (err) {
       console.error("Message sending failed:", err);
-
       setError(
         err.response?.data?.message ||
         "Unable to send message."
@@ -171,15 +171,12 @@ function Chat() {
     }
   };
 
-  // Close conversation
   const handleCloseConversation = async () => {
     if (!selectedConversation) return;
 
-    const confirmed = window.confirm(
+    if (!window.confirm(
       "Are you sure you want to close this conversation?"
-    );
-
-    if (!confirmed) return;
+    )) return;
 
     try {
       await closeChatConversation(
@@ -199,8 +196,6 @@ function Chat() {
         status: "CLOSED",
       }));
     } catch (err) {
-      console.error("Failed to close conversation:", err);
-
       setError(
         err.response?.data?.message ||
         "Unable to close conversation."
@@ -208,11 +203,207 @@ function Chat() {
     }
   };
 
+  // Long press and right-click menu helpers.
+  const startLongPress = (menu) => {
+    clearTimeout(longPressTimer.current);
+    longPressTriggered.current = false;
+
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      setContextMenu(menu);
+    }, 550);
+  };
+
+  const cancelLongPress = () => {
+    clearTimeout(longPressTimer.current);
+  };
+
+  const handleConversationClick = (conversation) => {
+    if (longPressTriggered.current) {
+      longPressTriggered.current = false;
+      return;
+    }
+
+    openConversation(conversation);
+  };
+
+  const showConversationMenu = (event, conversation) => {
+    event.preventDefault();
+    cancelLongPress();
+
+    setContextMenu({
+      type: "conversation",
+      conversation,
+    });
+  };
+
+  const showMessageMenu = (event, message) => {
+    event.preventDefault();
+    cancelLongPress();
+
+    setContextMenu({
+      type: "message",
+      message,
+    });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu(null);
+  };
+
+  const handleDeleteConversation = async () => {
+    const conversation = contextMenu?.conversation;
+    if (!conversation) return;
+
+    const confirmed = window.confirm(
+      "Delete this conversation for you? The other participant will still have their chat."
+    );
+
+    if (!confirmed) {
+      closeContextMenu();
+      return;
+    }
+
+    try {
+      await deleteChatConversation(conversation.conversationId);
+
+      setConversations((previous) =>
+        previous.filter(
+          (item) =>
+            item.conversationId !== conversation.conversationId
+        )
+      );
+
+      if (
+        selectedConversation?.conversationId ===
+        conversation.conversationId
+      ) {
+        setSelectedConversation(null);
+        setMessages([]);
+        setMessageText("");
+      }
+
+      closeContextMenu();
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Unable to delete conversation."
+      );
+      closeContextMenu();
+    }
+  };
+
+  const handleCopyMessage = async () => {
+    const message = contextMenu?.message;
+    if (!message || !message.content) return;
+
+    try {
+      await navigator.clipboard.writeText(message.content);
+      closeContextMenu();
+    } catch (err) {
+      console.error("Copy failed:", err);
+      setError("Unable to copy message on this device.");
+      closeContextMenu();
+    }
+  };
+
+  const handleEditMessage = async () => {
+    const message = contextMenu?.message;
+
+    if (!message || !selectedConversation) return;
+
+    const updatedContent = window.prompt(
+      "Edit your message:",
+      message.content || ""
+    );
+
+    closeContextMenu();
+
+    if (updatedContent === null) return;
+
+    if (!updatedContent.trim()) {
+      setError("Message cannot be empty.");
+      return;
+    }
+
+    try {
+      const updatedMessage = await editChatMessage(
+        selectedConversation.conversationId,
+        message.messageId,
+        updatedContent.trim()
+      );
+
+      setMessages((previous) =>
+        previous.map((item) =>
+          item.messageId === updatedMessage.messageId
+            ? updatedMessage
+            : item
+        )
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Unable to edit message."
+      );
+    }
+  };
+
+  const handleDeleteMessage = async (forEveryone) => {
+    const message = contextMenu?.message;
+
+    if (!message || !selectedConversation) return;
+
+    const actionText = forEveryone
+      ? "Delete this message for everyone?"
+      : "Delete this message only for you?";
+
+    if (!window.confirm(actionText)) {
+      closeContextMenu();
+      return;
+    }
+
+    try {
+      await deleteChatMessage(
+        selectedConversation.conversationId,
+        message.messageId,
+        forEveryone
+      );
+
+      setMessages((previous) =>
+        previous.map((item) => {
+          if (item.messageId !== message.messageId) return item;
+
+          if (forEveryone) {
+            return {
+              ...item,
+              content: null,
+              deletedForEveryone: true,
+              deletedForMe: true,
+            };
+          }
+
+          return {
+            ...item,
+            content: null,
+            deletedForMe: true,
+          };
+        })
+      );
+
+      closeContextMenu();
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Unable to delete message."
+      );
+      closeContextMenu();
+    }
+  };
+
   const formatDate = (dateValue) => {
     if (!dateValue) return "";
 
     const date = new Date(dateValue);
-
     if (Number.isNaN(date.getTime())) return "";
 
     return date.toLocaleDateString([], {
@@ -225,7 +416,6 @@ function Chat() {
     if (!dateValue) return "";
 
     const date = new Date(dateValue);
-
     if (Number.isNaN(date.getTime())) return "";
 
     return date.toLocaleTimeString([], {
@@ -254,10 +444,11 @@ function Chat() {
   }
 
   return (
-    <div className="chat-page">
+    <div className="chat-page" onClick={() => {
+      if (contextMenu) closeContextMenu();
+    }}>
 
       {/* CONVERSATION SIDEBAR */}
-
       <aside
         className={`chat-sidebar ${
           selectedConversation ? "mobile-sidebar-hidden" : ""
@@ -279,8 +470,7 @@ function Chat() {
             <div className="chat-empty-inbox">
               <h3>No conversations yet</h3>
               <p>
-                Your ride and rental conversations will
-                appear here.
+                Your ride and rental conversations will appear here.
               </p>
             </div>
           ) : (
@@ -298,7 +488,22 @@ function Chat() {
                   className={`chat-conversation-item ${
                     isActive ? "selected" : ""
                   }`}
-                  onClick={() => openConversation(conversation)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleConversationClick(conversation);
+                  }}
+                  onContextMenu={(event) =>
+                    showConversationMenu(event, conversation)
+                  }
+                  onTouchStart={() =>
+                    startLongPress({
+                      type: "conversation",
+                      conversation,
+                    })
+                  }
+                  onTouchEnd={cancelLongPress}
+                  onTouchMove={cancelLongPress}
+                  onTouchCancel={cancelLongPress}
                 >
                   <div className="chat-avatar">
                     {(participant.name || "?")
@@ -337,10 +542,11 @@ function Chat() {
       </aside>
 
       {/* MAIN CHAT WINDOW */}
-
       <main
         className={`chat-main ${
-          selectedConversation ? "mobile-chat-visible" : "mobile-chat-hidden"
+          selectedConversation
+            ? "mobile-chat-visible"
+            : "mobile-chat-hidden"
         }`}
       >
         {!selectedConversation ? (
@@ -352,18 +558,15 @@ function Chat() {
             <h2>Your Alridez Messages</h2>
 
             <p>
-              Select a conversation to communicate with
-              your ride or rental partner.
+              Select a conversation to communicate with your ride
+              or rental partner.
             </p>
           </div>
         ) : (
           <>
             {/* CHAT HEADER */}
-
             <div className="chat-header">
-
               <div className="chat-header-user">
-
                 <button
                   type="button"
                   className="chat-back-button"
@@ -390,9 +593,7 @@ function Chat() {
                   </h3>
 
                   <p>
-                    {getServiceLabel(
-                      selectedConversation.serviceType
-                    )}
+                    {getServiceLabel(selectedConversation.serviceType)}
                     {" "}#{selectedConversation.serviceReferenceId}
                   </p>
                 </div>
@@ -413,17 +614,12 @@ function Chat() {
                   Conversation Closed
                 </span>
               )}
-
             </div>
 
             {/* MESSAGES */}
-
             <div className="chat-messages">
-
               {messagesLoading ? (
-                <p className="chat-status">
-                  Loading messages...
-                </p>
+                <p className="chat-status">Loading messages...</p>
               ) : messages.length === 0 ? (
                 <div className="chat-no-messages">
                   <h3>Start a conversation</h3>
@@ -434,27 +630,52 @@ function Chat() {
                   const isMine =
                     String(message.senderId) === String(currentUser?.id);
 
+                  const isDeleted =
+                    message.deletedForMe ||
+                    message.deletedForEveryone;
+
                   return (
                     <div
                       key={message.messageId}
                       className={`chat-message-row ${
                         isMine ? "mine" : "theirs"
                       }`}
+                      onContextMenu={(event) =>
+                        showMessageMenu(event, message)
+                      }
+                      onTouchStart={() =>
+                        startLongPress({
+                          type: "message",
+                          message,
+                        })
+                      }
+                      onTouchEnd={cancelLongPress}
+                      onTouchMove={cancelLongPress}
+                      onTouchCancel={cancelLongPress}
                     >
                       <div className="chat-message-bubble">
-
                         {!isMine && (
                           <span className="chat-sender-name">
                             {message.senderName}
                           </span>
                         )}
 
-                        <p>{message.content}</p>
+                        {isDeleted ? (
+                          <p className="chat-deleted-message">
+                            {message.deletedForEveryone
+                              ? "This message was deleted"
+                              : "You deleted this message"}
+                          </p>
+                        ) : (
+                          <p>{message.content}</p>
+                        )}
 
                         <div className="chat-message-meta">
-                          <span>
-                            {formatTime(message.sentAt)}
-                          </span>
+                          {message.editedAt && !isDeleted && (
+                            <span>Edited</span>
+                          )}
+
+                          <span>{formatTime(message.sentAt)}</span>
 
                           {isMine && message.readAt && (
                             <span className="chat-read-status">
@@ -462,17 +683,14 @@ function Chat() {
                             </span>
                           )}
                         </div>
-
                       </div>
                     </div>
                   );
                 })
               )}
-
             </div>
 
             {/* MESSAGE INPUT */}
-
             <form
               className="chat-composer"
               onSubmit={handleSendMessage}
@@ -514,8 +732,94 @@ function Chat() {
         )}
       </main>
 
-      {/* ERROR MESSAGE */}
+      {/* CONTEXT MENU */}
+      {contextMenu && (
+        <div
+          className="chat-context-overlay"
+          onClick={closeContextMenu}
+        >
+          <div
+            className="chat-context-menu"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {contextMenu.type === "conversation" ? (
+              <>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={handleDeleteConversation}
+                >
+                  <span>🗑</span>
+                  Delete conversation
+                </button>
 
+                <button
+                  type="button"
+                  onClick={closeContextMenu}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                {!contextMenu.message.deletedForMe &&
+                  !contextMenu.message.deletedForEveryone && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleCopyMessage}
+                      >
+                        <span>📋</span>
+                        Copy
+                      </button>
+
+                      {String(contextMenu.message.senderId) ===
+                        String(currentUser?.id) && (
+                        <button
+                          type="button"
+                          onClick={handleEditMessage}
+                        >
+                          <span>✏️</span>
+                          Edit
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => handleDeleteMessage(false)}
+                      >
+                        <span>🗑</span>
+                        Delete for me
+                      </button>
+
+                      {String(contextMenu.message.senderId) ===
+                        String(currentUser?.id) && (
+                        <button
+                          type="button"
+                          className="danger"
+                          onClick={() => handleDeleteMessage(true)}
+                        >
+                          <span>🗑</span>
+                          Delete for everyone
+                        </button>
+                      )}
+                    </>
+                  )}
+
+                <button
+                  type="button"
+                  onClick={closeContextMenu}
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ERROR MESSAGE */}
       {error && (
         <div className="chat-error">
           <span>{error}</span>
@@ -529,7 +833,6 @@ function Chat() {
           </button>
         </div>
       )}
-
     </div>
   );
 }
